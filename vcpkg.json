@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "portpolio",
+  "version": "0.1.0",
+  "dependencies": [
+    {
+      "name": "spdlog",
+      "version>=": "1.14.1"
+    },
+    {
+      "name": "flatbuffers",
+      "version>=": "24.3.25"
+    },
+    {
+      "name": "asio",
+      "version>=": "1.30.2"
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.11.3"
+    },
+    {
+      "name": "gtest",
+      "version>=": "1.14.0"
+    }
+  ]
+}
