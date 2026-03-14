@@ -26,17 +26,26 @@
 ## 빠른 커맨드 레퍼런스
 
 ```bash
+# 사전 조건 (Windows)
+# - VCPKG_ROOT=C:\vcpkg
+# - Visual Studio Developer Command Prompt 또는 VsDevCmd.bat 로 MSVC 환경 로드
+
 # 빌드
-cmake -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build -j$(nproc)
+cmake --preset debug
+cmake --build --preset debug
 
 # 테스트
-cd build && ctest --output-on-failure
+ctest --preset debug
 
 # 린트 (아키텍처 레이어 위반 검사)
-python3 tools/check_layers.py
+# PowerShell/cmd 인코딩 문제 시 PYTHONIOENCODING=utf-8 설정
+python tools/check_layers.py
+
+# 인코딩 검사 (텍스트 파일은 UTF-8 without BOM)
+python tools/check_encoding.py
 
 # 문서 유효성 검사
-python3 tools/doc_check.py
+python tools/doc_check.py
 
 # 코드 포맷
 clang-format -i $(find src -name "*.cpp" -o -name "*.h")
@@ -78,8 +87,7 @@ Types → Config → Core → Service → Network → Runtime
 
 1. **레이어 위반 절대 금지** — 빌드 전 `tools/check_layers.py` 실행
 2. **작업 전 문서 먼저** — 관련 도메인 문서를 읽은 후 코드 작성
-3. **실패 시 "더 열심히"가 아니라 "무엇이 빠졌는가"** 질문
-4. **모든 설계 결정은 `docs/design/`에 기록** — Slack/채팅이 아닌 레포가 진실
+4. **모든 설계 결정은 `docs/design/`에 기록**
 5. **테스트 없는 PR은 열지 않음**
 
 상세: [docs/design/core-beliefs.md](./docs/design/core-beliefs.md)
