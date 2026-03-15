@@ -5,20 +5,20 @@ docs/ 디렉토리의 마크다운 파일에서 깨진 내부 링크와
 ARCHITECTURE.md 도메인 테이블과 grades.md 간의 불일치를 검사한다.
 
 Usage:
-    python3 tools/doc_check.py
+    python tools/doc_check.py
 
 Exit codes:
     0: 이상 없음
     1: 문제 발견
 """
 
-import sys
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 DOCS_ROOT = ROOT / "docs"
-LINK_PATTERN = re.compile(r'\[.*?\]\(\./([^)]+)\)')
+LINK_PATTERN = re.compile(r"\[.*?\]\((?!https?://)(?!#)([^)]+)\)")
 
 
 def check_internal_links() -> list[str]:
@@ -28,7 +28,9 @@ def check_internal_links() -> list[str]:
         content = md_file.read_text(encoding="utf-8")
         for match in LINK_PATTERN.finditer(content):
             link_target = match.group(1)
-            target_path = md_file.parent / link_target
+            if link_target.startswith("mailto:"):
+                continue
+            target_path = (md_file.parent / link_target).resolve()
             if not target_path.exists():
                 errors.append(
                     f"{md_file.relative_to(ROOT)}: 깨진 링크 → {link_target}"
