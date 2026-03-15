@@ -24,6 +24,12 @@ from typing import TypedDict
 LAYER_ORDER = ["types", "config", "core", "service", "network", "runtime"]
 LAYER_RANK = {layer: i for i, layer in enumerate(LAYER_ORDER)}
 INCLUDE_PATTERN = re.compile(r'#include\s+"([^"]+)"')
+_PREFIX_RE = re.compile(r'^\d+_')
+
+
+def _strip_prefix(name: str) -> str:
+    """Strip leading numeric prefix (e.g. '01_types' -> 'types')."""
+    return _PREFIX_RE.sub("", name)
 
 
 class Violation(TypedDict):
@@ -42,14 +48,17 @@ def get_layer(path: Path, src_root: Path) -> str | None:
         return None
 
     top = rel.parts[0]
-    return top if top in LAYER_RANK else None
+    normalized = _strip_prefix(top)
+    return normalized if normalized in LAYER_RANK else None
 
 
 def get_include_layer(include_str: str) -> str | None:
     """Return the referenced top-level layer name for an include path."""
     parts = Path(include_str).parts
-    if parts and parts[0] in LAYER_RANK:
-        return parts[0]
+    if parts:
+        normalized = _strip_prefix(parts[0])
+        if normalized in LAYER_RANK:
+            return normalized
     return None
 
 

@@ -48,3 +48,13 @@
 - Windows 에서는 일반 PowerShell보다 Visual Studio Developer Command Prompt 환경에서 MSVC 탐지가 안정적이었다.
 - `python tools/check_layers.py` 는 통과했지만, 기본 CP949 콘솔에서는 Unicode 출력 때문에 `UnicodeEncodeError` 가 날 수 있었다. `PYTHONIOENCODING=utf-8` 설정 후 안정적으로 실행됐다.
 - 문서/스크립트 패치 중에도 콘솔 인코딩이 UTF-8 이 아니면 한글이 깨질 수 있었다. 운영 메모로 문서에 반영했다.
+
+## 2026-03-15 검증 업데이트
+
+- **빌드 환경**: 일반 bash에서 `cmake`를 직접 실행하면 MSVC를 찾지 못해 실패한다.
+  반드시 VS Dev Shell(PowerShell)을 경유해야 한다:
+  ```powershell
+  powershell -NoProfile -Command "& 'C:\Program Files\Microsoft Visual Studio\18\Community\Common7\Tools\Launch-VsDevShell.ps1' -Arch amd64 -SkipAutomaticLocation; cmake --preset debug"
+  ```
+- **PowerShell 명령 구분**: `&&` 미지원, `;` 사용.
+- `cmake --preset debug`, `cmake --build --preset debug`, `ctest --preset debug` 모두 VS Dev Shell 경유로 재검증 성공.

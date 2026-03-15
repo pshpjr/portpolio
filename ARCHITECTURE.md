@@ -27,34 +27,34 @@ Types → Config → Core → Service → Network → Runtime
 
 ## 레이어별 책임
 
-### `Types` (`src/types/`)
+### `Types` (`src/01_types/`)
 - POD 구조체, enum, 공용 상수
 - 외부 의존 없음 (STL만 허용)
 - 예: `EntityId`, `StatType`, `DamageResult`, `ItemId`
 
-### `Config` (`src/config/`)
+### `Config` (`src/02_config/`)
 - 게임 데이터 정의 로더 (JSON → 구조체)
 - FlatBuffers 스키마 포함
 - `Types`만 의존
 - 예: `SkillDataLoader`, `MonsterConfig`, `ItemConfig`
 
-### `Core` (`src/core/`)
+### `Core` (`src/03_core/`)
 - 순수 게임 로직. 네트워크/세션 개념 없음
 - `Types`, `Config`만 의존
 - 예: `CombatSystem`, `StatCalculator`, `HitDetection`, `InventoryManager`
 - **핵심 원칙**: Core는 네트워크를 모른다. 테스트 가능해야 한다.
 
-### `Service` (`src/service/`)
+### `Service` (`src/04_service/`)
 - 여러 Core 시스템을 조합한 게임플레이 흐름
 - `Types`, `Config`, `Core`만 의존
 - 예: `DungeonInstance`, `PartyManager`, `MatchmakingService`
 
-### `Network` (`src/network/`)
+### `Network` (`src/05_network/`)
 - 패킷 직렬화/역직렬화, 세션 관리, AOI
 - 모든 하위 레이어 의존 가능
 - 예: `PacketHandler`, `SessionManager`, `AoiGrid`
 
-### `Runtime` (`src/runtime/`)
+### `Runtime` (`src/06_runtime/`)
 - 서버 엔트리포인트, 핫리로드, 설정 관리
 - 모든 레이어 의존 가능
 - 예: `ServerApp`, `HotReloadManager`, `ConfigWatcher`
@@ -103,21 +103,21 @@ project-root/
 ├── ARCHITECTURE.md            # 이 파일
 ├── CMakeLists.txt
 ├── src/
-│   ├── types/
-│   ├── config/
-│   ├── core/
+│   ├── 01_types/
+│   ├── 02_config/
+│   ├── 03_core/
 │   │   ├── combat/
 │   │   ├── inventory/
 │   │   └── stat/
-│   ├── service/
+│   ├── 04_service/
 │   │   ├── dungeon/
 │   │   ├── party/
 │   │   └── matchmaking/
-│   ├── network/
+│   ├── 05_network/
 │   │   ├── packet/
 │   │   ├── session/
 │   │   └── aoi/
-│   └── runtime/
+│   └── 06_runtime/
 ├── tests/
 │   ├── unit/
 │   └── integration/
