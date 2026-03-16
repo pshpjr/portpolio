@@ -6,11 +6,12 @@
 
 ```
 □ AGENTS.md 읽기
-□ docs/exec-plans/active/ 확인
+□ docs/exec-plans/active/INDEX.md 확인
   → 진행 중인 플랜이 있으면: 해당 파일을 읽고 컨텍스트 복원
   → 없으면: 새 플랜 파일 작성 후 시작
 □ 관련 도메인 문서 읽기
 □ ARCHITECTURE.md 레이어 규칙 재확인
+□ 문서 작업이면 문서 검증 스크립트 존재 여부 확인
 ```
 
 ---
@@ -47,6 +48,13 @@
 
 작업 완료 시 `docs/exec-plans/completed/`로 이동.
 
+## Skill / Agent 저장 위치
+
+- 저장소 공용 skill은 루트 `.codex/skills/` 와 `.claude/skills/` 아래에 생성한다.
+- 저장소 공용 agent 프롬프트는 루트 `.codex/agents/` 와 `.claude/agents/` 아래에 생성한다.
+- 앱 디렉터리 아래에 skill 저장소를 만들지 않는다.
+- Codex UI용 `openai.yaml`은 `.codex/skills/<skill>/agents/openai.yaml`에만 둔다.
+
 ---
 
 ## PR 작성 기준
@@ -71,7 +79,10 @@ python tools/check_layers.py
 # 4. 인코딩 검사
 python tools/check_encoding.py
 
-# 5. 포맷 적용
+# 5. 문서 작업이면 링크/plan 검사
+python server/tools/doc_check.py
+
+# 6. 포맷 적용
 clang-format -i $(find src -name "*.cpp" -o -name "*.h")
 ```
 
@@ -102,6 +113,7 @@ VCPKG_ROOT="$HOME/.local/vcpkg" ctest --preset debug-linux
 - `cmake --preset debug` 는 일반 PowerShell보다 Visual Studio 개발자 셸에서 재현성이 높다. 일반 셸에서는 `cl.exe` 를 찾지 못해 실패할 수 있다.
 - `VCPKG_ROOT` 는 `C:\vcpkg` 같이 공백 없는 경로가 preset/toolchain 해석에 안전하다.
 - `check_layers.py` 는 콘솔 인코딩에 따라 Unicode 출력 오류가 날 수 있다. Windows 콘솔에서 문제가 나면 `PYTHONIOENCODING=utf-8` 로 실행한다.
+- `python` 이 Microsoft Store stub 경로만 잡히면 Python 스크립트 실행이 실패할 수 있다. 이 경우 실제 Python 설치 경로를 PATH에 추가한 뒤 검증을 실행한다.
 - 저장소 텍스트 파일은 UTF-8 without BOM 으로 유지한다. `python tools/check_encoding.py` 가 0으로 끝나지 않으면 인코딩 오류로 간주한다.
 
 PR 설명 필수 포함:
@@ -130,3 +142,4 @@ PR 설명 필수 포함:
 - `check_layers.py` 통과 전 PR 생성
 - exec-plan 없이 대형 작업 시작 (300줄 이상 변경 예상 시)
 - 문서를 코드보다 나중에 작성 (설계 결정은 코딩 전 또는 동시에)
+- 문서 검증 스크립트가 있는데도 문서 변경 후 확인하지 않기

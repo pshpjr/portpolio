@@ -8,14 +8,25 @@
 
 1~4인 인스턴스 던전 RPG용 게임 서버 포트폴리오 프로젝트.
 
+상위 제품 기획과 공용 문서는 루트 [`../docs/`](../docs/) 아래에서 관리한다.
+
 ---
 
 ## 세션 시작 순서
 
 1. 이 파일을 읽는다.
 2. [docs/INDEX.md](./docs/INDEX.md)에서 작업 유형에 맞는 문서를 찾는다.
-3. [docs/exec-plans/active/INDEX.md](./docs/exec-plans/active/INDEX.md)에서 현재 활성 계획이 자신과 관련 있는지 확인한다.
-4. 수정 경로가 정해졌다면 [docs/context-map.md](./docs/context-map.md)와 해당 디렉터리의 로컬 `AGENTS.md`를 읽는다.
+3. [docs/exec-plans/active/INDEX.md](./docs/exec-plans/active/INDEX.md)를 읽고 관련 active plan을 찾는다.
+4. 관련 plan이 없으면 새 exec-plan을 먼저 작성하고 active index에 등록한다.
+5. exec-plan 초안을 사용자에게 검토받기 전에는 구현 파일을 수정하지 않는다.
+6. 수정 경로가 정해졌다면 [docs/context-map.md](./docs/context-map.md)와 해당 디렉터리의 로컬 `AGENTS.md`를 읽는다.
+
+## 작업 시작 게이트
+
+- 서버의 모든 작업은 크기와 무관하게 exec-plan 작성으로 시작한다.
+- exec-plan 또는 사용자 검토 없이 코드, 빌드 설정, 테스트, 스크립트를 수정하면 안 된다.
+- 기존 active plan이 있으면 이어받고, 없으면 새 plan을 만든다.
+- 사용자가 plan 생략을 요청해도 서버 작업에서는 생략하지 않는다.
 
 ---
 
@@ -24,6 +35,7 @@
 - 레이어 규칙의 단일 소스는 [ARCHITECTURE.md](./ARCHITECTURE.md)다.
 - 워크플로, 검증, PR 전 체크리스트의 단일 소스는 [docs/workflow/agent-workflow.md](./docs/workflow/agent-workflow.md)다.
 - 설계 철학과 제품 범위의 단일 소스는 [docs/design/](./docs/design/) 아래 문서다.
+- 상위 기획이 필요할 때만 루트 [../docs/AGENTS.md](../docs/AGENTS.md)에서 관련 기획서를 찾아 읽는다.
 
 레이어 요약:
 
