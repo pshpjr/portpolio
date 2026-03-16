@@ -1,6 +1,15 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
 ColumnLimit: 100
+
+# 중괄호 항상 다음 줄 (Allman style)
+BreakBeforeBraces: Allman
+
+# 짧은 함수도 한 줄로 합치지 않음
 AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortLambdasOnASingleLine: Empty
+
 PointerAlignment: Left
 SortIncludes: true

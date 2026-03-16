@@ -1,0 +1,49 @@
+Checks: "readability-identifier-naming"
+
+CheckOptions:
+  # 함수명: 대문자 시작 (PascalCase)
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionPrefix
+    value: ""
+
+  # 멤버 변수: 끝에 _ 접미사
+  - key: readability-identifier-naming.MemberCase
+    value: lower_case
+  - key: readability-identifier-naming.MemberPrefix
+    value: "m_"
+
+  # 상수: k 접두사 + CamelCase  (kMaxCount)
+  - key: readability-identifier-naming.ConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstantPrefix
+    value: "k"
+
+  - key: readability-identifier-naming.ClassConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassConstantPrefix
+    value: "k"
+
+  # enum 타입명: e 접두사 + CamelCase  (ePlayerState)
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumPrefix
+    value: "e"
+
+  # enum 값: e 접두사 + CamelCase  (eIdle, eRunning)
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantPrefix
+    value: "e"
+
+  # 클래스명: PascalCase
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+
+  # 지역 변수: camelCase
+  - key: readability-identifier-naming.LocalVariableCase
+    value: camelCase
+
+  # 파라미터: camelCase
+  - key: readability-identifier-naming.ParameterCase
+    value: camelCase
