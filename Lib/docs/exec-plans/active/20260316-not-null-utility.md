@@ -26,7 +26,7 @@
 ## 설계 결정 기록
 
 - 내부 멤버는 `shared_ptr<T>` 하나만 보유한다.
-- `from()`은 외부에서 받은 `shared_ptr`을 **move로 소비**한다. 호출자는 이후 해당 포인터를 사용하지 않는다.
+- `from()`은 `shared_ptr<T>&&` rvalue reference만 받는다. 호출자는 반드시 `std::move()`를 명시해야 하며, 소유권 이전 의도를 컴파일 타임에 강제한다.
 - `NotNull` 객체가 존재하는 한 내부 포인터는 항상 non-null임을 불변식으로 보장한다.
 - 기본 생성자는 제공하지 않는다 (null 상태 진입 차단).
 - `shared_ptr`과의 암시적 변환은 `operator shared_ptr<T>()`로 제공한다.
