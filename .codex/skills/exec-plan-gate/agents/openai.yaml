@@ -1,0 +1,4 @@
+version: 1
+display_name: Exec Plan Gate
+short_description: Require an exec-plan before repository work starts.
+default_prompt: Use $exec-plan-gate to create or resume the relevant exec-plan, update the active index, and stop for user review before implementation.

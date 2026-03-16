@@ -9,7 +9,7 @@ Linux 환경에서도 프로젝트 표준 빌드 체인(vcpkg + Ninja)으로 con
 - src/01_types/entity_id.h
 - tools/setup_linux_env.sh
 - docs/workflow/agent-workflow.md
-- docs/exec-plans/active/20260316-linux-build-validation.md
+- docs/exec-plans/completed/20260316-linux-build-validation.md
 
 ## 완료 기준
 - [x] Linux 전용 preset이 vcpkg + Ninja를 명시
