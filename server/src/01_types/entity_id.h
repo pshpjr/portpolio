@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <concepts>
+#include <functional>
 
 namespace portpolio::types {
 
