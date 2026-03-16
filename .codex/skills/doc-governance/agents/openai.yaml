@@ -1,0 +1,4 @@
+version: 1
+display_name: Doc Governance
+short_description: Review and maintain repo documentation structure for low-context agent workflows.
+default_prompt: Review or update documentation so each file has a single role, links stay consistent, and entrypoint documents remain small.

@@ -1,112 +1,57 @@
-# 에이전트 작업 흐름 (agent-workflow.md)
+# Agent Workflow
+> 에이전트 작업 절차의 단일 소스.
+> 환경 세팅과 상세 검증 명령은 별도 참조 문서로 분리한다.
 
-## 작업 시작 체크리스트
+## 세션 시작 체크리스트
 
-새 세션에서 작업을 시작할 때:
-
-```
-□ AGENTS.md 읽기
-□ docs/exec-plans/active/ 확인
-  → 진행 중인 플랜이 있으면: 해당 파일을 읽고 컨텍스트 복원
-  → 없으면: 새 플랜 파일 작성 후 시작
-□ 관련 도메인 문서 읽기
-□ ARCHITECTURE.md 레이어 규칙 재확인
-```
+1. `AGENTS.md`를 읽는다.
+2. `docs/exec-plans/active/INDEX.md`를 읽고 관련 plan만 연다.
+3. 수정 경로에 맞는 `docs/context-map.md`와 로컬 `AGENTS.md`를 읽는다.
+4. 작업 규모가 크면 exec-plan을 작성하거나 기존 plan을 이어받는다.
+5. 레이어 규칙과 관련 컨벤션을 확인한 뒤 구현한다.
 
 ---
 
-## 실행 계획 파일 (exec-plan) 형식
+## exec-plan 규칙
 
-`docs/exec-plans/active/` 에 작성. 파일명: `YYYYMMDD-작업명.md`
+- 위치: `docs/exec-plans/active/`
+- 파일명: `YYYYMMDD-작업명.md`
+- 완료 후 `completed/`로 이동
 
-```markdown
-# [작업명]
+필수 섹션:
 
-## 목표
-한 문장으로 이 작업이 달성해야 할 것.
-
-## 범위
-- 수정/생성할 파일 목록
-- 영향받는 레이어
-
-## 완료 기준
-- [ ] 빌드 통과
-- [ ] 테스트 통과
-- [ ] check_layers.py 통과
-- [ ] 구체적인 기능 기준 1
-- [ ] 구체적인 기능 기준 2
-
-## 진행 상황
-- [x] 완료된 항목
-- [ ] 남은 항목
-
-## 설계 결정 기록
-작업 중 내린 결정과 이유를 여기에 기록.
-(나중에 docs/design/으로 이동 가능)
-```
-
-작업 완료 시 `docs/exec-plans/completed/`로 이동.
+- 목표
+- 범위
+- 완료 기준
+- 진행 상황
+- 설계 결정 기록
 
 ---
 
-## PR 작성 기준
+## PR 전 검증 규칙
 
-PR을 열기 전 반드시:
+- 관련 빌드가 통과해야 한다.
+- 관련 테스트가 통과해야 한다.
+- `tools/check_layers.py`가 통과해야 한다.
+- 텍스트 파일을 바꿨다면 `tools/check_encoding.py`를 통과해야 한다.
+- 변경 범위에 맞는 문서와 exec-plan 상태를 갱신해야 한다.
 
-```bash
-# 0. Windows 사전 조건
-# - VCPKG_ROOT 가 vcpkg 루트를 가리켜야 함 (권장: C:\vcpkg)
-# - Visual Studio Developer Command Prompt 또는 VsDevCmd.bat 로 MSVC 환경을 먼저 로드
-
-# 1. 빌드 확인
-cmake --preset debug
-cmake --build --preset debug
-
-# 2. 테스트 통과
-ctest --preset debug
-
-# 3. 레이어 위반 검사
-python tools/check_layers.py
-
-# 4. 인코딩 검사
-python tools/check_encoding.py
-
-# 5. 포맷 적용
-clang-format -i $(find src -name "*.cpp" -o -name "*.h")
-```
-
-### Windows / vcpkg 메모
-
-- `vcpkg.json` manifest 모드를 사용할 때는 `builtin-baseline` 또는 `vcpkg-configuration.json` 이 반드시 있어야 한다.
-- `CMakePresets.json` 의 `toolchainFile` 은 `$env{VCPKG_ROOT}` 를 사용하므로, `VCPKG_ROOT` 가 비어 있으면 configure 단계에서 즉시 실패한다.
-- `cmake --preset debug` 는 일반 PowerShell보다 Visual Studio 개발자 셸에서 재현성이 높다. 일반 셸에서는 `cl.exe` 를 찾지 못해 실패할 수 있다.
-- `VCPKG_ROOT` 는 `C:\vcpkg` 같이 공백 없는 경로가 preset/toolchain 해석에 안전하다.
-- `check_layers.py` 는 콘솔 인코딩에 따라 Unicode 출력 오류가 날 수 있다. Windows 콘솔에서 문제가 나면 `PYTHONIOENCODING=utf-8` 로 실행한다.
-- 저장소 텍스트 파일은 UTF-8 without BOM 으로 유지한다. `python tools/check_encoding.py` 가 0으로 끝나지 않으면 인코딩 오류로 간주한다.
-
-PR 설명 필수 포함:
-- **무엇을 했나**: 변경 내용 요약
-- **왜 했나**: 동기, 설계 결정
-- **영향 범위**: 수정된 레이어/도메인
-- **테스트**: 어떻게 검증했나
+상세 명령은 [verification.md](./verification.md)를 따른다.
 
 ---
 
-## 에이전트가 막혔을 때
+## 막혔을 때 원칙
 
-1. "더 열심히 시도"하지 않는다
-2. 무엇이 빠진지 분석:
-   - 문서가 부족한가? → `docs/`에 추가
-   - 컨벤션이 불명확한가? → `docs/conventions/`에 추가
-   - 린터가 없어 실수를 반복하는가? → `tools/`에 검사 추가
-3. 부족한 것을 채운 후 다시 시도
+1. 추측으로 밀어붙이지 않는다.
+2. 빠진 것이 문서인지, 컨벤션인지, 자동 검사인지 분류한다.
+3. 부족한 지점을 문서 또는 도구로 보강한 뒤 다시 진행한다.
 
 ---
 
 ## 금지 행동
 
-- 레이어 의존성 위반 코드 커밋
-- 테스트 없는 Core 레이어 신규 코드
-- `check_layers.py` 통과 전 PR 생성
-- exec-plan 없이 대형 작업 시작 (300줄 이상 변경 예상 시)
-- 문서를 코드보다 나중에 작성 (설계 결정은 코딩 전 또는 동시에)
+- 레이어 위반 코드 커밋
+- Core 신규 로직에 테스트 없이 진행
+- 관련 검증 없이 PR 준비
+- 대형 작업을 exec-plan 없이 시작
+- 설계 결정을 코드 뒤에만 남기고 문서에 남기지 않음

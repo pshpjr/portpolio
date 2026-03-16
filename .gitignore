@@ -4,7 +4,6 @@ build/
 .idea/
 .venv/
 compile_commands.json
-.claude/
 /.github/workflows/ci.yml
 /.localappdata/vcpkg/config
 /.vcpkg-bincache/9c/9c9a1ff54ad0e2a5c5f5f12cf30397c1453ff38cdcae3f48537d21f50050d7cc.zip
