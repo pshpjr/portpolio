@@ -1,8 +1,9 @@
-build/
-.vs/
-.vscode/
-.idea/
-.venv/
+**/build/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/.venv/
+**/.cache/
 compile_commands.json
 /.github/workflows/ci.yml
 /.localappdata/vcpkg/config

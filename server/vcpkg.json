@@ -13,8 +13,12 @@
       "version>=": "24.3.25"
     },
     {
-      "name": "asio",
-      "version>=": "1.30.2"
+      "name": "boost-asio",
+      "version>=": "1.87.0"
+    },
+    {
+      "name": "boost-system",
+      "version>=": "1.87.0"
     },
     {
       "name": "nlohmann-json",

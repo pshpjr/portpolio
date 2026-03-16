@@ -20,6 +20,9 @@
   - 경로 이동, 문서 링크 갱신, 루트/앱 진입점 구조를 수정할 때
   - 모노레포 기준선 자체를 바꿀 때
 
+- [20260316-exec-plan-gate-and-skill.md](./20260316-exec-plan-gate-and-skill.md) - 작업 전 exec-plan 강제 규칙과 skill 추가
+- [20260316-session-class-architecture.md](./20260316-session-class-architecture.md) - 세션 클래스 책임, 상태, 인터페이스 경계를 구현 전에 합의
+
 ## 운영 규칙
 
 - 작업과 직접 무관한 활성 plan은 읽지 않는다.

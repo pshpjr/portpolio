@@ -22,6 +22,8 @@
   [architecture/layers.md](./architecture/layers.md)
 - 상세 검증 명령 확인:
   [workflow/verification.md](./workflow/verification.md)
+- Windows 빌드 장애 대응 확인:
+  [workflow/build-troubleshooting.md](./workflow/build-troubleshooting.md)
 - 외부 라이브러리 확인:
   [architecture/dependencies.md](./architecture/dependencies.md)
 - 품질 등급 참조:
