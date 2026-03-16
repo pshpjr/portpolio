@@ -75,26 +75,6 @@ python tools/check_encoding.py
 clang-format -i $(find src -name "*.cpp" -o -name "*.h")
 ```
 
-### Linux / vcpkg / Ninja 메모
-
-- Linux도 `vcpkg manifest + Ninja`를 기본 빌드 체인으로 사용한다.
-- `VCPKG_ROOT` 가 비어 있으면 configure가 실패한다.
-- `ninja` 가 없으면 configure 단계에서 `CMAKE_MAKE_PROGRAM` 오류가 발생한다.
-- 초기 환경 구성은 아래 스크립트로 자동화한다.
-
-```bash
-bash tools/setup_linux_env.sh
-export VCPKG_ROOT="$HOME/.local/vcpkg"
-```
-
-- Linux 검증 커맨드:
-
-```bash
-VCPKG_ROOT="$HOME/.local/vcpkg" cmake --preset debug-linux
-VCPKG_ROOT="$HOME/.local/vcpkg" cmake --build --preset debug-linux
-VCPKG_ROOT="$HOME/.local/vcpkg" ctest --preset debug-linux
-```
-
 ### Windows / vcpkg 메모
 
 - `vcpkg.json` manifest 모드를 사용할 때는 `builtin-baseline` 또는 `vcpkg-configuration.json` 이 반드시 있어야 한다.

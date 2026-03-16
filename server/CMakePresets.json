@@ -34,19 +34,6 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
-    },
-    {
-      "name": "debug-linux",
-      "displayName": "Debug (Linux + vcpkg + Ninja)",
-      "inherits": "base",
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      },
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
     }
   ],
   "buildPresets": [
@@ -61,10 +48,6 @@
     {
       "name": "ci",
       "configurePreset": "ci"
-    },
-    {
-      "name": "debug-linux",
-      "configurePreset": "debug-linux"
     }
   ],
   "testPresets": [
@@ -78,13 +61,6 @@
     {
       "name": "ci",
       "configurePreset": "ci",
-      "output": {
-        "outputOnFailure": true
-      }
-    },
-    {
-      "name": "debug-linux",
-      "configurePreset": "debug-linux",
       "output": {
         "outputOnFailure": true
       }
