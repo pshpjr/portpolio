@@ -6,6 +6,7 @@
 
 - [20260316-not-null-utility.md](./20260316-not-null-utility.md) - NotNull 타입 안전 래퍼 구현
 - [20260317-utility-functions.md](./20260317-utility-functions.md) - 문자열·컨테이너·랜덤 유틸리티 추가
+- [20260317-assert-utility.md](./20260317-assert-utility.md) - Assert 런타임 불변식 검증 유틸리티 구현
 
 ## 운영 규칙
 
