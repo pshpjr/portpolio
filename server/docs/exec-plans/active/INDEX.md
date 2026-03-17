@@ -4,6 +4,8 @@
 
 ## 현재 활성 계획
 
+- [20260317-add-utility-classes.md](./20260317-add-utility-classes.md) - NotNull\<T\> 등 경량 유틸리티 클래스 추가
+
 ### `20260314-project-setup.md`
 
 - 목적: 서버 프로젝트 초기 설정과 빌드/검증 기반 정리
