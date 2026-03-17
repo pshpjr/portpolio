@@ -48,7 +48,7 @@ public:
     explicit NotNull(T ptr) noexcept;        // assert(ptr != nullptr)
 
     T        operator->()       noexcept;
-    const T  operator->() const noexcept;    // T가 포인터/스마트포인터이면 const 메서드만 호출 가능
+    const T  operator->() const noexcept;    // T = Foo* 일 때만 const 메서드 호출 강제됨 (아래 주의사항 참고)
 
     auto&        operator*()       noexcept;
     const auto&  operator*() const noexcept;
@@ -61,8 +61,16 @@ public:
 };
 ```
 
-> `const T operator->() const` 에서 T 가 `Foo*` 이면 `const Foo*` 를 돌려주는 효과.
-> T 가 `shared_ptr<Foo>` 이면 반환 타입이 `const shared_ptr<Foo>` 가 되어 `->` 재호출 시 `Foo const*` 로 전파된다.
+> ### T 타입별 const 오버로드 동작 비교
+>
+> | T | `operator->() const` 반환 타입 | `->` 로 접근한 객체 | 비-const 메서드 호출 가능? |
+> |---|---|---|---|
+> | `Foo*` | `Foo* const` (포인터가 const) | `Foo` | **불가** — `Foo* const` 에서 `->` 하면 `Foo&` 이지만, 반환이 `const Foo*` 로 처리되기 때문 |
+> | `shared_ptr<Foo>` | `const shared_ptr<Foo>` | `Foo` | **가능** — `shared_ptr::operator->() const` 는 `Foo*` 를 반환하므로 const 가 내부 객체까지 전파되지 않음 |
+>
+> 즉 `T = shared_ptr<Foo>` 일 때 `const NotNull<shared_ptr<Foo>>&` 로 받아도 `Foo` 의 비-const 메서드를 막지 못한다.
+> `shared_ptr` 의 const 전파가 필요한 경우 `std::experimental::propagate_const` 를 사용해야 하지만,
+> **이 프로젝트에서는 해당 패턴을 사용하지 않기로 합의했다.** (`shared_ptr` 대신 raw pointer 를 `NotNull` 로 감싸는 방식을 택한다.)
 
 ---
 
