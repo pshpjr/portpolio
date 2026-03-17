@@ -1,8 +1,5 @@
 #pragma once
 
-#include <cassert>
-#include <type_traits>
-
 /**
  * @brief CRTP 기반 싱글턴 헬퍼
  *
@@ -13,28 +10,14 @@
  *       MyManager() = default;
  *   };
  *
- *   MyManager::instance().doSomething();
+ *   MyManager::get().doSomething();
  */
 template <typename T>
 class Singleton {
 public:
-    static T& instance() {
-        assert(s_instance != nullptr && "Singleton not initialized");
-        return *s_instance;
-    }
-
-    static void create() {
-        assert(s_instance == nullptr && "Singleton already created");
-        static T obj{};
-        s_instance = &obj;
-    }
-
-    static void destroy() {
-        s_instance = nullptr;
-    }
-
-    static bool is_created() {
-        return s_instance != nullptr;
+    static T& get() {
+        static T instance{};
+        return instance;
     }
 
     Singleton(const Singleton&)            = delete;
@@ -43,9 +26,6 @@ public:
     Singleton& operator=(Singleton&&)      = delete;
 
 protected:
-    Singleton() = default;
+    Singleton()  = default;
     ~Singleton() = default;
-
-private:
-    inline static T* s_instance = nullptr;
 };
