@@ -69,8 +69,8 @@ public:
 > | `shared_ptr<Foo>` | `const shared_ptr<Foo>` | `Foo` | **가능** — `shared_ptr::operator->() const` 는 `Foo*` 를 반환하므로 const 가 내부 객체까지 전파되지 않음 |
 >
 > 즉 `T = shared_ptr<Foo>` 일 때 `const NotNull<shared_ptr<Foo>>&` 로 받아도 `Foo` 의 비-const 메서드를 막지 못한다.
-> `shared_ptr` 의 const 전파가 필요한 경우 `std::experimental::propagate_const` 를 사용해야 하지만,
-> **이 프로젝트에서는 해당 패턴을 사용하지 않기로 합의했다.** (`shared_ptr` 대신 raw pointer 를 `NotNull` 로 감싸는 방식을 택한다.)
+> 그러나 **이 프로젝트에서는 소유권 없는 참조를 `const ref` 로 받는 규약을 사용하기 때문에** 이 제한이 문제가 되지 않는다.
+> `const NotNull<T>&` 로 넘기는 규약 자체가 호출자 측의 수정 의도를 차단하며, `propagate_const` 같은 별도 패턴이 필요 없다.
 
 ---
 
