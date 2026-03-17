@@ -56,7 +56,21 @@
 
 ### 3. 랜덤 유틸리티 (`random_utils.h`)
 
-#### 3-1. `RandomEngine` — 전용 난수 엔진 래퍼 (싱글턴 아님, 값 객체)
+#### 설계 원칙: 공 뽑기 모델 (Bag Draw)
+
+게임 랜덤은 **통계적 확률이 아닌 보장된 비율**이어야 한다.
+
+- `std::discrete_distribution`은 매 호출마다 독립 시행 → 단기 편차 발생
+- Bag Draw 모델: 가중치만큼 공을 가방에 넣고 섞은 뒤 순서대로 뽑는다
+- 한 사이클(가방 전체)을 소진하면 다시 채우고 섞는다
+- **사이클 내 정확한 비율**을 보장하며 장기 평균도 설계 확률과 일치한다
+
+```
+예) 가중치 [3, 1, 1] → 가방 [0,0,0,1,2] 셔플 → 순서대로 pick
+    5회 안에 반드시 0번이 3번, 1번·2번이 각 1번씩 등장
+```
+
+#### 3-1. `RandomEngine` — 전용 난수 엔진 래퍼 (값 객체)
 
 ```cpp
 class RandomEngine {
@@ -65,9 +79,10 @@ public:
     explicit RandomEngine(uint64_t seed);           // 재현 가능한 시드
 
     int    rand_int(int min, int max);              // [min, max] 균등 정수
+    int    rand_int(IntRange range);
     double rand_float(double min, double max);      // [min, max) 균등 실수
+    double rand_float(FloatRange range);
     bool   rand_bool(double probability);           // 확률(0.0~1.0) bool
-    int    rand_discrete(span<const double> weights); // 가중치 이산 분포 인덱스 반환
 
     template<typename Container>
     auto&  rand_pick(Container& c);                 // 컨테이너에서 랜덤 원소 참조
@@ -77,6 +92,8 @@ public:
 };
 ```
 
+> `rand_discrete`는 `BagDraw`로 대체된다. `RandomEngine`은 순수 균등 난수 기반 연산만 담당한다.
+
 #### 3-2. `IntRange` / `FloatRange` — 범위 값 객체
 
 ```cpp
@@ -84,13 +101,32 @@ struct IntRange   { int    min; int    max; };
 struct FloatRange { double min; double max; };
 ```
 
-#### 3-3. 범위 객체를 받는 오버로드
+#### 3-3. `BagDraw<T>` — 공 뽑기 랜덤 (가중치 보장 이산 분포)
 
 ```cpp
-// RandomEngine 멤버 오버로드
-int    rand_int(IntRange range);
-double rand_float(FloatRange range);
+template<typename T>
+class BagDraw {
+public:
+    // 항목과 정수 가중치로 생성
+    // 예: BagDraw<ItemId>({ItemId::Sword, 3}, {ItemId::Shield, 1}, {ItemId::Potion, 1})
+    BagDraw(std::initializer_list<std::pair<T, int>> weighted_items,
+            RandomEngine& engine);
+
+    // 다음 공 뽑기 — 가방이 비면 자동으로 리필 & 셔플
+    const T& draw();
+
+    // 현재 가방에 남은 공 수
+    int remaining() const;
+
+    // 가방을 강제로 리셋(리필 & 셔플)
+    void reset();
+};
 ```
+
+**동작 방식**
+1. 생성 시: 가중치만큼 `T` 값을 `bag_` 벡터에 복제 후 셔플
+2. `draw()`: `bag_[index_++]` 반환, `index_ == bag_.size()`이면 리셋 후 재시작
+3. 상태(`bag_`, `index_`)를 직렬화하면 재현 가능
 
 #### 3-4. 글로벌 편의 함수 (thread_local RandomEngine 사용)
 
@@ -101,7 +137,6 @@ double rand_float(FloatRange range);
 | `rand_float(double min, double max)` | 글로벌 엔진으로 실수 난수 |
 | `rand_float(FloatRange range)` | 범위 객체 버전 |
 | `rand_bool(double probability)` | 글로벌 엔진으로 bool |
-| `rand_discrete(span<const double>)` | 글로벌 엔진으로 이산 분포 |
 
 ---
 
