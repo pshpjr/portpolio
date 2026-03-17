@@ -101,32 +101,55 @@ struct IntRange   { int    min; int    max; };
 struct FloatRange { double min; double max; };
 ```
 
-#### 3-3. `BagDraw<T>` — 공 뽑기 랜덤 (가중치 보장 이산 분포)
+#### 3-3. `BagDraw<T>` — 게임 전용 공 뽑기 랜덤
+
+`random_utils.h`와 분리된 **`game_random.h`** 에 배치한다.
+`RandomEngine`을 내부에 보유하고, **시드·크기·현재 인덱스**를 상태로 저장해
+서버 재부팅 후에도 정확히 이어서 진행할 수 있다.
+
+##### 상태 값 객체 `BagDrawState`
+
+```cpp
+struct BagDrawState {
+    uint64_t seed;        // 셔플 재현용 시드
+    int      bag_size;    // 가방 전체 공 수 (가중치 합계)
+    int      index;       // 다음에 뽑을 위치 (0 ~ bag_size-1)
+};
+```
+
+- DB/파일에 이 세 값만 저장하면 재부팅 후 동일한 가방 순서를 복원할 수 있다.
+- `seed`로 셔플 결과를 재현하므로 공 순서까지 완벽히 복구된다.
+
+##### `BagDraw<T>` 클래스
 
 ```cpp
 template<typename T>
 class BagDraw {
 public:
-    // 항목과 정수 가중치로 생성
-    // 예: BagDraw<ItemId>({ItemId::Sword, 3}, {ItemId::Shield, 1}, {ItemId::Potion, 1})
-    BagDraw(std::initializer_list<std::pair<T, int>> weighted_items,
-            RandomEngine& engine);
+    // 신규 생성 — random_device로 시드 자동 발급
+    explicit BagDraw(std::initializer_list<std::pair<T, int>> weighted_items);
 
-    // 다음 공 뽑기 — 가방이 비면 자동으로 리필 & 셔플
+    // 재부팅 복원 — 저장된 상태로 동일한 가방 순서 재현
+    BagDraw(std::initializer_list<std::pair<T, int>> weighted_items,
+            const BagDrawState& saved_state);
+
+    // 다음 공 뽑기 — 가방이 비면 새 시드로 리필 & 셔플
     const T& draw();
+
+    // 현재 상태 스냅샷 — 저장·전송용
+    BagDrawState save_state() const;
 
     // 현재 가방에 남은 공 수
     int remaining() const;
-
-    // 가방을 강제로 리셋(리필 & 셔플)
-    void reset();
 };
 ```
 
 **동작 방식**
-1. 생성 시: 가중치만큼 `T` 값을 `bag_` 벡터에 복제 후 셔플
-2. `draw()`: `bag_[index_++]` 반환, `index_ == bag_.size()`이면 리셋 후 재시작
-3. 상태(`bag_`, `index_`)를 직렬화하면 재현 가능
+1. 생성 시: 가중치만큼 `T` 값을 `bag_` 벡터에 복제 → 시드 기록 → 셔플
+2. `draw()`: `bag_[index_++]` 반환
+3. `index_ == bag_size`이면: 새 시드 생성 → 리필 → 셔플 → `index_ = 0`
+4. `save_state()`: `{seed_, bag_size_, index_}` 반환 → DB 저장
+5. 복원 생성자: 동일 `seed_`로 셔플 재현 후 `index_` 위치에서 재개
 
 #### 3-4. 글로벌 편의 함수 (thread_local RandomEngine 사용)
 
@@ -147,7 +170,8 @@ Lib/include/
 └── utils/
     ├── string_utils.h
     ├── container_utils.h
-    └── random_utils.h
+    ├── random_utils.h      ← RandomEngine, IntRange, FloatRange, 글로벌 편의 함수
+    └── game_random.h       ← BagDrawState, BagDraw<T> (게임 전용)
 ```
 
 ---
@@ -168,15 +192,16 @@ Lib/include/
 - [ ] 1. `Lib/include/utils/string_utils.h` 작성
 - [ ] 2. `Lib/include/utils/container_utils.h` 작성
 - [ ] 3. `Lib/include/utils/random_utils.h` 작성
-- [ ] 4. `Lib/tests/` 아래 단위 테스트 작성
-- [ ] 5. `Lib/include/README.md` 및 `Lib/README.md` 업데이트
-- [ ] 6. INDEX.md 완료 처리 및 `completed/`로 이동
+- [ ] 4. `Lib/include/utils/game_random.h` 작성
+- [ ] 5. `Lib/tests/` 아래 단위 테스트 작성
+- [ ] 6. `Lib/include/README.md` 및 `Lib/README.md` 업데이트
+- [ ] 7. INDEX.md 완료 처리 및 `completed/`로 이동
 
 ---
 
 ## 완료 조건
 
-- 세 헤더 파일이 `portpolio::lib::utils` 네임스페이스 아래 구현됨
+- 네 헤더 파일이 `portpolio::lib::utils` 네임스페이스 아래 구현됨
 - 각 함수에 단위 테스트 존재
 - 외부 의존성 없이 표준 라이브러리만 사용
 - README 업데이트 완료
