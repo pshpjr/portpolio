@@ -18,8 +18,9 @@ description: Use this skill when reviewing, updating, or validating repository d
 
 1. 변경 경로를 보고 문서 역할을 [references/document-roles.md](./references/document-roles.md)에서 확인한다.
 2. 수정 또는 리뷰 전에 [references/review-checks.md](./references/review-checks.md)의 체크리스트를 적용한다.
-3. 필요한 검사 커맨드는 [references/commands.md](./references/commands.md)에서 고른다.
-4. 더 좁은 관점의 검토가 필요하면 프로젝트 서브에이전트를 사용한다.
+3. 문서를 수정했다면 완료 전에 반드시 [references/commands.md](./references/commands.md)의 `python tools/doc_check.py`를 실행한다.
+4. 필요하면 같은 파일의 추가 검사 커맨드를 고른다.
+5. 더 좁은 관점의 검토가 필요하면 프로젝트 서브에이전트를 사용한다.
 
 ## 프로젝트 서브에이전트
 

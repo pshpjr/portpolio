@@ -35,8 +35,8 @@
 
 - 관련 빌드가 통과해야 한다.
 - 관련 테스트가 통과해야 한다.
-- `tools/check_layers.py`가 통과해야 한다.
-- 텍스트 파일을 바꿨다면 `tools/check_encoding.py`를 통과해야 한다.
+- `../tools/check_layers.py`가 통과해야 한다.
+- 텍스트 파일을 바꿨다면 `../tools/check_encoding.py`를 통과해야 한다.
 - 변경 범위에 맞는 문서와 exec-plan 상태를 갱신해야 한다.
 
 상세 명령은 [verification.md](./verification.md)를 따르고, Windows 환경 장애 대응은 [build-troubleshooting.md](./build-troubleshooting.md)를 따른다.

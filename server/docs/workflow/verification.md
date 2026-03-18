@@ -65,8 +65,8 @@ Get-ChildItem 'C:\Program Files\Microsoft Visual Studio' -Recurse -Filter cl.exe
 cmake --preset debug
 cmake --build --preset debug
 ctest --preset debug
-python tools/check_layers.py
-python tools/check_encoding.py
+python ../tools/check_layers.py --root src --layer-order types,config,core,service,network,runtime
+python ../tools/check_encoding.py --root .
 ```
 
 ## Windows / vcpkg 메모

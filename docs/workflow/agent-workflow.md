@@ -62,59 +62,22 @@
 PR을 열기 전 반드시:
 
 ```bash
-# 0. Windows 사전 조건
-# - VCPKG_ROOT 가 vcpkg 루트를 가리켜야 함 (권장: C:\vcpkg)
-# - Visual Studio Developer Command Prompt 또는 VsDevCmd.bat 로 MSVC 환경을 먼저 로드
+# 1. 문서 링크/plan 검사
+python tools/doc_check.py
 
-# 1. 빌드 확인
-cmake --preset debug
-cmake --build --preset debug
-
-# 2. 테스트 통과
-ctest --preset debug
-
-# 3. 레이어 위반 검사
-python tools/check_layers.py
-
-# 4. 인코딩 검사
+# 2. 인코딩 검사
 python tools/check_encoding.py
 
-# 5. 문서 작업이면 링크/plan 검사
-python server/tools/doc_check.py
+# 3. 서버 의존관계 검사
+python tools/check_layers.py --root server/src --layer-order types,config,core,service,network,runtime
 
-# 6. 포맷 적용
-clang-format -i $(find src -name "*.cpp" -o -name "*.h")
+# 4. 라이브러리 의존관계 검사
+python tools/check_layers.py --root Lib --layer-order include,src,tests
 ```
 
-### Linux / vcpkg / Ninja 메모
-
-- Linux도 `vcpkg manifest + Ninja`를 기본 빌드 체인으로 사용한다.
-- `VCPKG_ROOT` 가 비어 있으면 configure가 실패한다.
-- `ninja` 가 없으면 configure 단계에서 `CMAKE_MAKE_PROGRAM` 오류가 발생한다.
-- 초기 환경 구성은 아래 스크립트로 자동화한다.
-
-```bash
-bash tools/setup_linux_env.sh
-export VCPKG_ROOT="$HOME/.local/vcpkg"
-```
-
-- Linux 검증 커맨드:
-
-```bash
-VCPKG_ROOT="$HOME/.local/vcpkg" cmake --preset debug-linux
-VCPKG_ROOT="$HOME/.local/vcpkg" cmake --build --preset debug-linux
-VCPKG_ROOT="$HOME/.local/vcpkg" ctest --preset debug-linux
-```
-
-### Windows / vcpkg 메모
-
-- `vcpkg.json` manifest 모드를 사용할 때는 `builtin-baseline` 또는 `vcpkg-configuration.json` 이 반드시 있어야 한다.
-- `CMakePresets.json` 의 `toolchainFile` 은 `$env{VCPKG_ROOT}` 를 사용하므로, `VCPKG_ROOT` 가 비어 있으면 configure 단계에서 즉시 실패한다.
-- `cmake --preset debug` 는 일반 PowerShell보다 Visual Studio 개발자 셸에서 재현성이 높다. 일반 셸에서는 `cl.exe` 를 찾지 못해 실패할 수 있다.
-- `VCPKG_ROOT` 는 `C:\vcpkg` 같이 공백 없는 경로가 preset/toolchain 해석에 안전하다.
-- `check_layers.py` 는 콘솔 인코딩에 따라 Unicode 출력 오류가 날 수 있다. Windows 콘솔에서 문제가 나면 `PYTHONIOENCODING=utf-8` 로 실행한다.
-- `python` 이 Microsoft Store stub 경로만 잡히면 Python 스크립트 실행이 실패할 수 있다. 이 경우 실제 Python 설치 경로를 PATH에 추가한 뒤 검증을 실행한다.
-- 저장소 텍스트 파일은 UTF-8 without BOM 으로 유지한다. `python tools/check_encoding.py` 가 0으로 끝나지 않으면 인코딩 오류로 간주한다.
+- 앱별 빌드와 테스트 명령은 각 앱의 workflow 문서를 따른다.
+- 공용 Python 검사 도구 규칙은 [../conventions/tooling.md](../conventions/tooling.md)를 따른다.
+- 저장소 텍스트 파일은 UTF-8 without BOM으로 유지한다.
 
 PR 설명 필수 포함:
 - **무엇을 했나**: 변경 내용 요약

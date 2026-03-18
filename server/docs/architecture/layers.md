@@ -10,4 +10,4 @@ Types → Config → Core → Service → Network → Runtime
 
 - 각 레이어는 자신의 왼쪽 레이어만 의존한다.
 - 같은 레이어 내부 순환 의존은 허용하지 않는다.
-- 위반 검사는 `python tools/check_layers.py`로 수행한다.
+- 위반 검사는 `python ../tools/check_layers.py --root src --layer-order types,config,core,service,network,runtime`로 수행한다.

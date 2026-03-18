@@ -34,7 +34,7 @@
 
 - 레이어 규칙의 단일 소스는 [ARCHITECTURE.md](./ARCHITECTURE.md)다.
 - 워크플로, 검증, PR 전 체크리스트의 단일 소스는 [docs/workflow/agent-workflow.md](./docs/workflow/agent-workflow.md)다.
-- 설계 철학과 제품 범위의 단일 소스는 [docs/design/](./docs/design/) 아래 문서다.
+- 공용 설계 철학과 공용 컨벤션의 단일 소스는 루트 [../docs/](../docs/) 아래 문서다.
 - 상위 기획이 필요할 때만 루트 [../docs/AGENTS.md](../docs/AGENTS.md)에서 관련 기획서를 찾아 읽는다.
 
 레이어 요약:
@@ -49,12 +49,12 @@ Types -> Config -> Core -> Service -> Network -> Runtime
 
 ## 빠른 라우팅
 
-- C++ 코드 수정: [docs/conventions/cpp-style.md](./docs/conventions/cpp-style.md)
-- Python 툴 수정: [docs/conventions/tooling.md](./docs/conventions/tooling.md)
+- C++ 코드 수정: [../docs/conventions/cpp-style.md](../docs/conventions/cpp-style.md)
+- Python 툴 수정: [../docs/conventions/tooling.md](../docs/conventions/tooling.md)
 - 레이어/도메인 판단: [ARCHITECTURE.md](./ARCHITECTURE.md)
 - 작업 절차, exec-plan, 검증: [docs/workflow/agent-workflow.md](./docs/workflow/agent-workflow.md)
 - 제품 목표, 범위: [docs/design/overview.md](./docs/design/overview.md)
-- 설계 원칙: [docs/design/core-beliefs.md](./docs/design/core-beliefs.md)
+- 설계 원칙: [../docs/design/core-beliefs.md](../docs/design/core-beliefs.md)
 
 ---
 
@@ -62,7 +62,6 @@ Types -> Config -> Core -> Service -> Network -> Runtime
 
 - `src/03_core/` -> `src/03_core/AGENTS.md`
 - `src/04_service/` -> `src/04_service/AGENTS.md`
-- `src/05_network/` -> `src/05_network/AGENTS.md`
 - `tools/` -> `tools/AGENTS.md`
 - `tests/` -> `tests/AGENTS.md`
 

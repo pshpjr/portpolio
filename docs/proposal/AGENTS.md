@@ -63,4 +63,4 @@
 - 인게임 규칙: [`ingame/`](./ingame/)
 - 아웃게임 규칙: [`outgame/`](./outgame/)
 - 서버 기획: [`server/`](./server/)
-- 문서 검증 스크립트: [`../../server/tools/doc_check.py`](../../server/tools/doc_check.py)
+- 문서 검증 스크립트: [`../../tools/doc_check.py`](../../tools/doc_check.py)

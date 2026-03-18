@@ -11,7 +11,7 @@ Types -> Config -> Core -> Service -> Network -> Runtime
 ```
 
 - 각 레이어는 자신보다 왼쪽에 있는 레이어만 참조할 수 있다.
-- 오른쪽 방향 의존성은 금지하며 `tools/check_layers.py`와 CI에서 검사한다.
+- 오른쪽 방향 의존성은 금지하며 공용 `../tools/check_layers.py`와 CI에서 검사한다.
 - 같은 레이어 내부의 순환 의존성도 허용하지 않는다.
 
 ### 금지 예시

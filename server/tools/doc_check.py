@@ -1,124 +1,14 @@
 #!/usr/bin/env python3
-"""문서 유효성 검사 툴.
+"""Backward-compatible wrapper for the shared documentation checker."""
 
-저장소 내 사람이 관리하는 마크다운 문서에서 깨진 내부 링크와
-active exec-plan 형식 누락을 검사한다.
+from __future__ import annotations
 
-Usage:
-    python server/tools/doc_check.py
-
-Exit codes:
-    0: 이상 없음
-    1: 문제 발견
-"""
-
-import re
-import sys
+import runpy
 from pathlib import Path
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-LINK_PATTERN = re.compile(r"\[.*?\]\((?!https?://)(?!#)([^)]+)\)")
-FENCED_CODE_BLOCK_PATTERN = re.compile(r"```.*?```|~~~.*?~~~", re.DOTALL)
-EXCLUDED_PARTS = {
-    ".git",
-    ".idea",
-    ".codex",
-    ".claude",
-    "build",
-    "Lib",
-    "vcpkg_installed",
-    "blds",
-}
-ACTIVE_PLAN_DIRS = (
-    REPO_ROOT / "docs" / "exec-plans" / "active",
-    REPO_ROOT / "docs" / "proposal" / "exec-plans" / "active",
-    REPO_ROOT / "server" / "docs" / "exec-plans" / "active",
-)
-PLAN_GOAL_HEADINGS = ("## 목표", "## Goal")
-PLAN_COMPLETION_HEADINGS = ("## 완료 기준", "## Completion Criteria")
-
-
-def iter_markdown_files() -> list[Path]:
-    """검사 대상 마크다운 파일 목록을 반환한다."""
-    files = []
-    for md_file in REPO_ROOT.rglob("*.md"):
-        if any(part in EXCLUDED_PARTS for part in md_file.parts):
-            continue
-        files.append(md_file)
-    return files
-
-
-def strip_fenced_code_blocks(content: str) -> str:
-    """펜스 코드 블록을 제거해 링크 오탐을 줄인다."""
-    return FENCED_CODE_BLOCK_PATTERN.sub("", content)
-
-
-def check_internal_links() -> list[str]:
-    """마크다운 파일의 내부 링크 유효성을 검사한다."""
-    errors = []
-    for md_file in iter_markdown_files():
-        content = strip_fenced_code_blocks(md_file.read_text(encoding="utf-8"))
-        for match in LINK_PATTERN.finditer(content):
-            link_target = match.group(1).strip()
-            if not link_target or link_target.startswith("mailto:"):
-                continue
-            target_without_anchor = link_target.split("#", 1)[0]
-            if not target_without_anchor:
-                continue
-            target_path = (md_file.parent / target_without_anchor).resolve()
-            if not target_path.exists():
-                errors.append(
-                    f"{md_file.relative_to(REPO_ROOT)}: 깨진 링크 → {link_target}"
-                )
-    return errors
-
-
-def check_exec_plans() -> list[str]:
-    """active exec-plan 파일들의 형식을 검사한다."""
-    warnings = []
-    for active_dir in ACTIVE_PLAN_DIRS:
-        if not active_dir.exists():
-            continue
-        for plan in active_dir.glob("*.md"):
-            if plan.name == "INDEX.md":
-                continue
-            content = plan.read_text(encoding="utf-8")
-            if not any(heading in content for heading in PLAN_COMPLETION_HEADINGS):
-                warnings.append(
-                    f"{plan.relative_to(REPO_ROOT)}: 완료 기준 섹션 없음"
-                )
-            if not any(heading in content for heading in PLAN_GOAL_HEADINGS):
-                warnings.append(
-                    f"{plan.relative_to(REPO_ROOT)}: 목표 섹션 없음"
-                )
-    return warnings
-
-
-def main() -> int:
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-
-    issues = []
-
-    link_errors = check_internal_links()
-    if link_errors:
-        print(f"❌ 깨진 내부 링크 {len(link_errors)}건:")
-        for e in link_errors:
-            print(f"  {e}")
-        issues.extend(link_errors)
-
-    plan_warnings = check_exec_plans()
-    if plan_warnings:
-        print(f"⚠️  exec-plan 형식 경고 {len(plan_warnings)}건:")
-        for w in plan_warnings:
-            print(f"  {w}")
-
-    if not issues:
-        print("✅ 문서 검사 통과")
-        return 0
-
-    return 1
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    runpy.run_path(
+        str(Path(__file__).resolve().parents[2] / "tools" / "doc_check.py"),
+        run_name="__main__",
+    )

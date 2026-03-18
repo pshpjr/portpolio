@@ -4,6 +4,7 @@
 
 ## 현재 활성 계획
 
+- [20260318-monorepo-agent-doc-alignment.md](./20260318-monorepo-agent-doc-alignment.md) - agent/context-map 정리와 Lib 공통 규칙 정렬
 - [20260316-skill-location-governance.md](./20260316-skill-location-governance.md) - skill 저장 위치 정정과 문서화
 
 ## 운영 규칙

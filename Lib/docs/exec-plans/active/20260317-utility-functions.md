@@ -56,20 +56,6 @@
 
 ### 3. 랜덤 유틸리티 (`random_utils.h`)
 
-#### 설계 원칙: 공 뽑기 모델 (Bag Draw)
-
-게임 랜덤은 **통계적 확률이 아닌 보장된 비율**이어야 한다.
-
-- `std::discrete_distribution`은 매 호출마다 독립 시행 → 단기 편차 발생
-- Bag Draw 모델: 가중치만큼 공을 가방에 넣고 섞은 뒤 순서대로 뽑는다
-- 한 사이클(가방 전체)을 소진하면 다시 채우고 섞는다
-- **사이클 내 정확한 비율**을 보장하며 장기 평균도 설계 확률과 일치한다
-
-```
-예) 가중치 [3, 1, 1] → 가방 [0,0,0,1,2] 셔플 → 순서대로 pick
-    5회 안에 반드시 0번이 3번, 1번·2번이 각 1번씩 등장
-```
-
 #### 3-1. `RandomEngine` — 전용 난수 엔진 래퍼 (값 객체)
 
 ```cpp
@@ -102,6 +88,15 @@ struct FloatRange { double min; double max; };
 ```
 
 #### 3-3. `BagDraw<T>` — 게임 전용 공 뽑기 랜덤
+
+- Bag Draw 모델: 가중치만큼 공을 가방에 넣고 섞은 뒤 순서대로 뽑는다
+- 한 사이클(가방 전체)을 소진하면 다시 채우고 섞는다
+- **사이클 내 정확한 비율**을 보장하며 장기 평균도 설계 확률과 일치한다
+
+```
+예) 가중치 [3, 1, 1] → 가방 [0,0,0,1,2] 셔플 → 순서대로 pick
+    5회 안에 반드시 0번이 3번, 1번·2번이 각 1번씩 등장
+```
 
 `random_utils.h`와 분리된 **`game_random.h`** 에 배치한다.
 `RandomEngine`을 내부에 보유하고, **시드·크기·현재 인덱스**를 상태로 저장해
@@ -153,13 +148,13 @@ public:
 
 #### 3-4. 글로벌 편의 함수 (thread_local RandomEngine 사용)
 
-| 함수 | 설명 |
-|------|------|
-| `rand_int(int min, int max)` | 글로벌 엔진으로 정수 난수 |
-| `rand_int(IntRange range)` | 범위 객체 버전 |
-| `rand_float(double min, double max)` | 글로벌 엔진으로 실수 난수 |
-| `rand_float(FloatRange range)` | 범위 객체 버전 |
-| `rand_bool(double probability)` | 글로벌 엔진으로 bool |
+| 함수                              | 설명 |
+|---------------------------------|------|
+| `Rand(int min, int max)`        | 글로벌 엔진으로 정수 난수 |
+| `Rand(IntRange range)`          | 범위 객체 버전 |
+| `Rand(double min, double max)`  | 글로벌 엔진으로 실수 난수 |
+| `Rand(FloatRange range)`        | 범위 객체 버전 |
+| `Rand_bool(double probability)` | 글로벌 엔진으로 bool |
 
 ---
 
@@ -199,7 +194,7 @@ Lib/include/
 
 ---
 
-## 완료 조건
+## 완료 기준
 
 - 네 헤더 파일이 `portpolio::lib::utils` 네임스페이스 아래 구현됨
 - 각 함수에 단위 테스트 존재

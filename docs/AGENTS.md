@@ -7,6 +7,8 @@
 ## 대상 범위
 
 - `proposal/` — 제품 기획서
+- `design/` — 저장소 공용 설계 철학
+- `conventions/` — 저장소 공용 코딩/도구 규칙
 - `workflow/` — 루트 공용 작업 절차
 - `exec-plans/` — 루트 레벨 실행 계획
 
@@ -35,9 +37,13 @@
 
 - 기획서 전체 개요: [proposal/main.md](./proposal/main.md)
 - 기획서 작업 진입점: [proposal/AGENTS.md](./proposal/AGENTS.md)
+- 공용 설계 철학: [design/core-beliefs.md](./design/core-beliefs.md)
+- 공용 C++ 규칙: [conventions/cpp-style.md](./conventions/cpp-style.md)
+- 공용 Python 도구 규칙: [conventions/tooling.md](./conventions/tooling.md)
 - 공용 작업 절차: [workflow/agent-workflow.md](./workflow/agent-workflow.md)
 - 루트 활성 exec-plan: [exec-plans/active/INDEX.md](./exec-plans/active/INDEX.md)
 - 서버 구현 문서로 이동: [../server/AGENTS.md](../server/AGENTS.md)
+- 공용 라이브러리 문서로 이동: [../Lib/AGENTS.md](../Lib/AGENTS.md)
 
 ## Skill / Agent 위치 규칙
 
