@@ -43,3 +43,7 @@
 - `lastRecvTime`만으로는 세션 생존 판단 근거가 부족하므로 `acceptedAt`, `connectedAt`, `SessionId`, `SessionState`, 소켓/채널 핸들, `DisconnectReason`, `recvBuffer`, `sendQueue`, `atomic_flag isSending`를 핵심 멤버 후보로 본다.
 - `isAlive`는 별도 저장 bool보다 상태값과 종료 상태를 기반으로 계산하는 방향을 기본안으로 둔다.
 - 구현 전 검토 포인트는 다음과 같이 본다: thread-safety, disconnect idempotency, negotiation timeout, partial packet buffering, send queue ownership.
+
+## 참고자료
+
+- [세션 종료 시 처리 — OnCloseSession 이후 OnPacket 미호출 보장 논의 기록](../../docs/design/session-close-packet-ordering.md): serial recv 전제 하에 atomic counter 패턴과 Close() post 방식으로 경쟁 조건을 해결하는 설계 논의. strand 전면 도입 여부 미결.

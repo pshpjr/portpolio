@@ -31,6 +31,8 @@
   [quality/grades.md](./quality/grades.md)
 - 저장소 구조 참조:
   [reference/project-layout.md](./reference/project-layout.md)
+- 세션 종료 순서 보장(OnCloseSession/OnPacket 경쟁 조건) 설계 논의 참조:
+  [design/session-close-packet-ordering.md](./design/session-close-packet-ordering.md)
 
 ## 상황별 읽기 규칙
 
