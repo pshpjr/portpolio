@@ -47,3 +47,4 @@
 ## 참고자료
 
 - [세션 종료 시 처리 — OnCloseSession 이후 OnPacket 미호출 보장 논의 기록](../../docs/design/session-close-packet-ordering.md): serial recv 전제 하에 atomic counter 패턴과 Close() post 방식으로 경쟁 조건을 해결하는 설계 논의. strand 전면 도입 여부 미결.
+- [세션 소유권 및 패킷 핸들러 등록 방식 설계 결정](../../docs/design/session-ownership-and-handler-registration.md): 상속/CRTP/콜백 세 가지 방식 비교 후 함수 포인터 글로벌 등록 + 컨텐츠 레이어 매핑 구조로 확정. 상태별 HandlerTable 포인터 교체 패턴 포함.

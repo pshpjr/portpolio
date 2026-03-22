@@ -33,6 +33,8 @@
   [reference/project-layout.md](./reference/project-layout.md)
 - 세션 종료 순서 보장(OnCloseSession/OnPacket 경쟁 조건) 설계 논의 참조:
   [design/session-close-packet-ordering.md](./design/session-close-packet-ordering.md)
+- 세션 소유권 및 패킷 핸들러 등록 방식 설계 결정 참조:
+  [design/session-ownership-and-handler-registration.md](./design/session-ownership-and-handler-registration.md)
 
 ## 상황별 읽기 규칙
 
