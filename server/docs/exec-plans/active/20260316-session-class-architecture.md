@@ -26,7 +26,7 @@
 - [completed] 관련 workflow, network 레이어 규칙, active exec-plan 규칙 확인
 - [completed] 세션 클래스 아키텍처 결정용 plan 초안 작성 및 사용자 검토
 - [completed] 사용자 피드백 반영
-- [in_progress] 세션 클래스 설계안 확정
+- [completed] 세션 클래스 설계안 확정
 - [pending] 구현 단계로 전환
 
 ## Design Decision Log
@@ -43,8 +43,11 @@
 - `lastRecvTime`만으로는 세션 생존 판단 근거가 부족하므로 `acceptedAt`, `connectedAt`, `SessionId`, `SessionState`, 소켓/채널 핸들, `DisconnectReason`, `recvBuffer`, `sendQueue`, `atomic_flag isSending`를 핵심 멤버 후보로 본다.
 - `isAlive`는 별도 저장 bool보다 상태값과 종료 상태를 기반으로 계산하는 방향을 기본안으로 둔다.
 - 구현 전 검토 포인트는 다음과 같이 본다: thread-safety, disconnect idempotency, negotiation timeout, partial packet buffering, send queue ownership.
+- 스레드 모델은 **strand 전면 도입**으로 확정한다. recv, send, negotiation timeout timer, Close 모두 동일 strand에 귀속. atomic counter + Close post 혼합 방식은 timer 추가 시 카운터 규칙 재검증이 필요하여 미채택.
+- `Close()`는 strand에 post하며, 소켓 닫힘과 `OnDisconnect` 호출이 모두 strand context 내에서 실행된다.
+- `OnDisconnect`는 항상 strand context에서 호출됨을 보장한다. 외부 스레드에서 호출되는 경우는 없다.
+- 내부 파괴 순서: `OnDisconnect` 리턴 후 `shared_ptr` 참조 카운트 소멸로 Session이 파괴된다. 별도 동기화 불필요.
 
 ## 참고자료
 
-- [세션 종료 시 처리 — OnCloseSession 이후 OnPacket 미호출 보장 논의 기록](../../docs/design/session-close-packet-ordering.md): serial recv 전제 하에 atomic counter 패턴과 Close() post 방식으로 경쟁 조건을 해결하는 설계 논의. strand 전면 도입 여부 미결.
-- [세션 소유권 및 패킷 핸들러 등록 방식 설계 결정](../../docs/design/session-ownership-and-handler-registration.md): 상속/CRTP/콜백 세 가지 방식 비교 후 함수 포인터 글로벌 등록 + 컨텐츠 레이어 매핑 구조로 확정. 상태별 HandlerTable 포인터 교체 패턴 포함.
+- [세션 설계 — 소유권, 핸들러, 생명주기, 종료 처리](../../docs/design/session-design.md): 소유권·핸들러 등록 방식(상속/CRTP/콜백 비교), 생명주기·상태·콜백·핵심 멤버, 종료 순서 보장(strand 전면 도입 확정)을 통합 정리한 설계 문서.
