@@ -4,5 +4,17 @@
 
 #ifndef PORTPOLIO_CONTENT_ID_HELPER_H
 #define PORTPOLIO_CONTENT_ID_HELPER_H
+#include "types/type_def.h"
+
+//  처리 방식이 달라지면 분리
+
+
+
+
+namespace psh::types::util
+{
+
+}
+
 
 #endif //PORTPOLIO_CONTENT_ID_HELPER_H

@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace portpolio::config {
+namespace psh::config {
 
 struct ServerConfig {
     std::string serverName{"portpolio"};

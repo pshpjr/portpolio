@@ -4,6 +4,11 @@ project(portpolio VERSION 0.1.0 LANGUAGES CXX)
 
 include(CTest)
 
+add_subdirectory(
+    "${CMAKE_CURRENT_SOURCE_DIR}/../Lib"
+    "${CMAKE_CURRENT_BINARY_DIR}/Lib"
+)
+
 find_package(Boost REQUIRED COMPONENTS system)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -15,7 +20,7 @@ file(GLOB_RECURSE PORTPOLIO_SOURCES CONFIGURE_DEPENDS
 )
 
 add_library(portpolio_server STATIC ${PORTPOLIO_SOURCES})
-add_library(portpolio::server ALIAS portpolio_server)
+add_library(psh::server ALIAS portpolio_server)
 
 target_include_directories(portpolio_server
     PUBLIC
@@ -27,6 +32,7 @@ target_compile_features(portpolio_server PUBLIC cxx_std_20)
 target_link_libraries(portpolio_server
     PUBLIC
         Boost::system
+        psh::lib
 )
 
 if(BUILD_TESTING)
@@ -38,7 +44,7 @@ if(BUILD_TESTING)
 
     target_link_libraries(portpolio_unit_tests
         PRIVATE
-            portpolio::server
+            psh::server
             GTest::gtest_main
     )
 

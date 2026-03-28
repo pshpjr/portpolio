@@ -1,4 +1,4 @@
-#include "03_core/inventory/inventory_manager.h"
+#include "03_core/item/inventory.h"
 
 namespace psh::core {
 

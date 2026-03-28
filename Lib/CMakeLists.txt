@@ -9,7 +9,7 @@ if(MSVC)
 endif()
 
 add_library(portpolio_lib INTERFACE)
-add_library(portpolio::lib ALIAS portpolio_lib)
+add_library(psh::lib ALIAS portpolio_lib)
 
 target_include_directories(portpolio_lib
     INTERFACE
@@ -27,7 +27,7 @@ if(BUILD_TESTING)
 
     target_link_libraries(portpolio_lib_unit_tests
         PRIVATE
-            portpolio::lib
+            psh::lib
             GTest::gtest_main
     )
 

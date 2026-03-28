@@ -1,21 +1,9 @@
 #pragma once
 
-/**
- * @brief CRTP 기반 싱글턴 헬퍼
- *
- * 사용법:
- *   class MyManager : public Singleton<MyManager> {
- *       friend class Singleton<MyManager>;
- *   private:
- *       MyManager() = default;
- *   };
- *
- *   MyManager::get().doSomething();
- */
 template <typename T>
 class Singleton {
 public:
-    static T& get() {
+    static T& Instance() {
         static T instance{};
         return instance;
     }

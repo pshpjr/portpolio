@@ -4,7 +4,7 @@
 #include <concepts>
 #include <functional>
 
-namespace portpolio::types {
+namespace psh::types {
 
 //  ContentID, DatabaseID로 분리될 수 있음
 class EntityId
@@ -40,8 +40,8 @@ private:
 }  // namespace portpolio::types
 
 template <>
-struct std::hash<portpolio::types::EntityId> {
-    std::size_t operator()(const portpolio::types::EntityId& entityId) const {
+struct std::hash<psh::types::EntityId> {
+    std::size_t operator()(const psh::types::EntityId& entityId) const {
         return static_cast<std::size_t>(entityId);
     }
 };
