@@ -4,7 +4,6 @@
 
 ## 현재 활성 계획
 
-- [20260328-connect-lib-to-server.md](./20260328-connect-lib-to-server.md) - `Lib` 타깃을 정리해 `server`가 공용 헤더를 소비할 수 있게 연결
 - [20260317-utility-functions.md](./20260317-utility-functions.md) - 문자열·컨테이너·랜덤 유틸리티 추가
 - [20260317-assert-utility.md](./20260317-assert-utility.md) - Assert 런타임 불변식 검증 유틸리티 구현
 
