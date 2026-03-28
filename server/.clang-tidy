@@ -9,9 +9,9 @@ CheckOptions:
 
   # 멤버 변수: 끝에 _ 접미사
   - key: readability-identifier-naming.MemberCase
-    value: lower_case
-  - key: readability-identifier-naming.MemberPrefix
-    value: "m_"
+    value: camelBack
+  - key: readability-identifier-naming.MemberPostfix
+    value: "_"
 
   # 상수: k 접두사 + CamelCase  (kMaxCount)
   - key: readability-identifier-naming.ConstantCase
@@ -24,13 +24,11 @@ CheckOptions:
   - key: readability-identifier-naming.ClassConstantPrefix
     value: "k"
 
-  # enum 타입명: e 접두사 + CamelCase  (ePlayerState)
+  # enum 타입명: CamelCase  (EnumType)
   - key: readability-identifier-naming.EnumCase
     value: CamelCase
-  - key: readability-identifier-naming.EnumPrefix
-    value: "e"
 
-  # enum 값: e 접두사 + CamelCase  (eIdle, eRunning)
+  # enum 값: e 접두사 + CamelCase  (eMember)
   - key: readability-identifier-naming.EnumConstantCase
     value: CamelCase
   - key: readability-identifier-naming.EnumConstantPrefix
