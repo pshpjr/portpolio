@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-namespace portpolio::lib::types {
+namespace psh::lib::types {
 namespace {
 
 struct TestValue {
@@ -92,4 +92,4 @@ static_assert(std::is_copy_constructible_v<NotNull<TestValue>>);
 static_assert(std::is_move_constructible_v<NotNull<TestValue>>);
 
 }  // namespace
-}  // namespace portpolio::lib::types
+}  // namespace psh::lib::types

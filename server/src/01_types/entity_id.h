@@ -1,10 +1,22 @@
 #pragma once
 
-#include <cstdint>
+#include "types/type_def.h"
+
 #include <concepts>
+#include <cstdint>
 #include <functional>
 
-namespace psh::types {
+namespace psh {
+
+enum class EnumObjectType : Int8
+{
+    None,
+    Player,
+    Npc,
+    Item
+};
+
+
 
 //  ContentID, DatabaseID로 분리될 수 있음
 class EntityId
@@ -40,8 +52,8 @@ private:
 }  // namespace portpolio::types
 
 template <>
-struct std::hash<psh::types::EntityId> {
-    std::size_t operator()(const psh::types::EntityId& entityId) const {
+struct std::hash<psh::EntityId> {
+    std::size_t operator()(const psh::EntityId& entityId) const {
         return static_cast<std::size_t>(entityId);
     }
 };

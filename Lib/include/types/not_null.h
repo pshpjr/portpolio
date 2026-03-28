@@ -54,4 +54,4 @@ private:
     std::shared_ptr<T> ptr_;
 };
 
-}  // namespace portpolio::lib::types
+}  // namespace psh::lib::types

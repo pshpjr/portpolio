@@ -8,7 +8,7 @@ namespace psh::config {
 
 struct ServerConfig {
     std::string serverName{"portpolio"};
-    types::EntityId shardId{1};
+    EntityId shardId{1};
 };
 
 }  // namespace portpolio::config

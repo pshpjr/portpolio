@@ -11,7 +11,7 @@
 
 
 
-namespace psh::types::util
+namespace psh::type_utils
 {
 
 }
