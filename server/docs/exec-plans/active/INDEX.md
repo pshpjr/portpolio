@@ -4,7 +4,6 @@
 
 ## 현재 활성 계획
 
-- [20260328-connect-lib-to-server.md](./20260328-connect-lib-to-server.md) - `server`에서 `Lib` 공개 타깃과 헤더를 사용 가능하게 연결
 - [20260317-add-utility-classes.md](./20260317-add-utility-classes.md) - NotNull\<T\> 등 경량 유틸리티 클래스 추가
 
 ### `20260314-project-setup.md`
