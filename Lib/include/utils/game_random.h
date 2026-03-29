@@ -1,8 +1,8 @@
 #pragma once
 
+#include "types/type_def.h"
 #include "utils/random_utils.h"
 
-#include <cstdint>
 #include <initializer_list>
 #include <stdexcept>
 #include <utility>
@@ -11,7 +11,7 @@
 namespace psh::lib::utils {
 
 struct BagDrawState {
-    std::uint64_t seed;
+    UInt64 seed;
     int bag_size;
     int index;
 };
@@ -91,7 +91,7 @@ private:
 
     std::vector<std::pair<T, int>> m_weightedItems;
     std::vector<T> m_bag;
-    std::uint64_t m_seed = 0;
+    UInt64 m_seed = 0;
     int m_index = 0;
     RandomEngine m_engine;
 };
