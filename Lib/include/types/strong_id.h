@@ -14,36 +14,35 @@ template <typename Tag, typename ValueType = Int32>
 using StrongId =
     strong::type<ValueType,
                  Tag,
-                 strong::default_constructible,
-                 strong::equality,
-                 strong::ordered>;
+                 strong::regular,
+                 strong::boolean>;
 
 template <typename Tag, typename ValueType = Int32>
     requires std::integral<ValueType>
 [[nodiscard]] constexpr ValueType& ValueOf(StrongId<Tag, ValueType>& value)
     noexcept {
-    return strong::value_of(value);
+    return value_of(value);
 }
 
 template <typename Tag, typename ValueType = Int32>
     requires std::integral<ValueType>
 [[nodiscard]] constexpr const ValueType& ValueOf(
     const StrongId<Tag, ValueType>& value) noexcept {
-    return strong::value_of(value);
+    return value_of(value);
 }
 
 template <typename Tag, typename ValueType = Int32>
     requires std::integral<ValueType>
 [[nodiscard]] constexpr ValueType&& ValueOf(StrongId<Tag, ValueType>&& value)
     noexcept {
-    return strong::value_of(std::move(value));
+    return value_of(std::move(value));
 }
 
 template <typename Tag, typename ValueType = Int32>
     requires std::integral<ValueType>
 [[nodiscard]] constexpr const ValueType&& ValueOf(
     const StrongId<Tag, ValueType>&& value) noexcept {
-    return strong::value_of(std::move(value));
+    return value_of(std::move(value));
 }
 
 }  // namespace psh::lib::types
