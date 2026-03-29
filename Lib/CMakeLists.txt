@@ -27,6 +27,10 @@ if(BUILD_TESTING)
     add_executable(portpolio_lib_unit_tests
         tests/types/not_null_test.cpp
         tests/types/strong_id_test.cpp
+        tests/utils/container_utils_test.cpp
+        tests/utils/game_random_test.cpp
+        tests/utils/random_utils_test.cpp
+        tests/utils/string_utils_test.cpp
     )
 
     target_link_libraries(portpolio_lib_unit_tests

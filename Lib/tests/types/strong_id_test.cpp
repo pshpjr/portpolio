@@ -27,7 +27,7 @@ TEST(StrongIdTest, SupportsComparisonWithinSameTag) {
     const ContentItemId low(1);
     const ContentItemId high(5);
 
-    EXPECT_LT(low, high);
+    EXPECT_LT(ValueOf(low), ValueOf(high));
     EXPECT_NE(low, high);
     EXPECT_EQ(ContentItemId(5), high);
 }

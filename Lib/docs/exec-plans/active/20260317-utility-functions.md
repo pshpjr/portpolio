@@ -3,7 +3,7 @@
 - **날짜**: 2026-03-17
 - **상태**: active
 - **담당 영역**: `Lib/include/utils/`
-- **네임스페이스**: `portpolio::lib::utils`
+- **네임스페이스**: `psh::lib::utils`
 
 ---
 
@@ -11,6 +11,7 @@
 
 게임 서버에서 범용으로 쓸 수 있는 유틸리티 헤더를 `Lib/include/utils/` 아래에 추가한다.
 서버·클라이언트 공용 코드이므로 외부 의존성 없이 표준 라이브러리만 사용한다.
+기존 문서에 남아 있는 `portpolio::lib` 기준은 이번 작업에서 `psh::lib`로 정리한다.
 
 ---
 
@@ -177,8 +178,9 @@ Lib/include/
 - **C++20**: `std::ranges`, `std::span`, `std::string_view` 적극 활용
 - **표준 라이브러리만**: `<string>`, `<vector>`, `<algorithm>`, `<random>`, `<ranges>`, `<span>` 등
 - **엔진/플랫폼 비의존**: Boost, spdlog 등 외부 라이브러리 사용 금지
-- **네임스페이스**: `portpolio::lib::utils`
+- **네임스페이스**: `psh::lib::utils`
 - **테스트**: `Lib/tests/` 아래에 각 헤더당 단위 테스트 파일 추가
+- **문서 정합성**: `Lib/AGENTS.md`와 관련 `Lib/docs/**` 문서의 네임스페이스 규칙을 `psh::lib`로 갱신
 
 ---
 
@@ -189,14 +191,14 @@ Lib/include/
 - [ ] 3. `Lib/include/utils/random_utils.h` 작성
 - [ ] 4. `Lib/include/utils/game_random.h` 작성
 - [ ] 5. `Lib/tests/` 아래 단위 테스트 작성
-- [ ] 6. `Lib/include/README.md` 및 `Lib/README.md` 업데이트
+- [ ] 6. `Lib/include/README.md`, `Lib/README.md`, `Lib/AGENTS.md` 및 관련 문서 업데이트
 - [ ] 7. INDEX.md 완료 처리 및 `completed/`로 이동
 
 ---
 
 ## 완료 기준
 
-- 네 헤더 파일이 `portpolio::lib::utils` 네임스페이스 아래 구현됨
+- 네 헤더 파일이 `psh::lib::utils` 네임스페이스 아래 구현됨
 - 각 함수에 단위 테스트 존재
 - 외부 의존성 없이 표준 라이브러리만 사용
-- README 업데이트 완료
+- README 및 네임스페이스 규칙 문서 업데이트 완료

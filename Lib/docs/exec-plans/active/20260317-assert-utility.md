@@ -65,7 +65,7 @@ ENSURE(cache_hit_rate > 0.5, "cache hit rate unexpectedly low");
 - [ ] `std::source_location` 파일명·줄번호·함수명 포함
 - [ ] `boost::stacktrace` 스택 트레이스 포함 (throw 전, stderr 출력 시)
 - [ ] throw 타입: `std::logic_error` (메시지에 진단 정보 포함)
-- [ ] 네임스페이스: `portpolio::lib::utils` (내부 detail 함수), 매크로는 전역
+- [ ] 네임스페이스: `psh::lib::utils` (내부 detail 함수), 매크로는 전역
 - [ ] 헤더 온리
 - [ ] `server/vcpkg.json`에 `boost-stacktrace` 추가
 - [ ] `server/CMakeLists.txt`에 `Boost::stacktrace_basic` 링크 추가

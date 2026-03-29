@@ -23,7 +23,7 @@
 - [x] `operator->()`, `operator*()` 역참조 제공
 - [x] `operator shared_ptr<T>()` 암시적 변환 제공
 - [x] `to_weak()` → `weak_ptr<T>` 변환 메서드 제공
-- [x] 네임스페이스: `portpolio::lib::types`
+- [x] 네임스페이스: `psh::lib::types`
 - [x] `Lib/CMakeLists.txt`로 헤더 포함 경로와 테스트 타깃 구성
 - [x] `Lib/vcpkg.json`으로 테스트 의존성 해석 가능
 - [x] 단위 테스트 작성 및 통과

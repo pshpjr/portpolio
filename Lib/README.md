@@ -20,8 +20,10 @@
 - `src/` : 공용 구현
 - `tests/` : 공용 단위 테스트
 - `include/types/` : 타입 안전 래퍼와 공용 타입 헤더
+- `include/utils/` : 문자열, 컨테이너, 랜덤 공용 유틸리티 헤더
 - `include/types/type_def.h` : `Int8`, `UInt8` 같은 고정 폭 정수 별칭
 - `include/types/strong_id.h` : `rollbear/strong_type` 기반 콘텐츠 아이템 ID, 스킬 ID 강타입 래퍼
 - `tests/types/` : 타입 계열 단위 테스트
+- `tests/utils/` : 유틸리티 계열 단위 테스트
 
 필요해질 때 하위 구조를 추가하고, 서버/클라이언트 어느 쪽이 소비하는지 문서에 남깁니다.
