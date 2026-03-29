@@ -1,339 +1,224 @@
-# 세션 설계 — 소유권, 핸들러, 생명주기, 종료 처리
+# 세션 설계
 
-## 배경
+## 목적
 
-게임 서버 네트워크 라이브러리를 설계하면서 세 가지 핵심 질문이 있었다.
+이 문서는 세션 소유권, 핸들러 연결 방식, 상태 전이, 종료 처리 규칙을 정리한다.
 
-1. **세션의 소유권을 누가 가질 것인가** — 라이브러리인가, 어플리케이션(컨텐츠)인가.
-2. **패킷 수신 핸들러를 어떻게 등록할 것인가** — 상속, 템플릿, 콜백 중 어떤 방식을 쓸 것인가.
-3. **세션 종료 시 OnDisconnect 이후 OnPacket이 호출되지 않음을 어떻게 보장하는가** — 스레드 모델과 종료 순서.
+핵심 목표는 다음과 같다.
 
-이 세 질문은 독립적으로 보이지만, 실제로는 하나의 일관된 설계 결정으로 연결된다.
-
----
-
-## 세션 소유권 및 핸들러 등록 방식
-
-### 검토한 선택지
-
-#### 방식 1: 라이브러리가 세션 소유 + 가상 함수 상속
-
-```cpp
-// 라이브러리
-class Session {
-public:
-    virtual void OnPacketReceived(PacketView pkt) = 0;
-    virtual void OnConnected() {}
-    virtual void OnDisconnected() {}
-    void Send(std::span<const std::byte> data);
-};
-
-class ISessionFactory {
-    virtual std::unique_ptr<Session> Create() = 0;
-};
-
-// 컨텐츠
-class GameSession : public Session {
-    User userData_;
-    void OnPacketReceived(PacketView pkt) override { /* ... */ }
-};
-```
-
-- **소유권**: 라이브러리의 NetworkService가 `unique_ptr<Session>`으로 소유.
-- **장점**: 소유권 명확. 멀티포트 시 다중 세션 타입(GameSession + AdminSession)을 한 풀에 공존 가능.
-- **미채택 이유**: 상속으로 라이브러리-컨텐츠가 결합된다. 세션과 유저 데이터의 생명주기가 강제 결합되어 분리가 어렵다.
-
-#### 방식 2: 라이브러리가 세션 소유 + CRTP 정적 디스패치
-
-```cpp
-// 라이브러리
-template <typename Derived>
-class IoHandler {
-protected:
-    void DoRead() {
-        static_cast<Derived*>(this)->OnPacketReceived(buffer_);
-    }
-};
-
-template <typename SessionType>
-class Acceptor { /* SessionType을 직접 생성 */ };
-
-// 컨텐츠
-class GameSession : public IoHandler<GameSession> {
-    User userData_;
-public:
-    void OnPacketReceived(PacketView pkt) { /* ... */ }
-};
-```
-
-- **소유권**: `Acceptor<S>`가 `shared_ptr<S>`로 관리. 세션 타입이 컴파일 타임에 고정.
-- **장점**: 가상 함수 비용 0, 인라이닝 가능. 세션이 곧 유저 데이터 — 매핑 불필요.
-- **미채택 이유**: **멀티포트 단일 풀 불가**. `IoHandler<GameSession>`과 `IoHandler<AdminSession>`은 다른 타입이라 공통 컨테이너에 넣을 수 없다. 게임 서버는 하나의 네트워크 시스템 안에서 모든 세션이 공존해야 하고, 어드민 세션에서 게임 세션에 접근하는 등의 상호작용이 필요하다. 이 제약이 순수 CRTP 방식을 배제하는 핵심 이유다.
-
-#### 방식 3: 라이브러리가 세션 소유 + 콜백 등록 (채택)
-
-```cpp
-// 라이브러리 — 세션은 순수 네트워크 객체
-class Session {
-    void Send(/*...*/);
-    SessionId GetId() const;
-};
-
-class NetworkService {
-    using OnConnectFunc    = void(*)(Session*);
-    using OnPacketFunc     = void(*)(Session*, PacketView);
-    using OnDisconnectFunc = void(*)(Session*);
-
-    void SetOnConnect(OnConnectFunc);
-    void SetOnPacket(OnPacketFunc);
-    void SetOnDisconnect(OnDisconnectFunc);
-};
-```
-
-- **소유권**: 라이브러리가 세션 생명주기 관리. 컨텐츠는 세션 포인터를 받아서 유저와 매핑.
-- **채택 이유**: 라이브러리-컨텐츠 계층 분리(상속 없음). 세션과 유저 데이터의 생명주기 독립.
-
-### 세부 결정
-
-#### std::function vs 함수 포인터
-
-`std::function`은 힙 할당과 간접 호출 비용이 있고, 람다 캡처의 `this` 댕글링 위험이 있다. 함수 포인터는 상태를 캡처할 수 없지만, 글로벌 등록이면 상태 캡처가 필요 없다.
-
-**결정: 함수 포인터 사용.**
-
-#### 세션별 핸들러 vs 글로벌 핸들러
-
-함수 포인터는 상태를 캡처할 수 없으므로, 세션별로 다른 동작을 하려면 결국 매핑 테이블을 거쳐야 한다. 세션별 핸들러 등록은 의미가 없다.
-
-**결정: 글로벌 핸들러 하나만 등록. 세션별 분기는 컨텐츠 레이어에서 처리.**
-
-#### 세션→유저 매핑 소유자
-
-라이브러리의 Session 클래스는 네트워크 관심사만 담당해야 한다. 유저 데이터는 컨텐츠의 관심사이므로, 매핑 역시 컨텐츠가 관리하는 것이 자연스럽다.
-
-**결정: 컨텐츠의 UserManager가 Session → User 매핑 관리.**
-
-#### 상태별 핸들러 분리
-
-유저 상태(로그인 전, 로비, 인게임 등)에 따라 허용되는 패킷이 다르다. 핸들러마다 상태를 체크하는 방식은 반복이 많고 "이 상태에서 뭐가 가능한지"를 한눈에 파악하기 어렵다. 상태별 HandlerTable을 정적으로 구성하고 포인터만 교체하는 방식을 선택했다.
-
-```cpp
-class User {
-    const HandlerTable* currentHandlers_ = &g_loginHandlers;
-public:
-    void SetState(UserState state) {
-        switch (state) {
-            case UserState::Login:  currentHandlers_ = &g_loginHandlers;  break;
-            case UserState::Lobby:  currentHandlers_ = &g_lobbyHandlers;  break;
-            case UserState::InGame: currentHandlers_ = &g_ingameHandlers; break;
-        }
-    }
-};
-```
-
-**결정: 상태별 HandlerTable을 전역으로 구성, 유저가 포인터로 현재 테이블을 참조.**
+- 세션은 네트워크 객체로 유지한다.
+- 유저와 게임 상태는 컨텐츠 레이어가 관리한다.
+- 종료 이후에는 일반 송수신과 게임 로직 진입을 막는다.
+- 비동기 콜백의 실행 순서는 한 모델 안에서 관리한다.
 
 ---
 
-## 세션 생명주기와 상태 전이
+## 1. 세션 소유권과 핸들러 연결
 
-### 상태 정의
+### 선택
 
-```
-Created → Negotiating → Active → Closing → Closed
-```
+세션 소유권은 네트워크 라이브러리에 둔다. 컨텐츠 레이어는 콜백으로 연결한다.
 
-- **Created**: 세션 객체 생성 직후.
-- **Negotiating**: Accept 완료 후 프로토콜 판별 중. 5초 내 완료하지 못하면 종료.
-- **Active**: 프로토콜 판별 완료, 정상 송수신 중.
-- **Closing**: 종료 진행 중 (Send 큐 소진 또는 강제 종료 대기).
-- **Closed**: 소켓 닫힘, 콜백 완료.
+### 이유
 
-### 콜백 정의
-
-| 콜백 | 호출 시점 | 반환값 | 비고 |
-|---|---|---|---|
-| `OnAccept(Session*)` | Accept 직후, Negotiating 진입 전 | `bool` | `false` 반환 시 즉시 종료 (IP 차단 등) |
-| `OnConnect(Session*)` | 프로토콜 협상 완료, Active 진입 시 | `void` | 한 번만 호출 |
-| `OnRecv(Session*, data, length)` | Active 상태에서 패킷 수신 시 | `void` | raw 바이트 전달 |
-| `OnDisconnect(Session*, reason)` | 세션 종료 확정 시 | `void` | 한 번만 호출, strand context 보장 |
-
-### 프로토콜 협상
-
-- Negotiating 상태에서 최초 수신 바이트로 프로토콜을 판별한다.
-- 지원 프로토콜: 커스텀 TCP (체크섬 + 길이 기반 헤더), HTTP.
-- 판별 타임아웃: 5초. 초과 시 `DisconnectReason::NegotiationTimeout`으로 종료.
-- Active 이후 프로토콜 전환은 없다. 다른 프로토콜 데이터가 들어오면 `ProtocolMismatch` 또는 `ProtocolViolation`으로 종료.
-- 프레이밍과 프로토콜 판별 로직은 별도 `SessionHelper`가 담당하며, `OnRecv`는 raw 바이트만 전달받는다.
-
-### isAlive
-
-별도 `bool` 멤버 없이 `SessionState`로 계산한다.
-
-```cpp
-bool IsAlive() const {
-    return state_ == SessionState::Active;
-}
-```
-
-### 핵심 멤버 목록
-
-| 멤버 | 타입 | 설명 |
-|---|---|---|
-| `sessionId_` | `SessionId` | 세션 고유 식별자 |
-| `state_` | `SessionState` | 현재 상태 |
-| `socket_` | `tcp::socket` | Asio 소켓 (strand 귀속) |
-| `strand_` | `strand<executor>` | 모든 비동기 연산의 실행 컨텍스트 |
-| `acceptedAt_` | `steady_clock::time_point` | Accept 시각 |
-| `connectedAt_` | `steady_clock::time_point` | Active 진입 시각 |
-| `disconnectReason_` | `DisconnectReason` | 종료 사유 |
-| `recvBuffer_` | (ring buffer 등) | 수신 버퍼 |
-| `sendQueue_` | (queue) | 송신 대기 큐 |
-| `isSending_` | `atomic_flag` | 송신 진행 중 여부 (중복 send 방지) |
-| `negotiationTimer_` | `steady_timer` | 협상 타임아웃 타이머 |
+- 세션을 순수 네트워크 객체로 유지하기 쉽다.
+- 세션 수명과 유저 수명을 분리하기 쉽다.
+- 게임 세션과 관리용 세션처럼 성격이 다른 연결을 같은 시스템에서 다루기 쉽다.
+- 상속 기반으로도 유사한 구조는 가능하지만, 결국 컨텐츠 상태와 분기 로직이 외부로 빠지기 쉬워 콜백 방식이 더 직접적이다.
 
 ---
 
-## 세션 종료 처리 — OnDisconnect 순서 보장
+## 2. 콜백 형태
 
-### 전제 조건
+### 선택
 
-라이브러리 레벨에서 **serial recv**(한 번에 하나의 async_read만 pending)를 보장한다. recv 완료 핸들러가 "다음 recv를 걸지 말지" 결정하는 유일한 제어 지점이 된다.
+세션마다 서로 다른 콜백 객체를 두지 않고, 공통 진입점 콜백을 호출한 뒤 컨텐츠 레이어에서 분기한다.
 
-### 기본 흐름
+### 이유
 
-```cpp
-void Session::OnRecvComplete(error_code ec) {
-    if (ec || closed_) {
-        onDisconnect_(shared_from_this(), disconnectReason_);
-        return;
-    }
-
-    onRecv_(shared_from_this(), parsed_data, length);
-
-    if (!closed_) {
-        PostNextRecv();
-    } else {
-        onDisconnect_(shared_from_this(), disconnectReason_);
-    }
-}
-```
-
-serial recv이므로 `OnRecv`와 다음 recv 사이에 `closed_` 체크 기회가 항상 존재한다.
-
-### 종료 경로
-
-#### 경로 A — 네트워크 측 감지
-
-상대방 연결 종료 또는 read 에러 → recv 완료 핸들러에서 에러 확인 → `OnDisconnect` 호출. 비교적 단순하다.
-
-#### 경로 B — 컨텐츠 측 요청
-
-컨텐츠가 `Session::Close()` 호출 → strand에 post → strand 내에서 소켓 닫힘 → recv 에러로 완료 → `OnDisconnect` 호출.
-
-### 스레드 모델 — strand 전면 도입
-
-#### 검토한 선택지
-
-**Atomic counter + Close post 혼합:**
-
-Session에 atomic counter를 두어 현재 걸려 있는 IO 횟수를 추적한다. counter를 음수로 만드는 스레드가 `OnDisconnect`를 호출하는 방식이다.
-
-- **미채택 이유**: 이 세션 설계에는 recv, send에 더해 협상 타임아웃 **타이머**가 이미 존재한다. 비동기 연산이 recv/send/close에서 recv/send/timer/close로 늘어나면 카운터 규칙을 전면 재검증해야 한다. 새 이벤트가 추가될 때마다 같은 문제가 반복된다.
-
-**Strand 전면 도입 (채택):**
-
-세션의 모든 비동기 연산(recv, send, timer, Close)을 하나의 strand에 귀속시킨다. Strand는 같은 strand에 post된 핸들러가 절대 동시 실행되지 않음을 보장한다.
-
-- **채택 이유**: 협상 타임아웃 타이머가 이미 3번째 비동기 연산으로 존재한다. Strand는 새 비동기 연산이 추가될 때 자연스럽게 대응하며, 직렬성이 strand 내부 메커니즘으로 보장된다. Atomic counter 대비 추론 부담이 낮다.
-
-#### 최종 결정
-
-| 항목 | 결정 |
-|---|---|
-| 스레드 모델 | **strand 전면 도입** |
-| `Close()` 구현 | strand에 post (`io_context.post`가 아닌 `strand_.post`) |
-| `OnDisconnect` 호출 스레드 | **항상 strand context** — io_context를 실행하는 스레드 중 하나 |
-| 내부 파괴 순서 | `OnDisconnect` 리턴 → `shared_ptr` 참조 카운트 소멸 → 별도 동기화 불필요 |
-
-```cpp
-void Session::Close(DisconnectReason reason) {
-    strand_.post([self = shared_from_this(), reason] {
-        self->DoClose(reason);
-    });
-}
-```
+- 실제 분기 기준은 세션 타입보다 유저 상태와 게임 상태에 가깝다.
+- 분기 책임을 `UserManager`와 핸들러 디스패치 구조에 모을 수 있다.
+- 세션 종류가 늘어나도 네트워크 계층 구조를 크게 바꾸지 않아도 된다.
 
 ---
 
-## 최종 아키텍처
+## 3. Session → User 매핑
 
-```
-┌──────────────────────────────────────────────────────┐
-│                   네트워크 라이브러리                    │
-│                                                      │
-│  NetworkService                                      │
-│  ├─ Session 생명주기 관리 (소유)                       │
-│  ├─ Accept / Connect                                 │
-│  └─ 글로벌 함수 포인터: OnAccept, OnConnect,           │
-│                        OnRecv, OnDisconnect          │
-│                                                      │
-│  Session                                             │
-│  ├─ strand_ (모든 비동기 연산 귀속)                    │
-│  ├─ socket_, recvBuffer_, sendQueue_, isSending_     │
-│  ├─ negotiationTimer_ (5초 협상 타임아웃)             │
-│  ├─ state_, sessionId_, acceptedAt_, connectedAt_    │
-│  └─ disconnectReason_                                │
-└───────────────────────┬──────────────────────────────┘
-                        │ Session* 전달
-                        ▼
-┌──────────────────────────────────────────────────────┐
-│                   컨텐츠 레이어                        │
-│                                                      │
-│  글로벌 진입점                                         │
-│  ├─ OnAccept(Session*)   → 연결 필터링 (bool 반환)     │
-│  ├─ OnConnect(Session*)  → UserManager::CreateUser   │
-│  ├─ OnRecv(Session*, data, length)                   │
-│  │      → UserManager::Find(session)                 │
-│  │      → user->GetHandlers()->Get(packetId)         │
-│  │      → handler(user, pkt)                         │
-│  └─ OnDisconnect(Session*, reason)                   │
-│         → UserManager::RemoveUser                    │
-│                                                      │
-│  UserManager                                         │
-│  └─ Session* → User* 매핑 관리                        │
-│                                                      │
-│  HandlerTable (상태별, 전역 정적)                      │
-│  ├─ g_loginHandlers   : LOGIN_REQ                    │
-│  ├─ g_lobbyHandlers   : ENTER_DUNGEON, CHAT, ...     │
-│  └─ g_ingameHandlers  : MOVE, ATTACK, CHAT, ...      │
-│                                                      │
-│  User                                                │
-│  └─ const HandlerTable* currentHandlers_             │
-│     (상태 전이 시 포인터 교체)                          │
-└──────────────────────────────────────────────────────┘
-```
+### 선택
 
-### 패킷 처리 흐름
+`Session → User` 매핑은 컨텐츠 레이어가 관리한다.
 
-```
-strand 내 recv 완료:
-    → SessionHelper가 raw 바이트 판별
-        → OnRecv(Session*, data, length) 호출
-            → UserManager에서 Session → User 조회
-            → User의 현재 HandlerTable에서 패킷 ID로 핸들러 조회
-            → 핸들러가 없으면 무시 (현재 상태에서 허용되지 않는 패킷)
-            → 핸들러가 있으면 호출: handler(user, pkt)
-```
+### 이유
+
+- 유저 데이터는 네트워크 라이브러리의 관심사가 아니다.
+- 라이브러리가 게임 객체를 알 필요가 없다.
+- 세션 교체, 재접속, 상태 복구, 테스트 시 책임 경계가 명확하다.
 
 ---
 
-## 설계 원칙 요약
+## 4. 상태별 패킷 처리
 
-- **라이브러리는 네트워크만 안다.** 유저, 게임 로직, 상태 같은 개념은 라이브러리에 존재하지 않는다.
-- **컨텐츠가 매핑을 소유한다.** Session → User 매핑의 생성, 조회, 제거 모두 컨텐츠 책임.
-- **함수 포인터로 글로벌 등록.** 세션별 핸들러 교체 없이, 컨텐츠 레이어의 디스패치 구조로 분기.
-- **상태별 핸들러 테이블 분리.** 상태 전이 = 포인터 교체. 핸들러 내부의 상태 체크 제거.
-- **strand로 모든 비동기 연산 직렬화.** recv, send, timer, Close 모두 동일한 strand에 귀속. 새 비동기 연산 추가 시 자동 적용.
-- **OnDisconnect는 항상 strand context.** 종료 순서 보장이 strand에 의해 자동으로 유지됨.
-- **확장은 필요할 때.** 권한 체크 등은 현재 구조가 막지 않으므로, 요구사항이 구체화된 후 추가.
+### 선택
+
+유저 상태별 `HandlerTable`을 분리하고, 현재 상태에 맞는 테이블을 참조한다.
+
+### 이유
+
+- 어떤 상태에서 어떤 패킷이 허용되는지 구조적으로 드러난다.
+- 핸들러 내부의 반복적인 상태 검사 코드를 줄일 수 있다.
+- 상태 전이를 테이블 교체로 표현할 수 있다.
+
+---
+
+## 5. 세션 상태
+
+세션 상태는 다음과 같다.
+
+`Created → Negotiating → Active → SendClosing → Closed`
+
+각 상태의 의미는 다음과 같다.
+
+- **Created**: 세션 객체 생성 직후
+- **Negotiating**: 연결 직후 초기 프로토콜 판별 중
+- **Active**: 일반 송수신 가능 상태
+- **SendClosing**: 종료 패킷 또는 남은 송신을 정리한 뒤 닫는 상태
+- **Closed**: 종료 완료 상태
+
+중요한 점은 종료가 항상 `SendClosing`을 거치지는 않는다는 것이다.
+
+- **SendClose 요청**: `Active → SendClosing → Closed`
+- **일반 close 호출**: `Active → Closed`
+- **연결 끊김 감지**: `Active → Closed`
+
+즉, `SendClosing`은 종료 전 마지막 송신을 시도하는 경로를 표현하는 상태다. 모든 종료를 대표하는 공통 단계는 아니다.
+
+---
+
+## 6. 종료 처리
+
+### 6.1 SendClose
+
+`SendClose`는 애플리케이션 레벨에서 “가능하면 이 패킷까지 보낸 뒤 닫아라”는 요청이다.
+
+동작은 다음과 같다.
+
+1. 종료 패킷을 송신 큐에 넣는다.
+2. 기존 송신 큐를 순서대로 처리한다.
+3. 종료 패킷까지 처리한 뒤 세션을 닫는다.
+
+이 동작은 전송 시도를 의미할 뿐, 상대 수신까지 보장하지는 않는다.
+
+### 6.2 일반 close / 연결 끊김
+
+일반 `close` 호출이나 연결 끊김 감지 시에는 세션을 더 이상 정상 연결로 취급하지 않는다.
+
+동작은 다음과 같다.
+
+1. 상태를 즉시 `Closed`로 바꾼다.
+2. `OnDisconnect`를 바로 `strand`에 등록한다.
+3. 이후 남은 후속 콜백은 상태를 확인하고 정리만 수행한다.
+
+즉, 일반 종료 경로는 `SendClosing`을 거치지 않는다.
+
+---
+
+## 7. strand와 상태 플래그
+
+### 선택
+
+세션 관련 주요 비동기 연산은 하나의 `strand`에 귀속시킨다. 다만 종료 의미 보장은 `strand`만으로 처리하지 않고 상태 플래그와 함께 처리한다.
+
+### 이유
+
+- `recv`, `send`, `timer`, `close`를 같은 순서 규칙 안에서 다룰 수 있다.
+- 종료 처리와 후속 작업의 실행 순서를 추적하기 쉽다.
+- 비동기 이벤트가 추가돼도 같은 모델 안에서 확장하기 쉽다.
+
+### 역할 구분
+
+`strand`는 동일 세션의 핸들러를 직렬화한다. 하지만 이미 큐에 들어온 콜백 자체를 없애지는 않는다. 따라서 종료 이후에도 `recv 완료`, `send 완료`, `timer 만료` 콜백이 뒤늦게 실행될 수 있다.
+
+이 문제는 상태 플래그로 정리한다.
+
+- `Active`가 아니면 컨텐츠 `recv 처리`를 하지 않는다.
+- `Active`가 아니면 컨텐츠의 일반 `Send` 요청을 받지 않는다.
+- 종료 이후 도착한 후속 콜백은 정리만 수행하고 게임 로직으로는 넘기지 않는다.
+
+즉, 종료 안정성은 다음 두 가지를 함께 사용해 확보한다.
+
+- `strand`에 의한 실행 순서 직렬화
+- 상태 플래그에 의한 의미적 차단
+
+---
+
+## 8. Active 상태에서만 일반 송수신 허용
+
+### 수신
+
+- `Active` 상태에서만 수신 패킷을 컨텐츠 레이어로 전달한다.
+- `Negotiating`, `SendClosing`, `Closed`에서는 일반 패킷을 컨텐츠 핸들러로 넘기지 않는다.
+- 종료 이후 늦게 실행된 수신 완료 콜백은 버린다.
+
+### 송신
+
+- 컨텐츠 레이어의 일반 `Send` 요청은 `Active`에서만 허용한다.
+- `Active`가 아니면 일반 송신 요청은 수행하지 않는다.
+- `SendClose`에 의해 들어간 종료 패킷만 종료 흐름 안에서 예외적으로 처리한다.
+
+---
+
+## 9. 송신 큐
+
+세션은 `sending` 플래그와 송신 큐를 통해 비동기 송신을 직렬화한다.
+
+기본 동작은 다음과 같다.
+
+1. 송신 요청이 오면 큐에 적재한다.
+2. 현재 송신 중이 아니면 즉시 비동기 송신을 시작한다.
+3. 송신 완료 시 다음 큐 항목을 이어서 전송한다.
+4. `SendClose`가 요청되면 종료 패킷을 큐에 넣고, 앞선 송신까지 처리한 뒤 종료한다.
+
+즉, `SendClose`는 종료 패킷만 따로 우선 전송하는 모델이 아니다. 현재 큐에 적재된 송신과 종료 패킷을 순서대로 처리한 뒤 연결을 닫는 모델이다.
+
+송신은 세션당 동시에 하나의 async send만 유지한다. 이미 send 중이면 새 패킷은 `moodycamel::ConcurrentQueue`에 enqueue만 하고, in-flight send가 끝난 뒤에만 다음 전송 배치를 꺼낸다.
+
+`SessionOption::vectorize`가 켜져 있으면 인접 패킷을 함께 내보낼 수 있는 경우 묶어서 scatter-gather 엔트리 수를 줄인다. `vectorize`가 꺼져 있으면 큐에 들어온 패킷을 각각 독립된 scatter-gather 엔트리로 유지한다.
+
+즉, 기본 모델은 "패킷 단위 큐잉 + 단일 in-flight send"이고, vectorize는 패킷 경계를 임의로 바꾸지 않으면서 전송 시점의 gather 개수만 줄이는 최적화 옵션으로 취급한다.
+
+---
+
+## 10. 최종 구조
+
+### 네트워크 라이브러리
+
+- `Session` 생명주기 관리
+- 연결 수립 및 종료 처리
+- 공통 콜백 진입점 제공
+- 세션 단위 비동기 연산 직렬화
+- 상태 플래그 기반 일반 송수신 차단
+- 송신 큐 및 `SendClose` 처리
+
+### 컨텐츠 레이어
+
+- `Session → User` 매핑 관리
+- 유저 상태 관리
+- 상태별 `HandlerTable` 구성
+- 패킷 디스패치
+- `OnDisconnect` 이후 유저 상태 전이 및 정리
+
+---
+
+## 최종 정리
+
+이 설계의 결정은 다음과 같다.
+
+- 세션 소유권은 라이브러리에 둔다.
+- 컨텐츠는 공통 콜백 진입점으로 연결한다.
+- `Session → User` 매핑은 컨텐츠가 관리한다.
+- 상태별 `HandlerTable`을 분리한다.
+- 일반 송수신은 `Active`에서만 허용한다.
+- 세션 관련 비동기 연산은 `strand`로 직렬화한다.
+- 종료 이후에는 상태 플래그로 게임 로직 진입을 차단한다.
+- `SendClose`는 종료 패킷과 기존 송신 큐를 처리한 뒤 닫는다.
+- 일반 `close` 호출이나 연결 끊김은 `Active → Closed`로 바로 전이한다.

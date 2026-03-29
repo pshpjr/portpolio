@@ -23,6 +23,8 @@
 
 ## Progress
 
+- [in_progress] 송신 버퍼 처리 규칙과 `SessionOption::vectorize` 정책을 설계 문서에 반영한다.
+
 - [completed] 관련 workflow, network 레이어 규칙, active exec-plan 규칙 확인
 - [completed] 세션 클래스 아키텍처 결정용 plan 초안 작성 및 사용자 검토
 - [completed] 사용자 피드백 반영
@@ -30,6 +32,12 @@
 - [pending] 구현 단계로 전환
 
 ## Design Decision Log
+
+- 송신은 세션당 동시에 하나의 async send만 허용하고, 전송 중 추가 패킷은 `moodycamel::ConcurrentQueue`에 적재한다.
+- 전송이 비어 있을 때만 큐를 비워 다음 async send를 시작한다.
+- `SessionOption::vectorize`가 켜져 있으면 합칠 수 있는 인접 패킷을 묶어 scatter-gather 엔트리 수를 줄인다.
+- `SessionOption::vectorize`가 꺼져 있으면 큐에 들어온 각 패킷을 개별 scatter-gather 엔트리로 유지한다.
+- 벡터화의 목적은 패킷 경계를 임의로 바꾸는 것이 아니라, 전송 가능한 경우에 한해 gather 개수를 줄여 I/O 호출 부담을 낮추는 데 둔다.
 
 - 세션 클래스는 네트워크 연결 생명주기와 I/O 상태를 관리하는 경계 객체로 두고, 게임 규칙이나 패킷 의미 해석은 별도 처리기로 위임한다.
 - `OnAccept`는 연결 정보 기반 승인 단계이며, `bool` 반환으로 세션 활성화 전 차단 여부를 결정한다.
@@ -50,4 +58,4 @@
 
 ## 참고자료
 
-- [세션 설계 — 소유권, 핸들러, 생명주기, 종료 처리](../../docs/design/session-design.md): 소유권·핸들러 등록 방식(상속/CRTP/콜백 비교), 생명주기·상태·콜백·핵심 멤버, 종료 순서 보장(strand 전면 도입 확정)을 통합 정리한 설계 문서.
+- [세션 설계 — 소유권, 핸들러, 생명주기, 종료 처리](../../design/session-design.md): 소유권·핸들러 등록 방식(상속/CRTP/콜백 비교), 생명주기·상태·콜백·핵심 멤버, 종료 순서 보장(strand 전면 도입 확정)을 통합 정리한 설계 문서.
