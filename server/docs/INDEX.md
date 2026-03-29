@@ -31,6 +31,8 @@
   [quality/grades.md](./quality/grades.md)
 - 저장소 구조 참조:
   [reference/project-layout.md](./reference/project-layout.md)
+- 세션 설계 전체(소유권, 핸들러, 생명주기, 종료 처리) 참조:
+  [design/session-design.md](./design/session-design.md)
 
 ## 상황별 읽기 규칙
 

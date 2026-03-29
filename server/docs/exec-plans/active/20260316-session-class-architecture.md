@@ -23,13 +23,21 @@
 
 ## Progress
 
+- [in_progress] 송신 버퍼 처리 규칙과 `SessionOption::vectorize` 정책을 설계 문서에 반영한다.
+
 - [completed] 관련 workflow, network 레이어 규칙, active exec-plan 규칙 확인
 - [completed] 세션 클래스 아키텍처 결정용 plan 초안 작성 및 사용자 검토
 - [completed] 사용자 피드백 반영
-- [in_progress] 세션 클래스 설계안 확정
+- [completed] 세션 클래스 설계안 확정
 - [pending] 구현 단계로 전환
 
 ## Design Decision Log
+
+- 송신은 세션당 동시에 하나의 async send만 허용하고, 전송 중 추가 패킷은 `moodycamel::ConcurrentQueue`에 적재한다.
+- 전송이 비어 있을 때만 큐를 비워 다음 async send를 시작한다.
+- `SessionOption::vectorize`가 켜져 있으면 합칠 수 있는 인접 패킷을 묶어 scatter-gather 엔트리 수를 줄인다.
+- `SessionOption::vectorize`가 꺼져 있으면 큐에 들어온 각 패킷을 개별 scatter-gather 엔트리로 유지한다.
+- 벡터화의 목적은 패킷 경계를 임의로 바꾸는 것이 아니라, 전송 가능한 경우에 한해 gather 개수를 줄여 I/O 호출 부담을 낮추는 데 둔다.
 
 - 세션 클래스는 네트워크 연결 생명주기와 I/O 상태를 관리하는 경계 객체로 두고, 게임 규칙이나 패킷 의미 해석은 별도 처리기로 위임한다.
 - `OnAccept`는 연결 정보 기반 승인 단계이며, `bool` 반환으로 세션 활성화 전 차단 여부를 결정한다.
@@ -43,3 +51,11 @@
 - `lastRecvTime`만으로는 세션 생존 판단 근거가 부족하므로 `acceptedAt`, `connectedAt`, `SessionId`, `SessionState`, 소켓/채널 핸들, `DisconnectReason`, `recvBuffer`, `sendQueue`, `atomic_flag isSending`를 핵심 멤버 후보로 본다.
 - `isAlive`는 별도 저장 bool보다 상태값과 종료 상태를 기반으로 계산하는 방향을 기본안으로 둔다.
 - 구현 전 검토 포인트는 다음과 같이 본다: thread-safety, disconnect idempotency, negotiation timeout, partial packet buffering, send queue ownership.
+- 스레드 모델은 **strand 전면 도입**으로 확정한다. recv, send, negotiation timeout timer, Close 모두 동일 strand에 귀속. atomic counter + Close post 혼합 방식은 timer 추가 시 카운터 규칙 재검증이 필요하여 미채택.
+- `Close()`는 strand에 post하며, 소켓 닫힘과 `OnDisconnect` 호출이 모두 strand context 내에서 실행된다.
+- `OnDisconnect`는 항상 strand context에서 호출됨을 보장한다. 외부 스레드에서 호출되는 경우는 없다.
+- 내부 파괴 순서: `OnDisconnect` 리턴 후 `shared_ptr` 참조 카운트 소멸로 Session이 파괴된다. 별도 동기화 불필요.
+
+## 참고자료
+
+- [세션 설계 — 소유권, 핸들러, 생명주기, 종료 처리](../../design/session-design.md): 소유권·핸들러 등록 방식(상속/CRTP/콜백 비교), 생명주기·상태·콜백·핵심 멤버, 종료 순서 보장(strand 전면 도입 확정)을 통합 정리한 설계 문서.
