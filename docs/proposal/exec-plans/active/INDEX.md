@@ -4,6 +4,15 @@
 
 ## 현재 활성 계획
 
+### `20260330-combat-controls-and-view.md`
+
+- 목적: 전투 기획 문서에 권장 시점, 기본 입력 체계, 스킬 사용 방식, 무기별 조작 예시를 추가
+- 주 영향 경로: `docs/proposal/ingame/combat.md`, `docs/proposal/common/skill.md`
+- 이 plan을 읽어야 하는 경우:
+  - 전투 시점과 기본 조작 체계를 정할 때
+  - `WASD` 기반 스킬 운용 구조를 문서화할 때
+  - 무기별 입력 예시와 서버 2D 판정 전제를 맞출 때
+
 ### `20260330-combat-stat-foundation.md`
 
 - 목적: 전투 스탯 목록과 전투 공식 기반 문서를 추가해 후속 밸런스/엑셀 작업의 기준을 마련

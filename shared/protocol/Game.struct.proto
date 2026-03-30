@@ -12,15 +12,9 @@ message UserInfo
 	string		nickname 	= 3;
 }
 
-// 공통 타입들
-message CharacterInfo 
+message StatInfo
 {
-	InstanceKey char_key 	= 1;
-	int32		tid    		= 2;
-	int32		lv     		= 3;
-	int32		exp    		= 4;
-	int32		hp     		= 5;
-	int32		mp     		= 6;
+
 }
 
 message CurrencyInfo
@@ -30,17 +24,42 @@ message CurrencyInfo
 	int32		count   		= 3;
 }
 
-// 좌표 정보를 담는 메시지
+message UserInfo 
+{
+	InstanceKey uid 		= 1;
+	int32		tid    		= 2;
+	int32		lv     		= 3;
+	int32		exp    		= 4;
+	int32		hp     		= 5;
+	int32		mp     		= 6;
+}
+
+message TransformInfo
+{
+	InstanceKey fieldId = 1;
+	int32 x = 2;
+	int32 y = 3;
+	int32 z = 4;
+}
+
 message IntPointInfo 
 {
     int32 x = 1;
     int32 y = 2;
 }
 
-// ItemLocationInfo를 써야해서 아래로 내림
+enum EnumStorageType
+{
+	None 		= 0;
+	Inventory 	= 1;
+	Character 	= 2;
+	Account 	= 3;
+}
+
 message ItemInfo
 {
 	InstanceKey			item_id			    = 1;
 	int32				item_tid			= 2;
 	int32				count				= 3;
 }
+
