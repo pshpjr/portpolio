@@ -1,0 +1,25 @@
+{
+  "table": "UserLevelStatLinkTable",
+  "primary_key": ["Level", "BalanceVersion"],
+  "foreign_keys": [
+    {
+      "field": "PlayerStatTableId",
+      "references": {
+        "table": "PlayerStatTable",
+        "field": "PlayerStatTableId"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "field": "Level",
+      "min": 1,
+      "max": 40
+    }
+  ],
+  "fields": [
+    { "name": "Level", "type": "int32" },
+    { "name": "PlayerStatTableId", "type": "int32" },
+    { "name": "BalanceVersion", "type": "int32" }
+  ]
+}

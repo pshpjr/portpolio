@@ -1,0 +1,25 @@
+{
+  "table": "PlayerStatTable",
+  "primary_key": ["PlayerStatTableId"],
+  "unique_keys": [["Level", "BalanceVersion"]],
+  "checks": [
+    {
+      "field": "Level",
+      "min": 1,
+      "max": 40
+    }
+  ],
+  "fields": [
+    { "name": "PlayerStatTableId", "type": "int32" },
+    { "name": "Level", "type": "int32" },
+    { "name": "MaxHP", "type": "int32" },
+    { "name": "AttackPower", "type": "int32" },
+    { "name": "Defense", "type": "int32" },
+    { "name": "CriticalChance", "type": "float" },
+    { "name": "CriticalDamage", "type": "float" },
+    { "name": "CooldownReduction", "type": "float" },
+    { "name": "DamageReduction", "type": "float" },
+    { "name": "MoveSpeedBonus", "type": "float" },
+    { "name": "BalanceVersion", "type": "int32" }
+  ]
+}

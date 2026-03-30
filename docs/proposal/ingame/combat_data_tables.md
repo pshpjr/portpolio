@@ -2,7 +2,7 @@
 
 ## 목적
 
-전투 스탯 데이터의 책임 범위와 테이블 연결 규칙만 정의한다. 실제 수치 행은 `CSV`, 반복 생성은 `generate_combat_tables.py`가 담당한다.
+전투 스탯 데이터의 책임 범위와 테이블 연결 규칙만 정의한다. 실제 행 데이터는 `data.json`, 필드 계약과 생성 메타는 `schema.json`, 서버/언리얼 코드 생성은 `combat_data_gen.py`가 담당한다.
 
 ## 핵심 규칙
 
@@ -11,16 +11,28 @@
 - 유저 레벨 스탯은 무기 타입과 무관하다.
 - 무기 장착과 강화로 바뀌는 값은 무기 스탯 테이블이 담당한다.
 - 이 문서는 설명서이며, 실제 행 데이터는 포함하지 않는다.
-- `BalanceVersion`으로 CSV 세트를 병행 관리한다.
+- `BalanceVersion`으로 데이터 세트를 병행 관리한다.
 
-## 생성 파일
+## 소스 파일
 
-- [player_stat_table.csv](./data/player_stat_table.csv)
-- [user_level_stat_link_table.csv](./data/user_level_stat_link_table.csv)
-- [weapon_stat_table.csv](./data/weapon_stat_table.csv)
-- [weapon_level_stat_link_table.csv](./data/weapon_level_stat_link_table.csv)
-- [weapon_table.csv](./data/weapon_table.csv)
-- [generate_combat_tables.py](../../../tools/generate_combat_tables.py)
+- [player_stat_table.schema.json](./data/player_stat_table.schema.json)
+- [player_stat_table.data.json](./data/player_stat_table.data.json)
+- [user_level_stat_link_table.schema.json](./data/user_level_stat_link_table.schema.json)
+- [user_level_stat_link_table.data.json](./data/user_level_stat_link_table.data.json)
+- [weapon_stat_table.schema.json](./data/weapon_stat_table.schema.json)
+- [weapon_stat_table.data.json](./data/weapon_stat_table.data.json)
+- [weapon_level_stat_link_table.schema.json](./data/weapon_level_stat_link_table.schema.json)
+- [weapon_level_stat_link_table.data.json](./data/weapon_level_stat_link_table.data.json)
+- [weapon_table.schema.json](./data/weapon_table.schema.json)
+- [weapon_table.data.json](./data/weapon_table.data.json)
+- [combat_data_gen.py](../../../server/tools/codegen/combat_data_gen.py)
+
+## 편집 규칙
+
+- `schema.json`은 필드 이름, 타입, enum, key, 런타임 메타를 정의한다.
+- `data.json`은 실제 행 데이터만 담는다.
+- 에이전트는 새 컬럼 추가 시 `schema.json`을 먼저 바꾸고, 그다음 `data.json`에 값을 채운다.
+- 서버와 언리얼 로딩 타입은 생성 코드만 수정 대상으로 보고, 수동 편집하지 않는다.
 
 ## 생성 규칙
 
@@ -31,8 +43,9 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId
 ```
 
 - `md`는 계약과 연결 규칙만 담는다.
-- `csv`는 사람이 검토하는 원본 데이터다.
-- 생성 스크립트는 규칙적으로 증가하는 행과 FK 연결을 검증한다.
+- `schema.json`은 DTO/USTRUCT 생성 계약이다.
+- `data.json`은 에이전트가 수정하는 원본 데이터다.
+- 생성 스크립트는 필수 필드와 테이블 메타를 검증한다.
 
 ## 데이터 책임
 
@@ -68,7 +81,7 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId
 
 무기 템플릿과 메타데이터를 저장하는 테이블이다.
 
-- 담당 값: `WeaponCode`, `WeaponName`, `WeaponType`, `BaseWeaponStatTableId`, `MaxEnhanceLevel`, `SkillSetId`, `IdentitySkillId`, `SmartDropTag`, `OptionPoolId`, `BaseDurabilityMax`, `RepairCostRate`, `EquipLevelMin`, `TradeLimitCount`, `AnimationSetId`, `IconKey`, `ModelKey`, `DisplayOrder`, `HandType`, `CombatRoleTag`, `RangeProfile`, `ResourceType`
+- 담당 값: `WeaponCode`, `WeaponName`, `WeaponType`, `BaseWeaponStatTableId`, `MaxEnhanceLevel`, `SkillSetId`, `IdentitySkillId`, `SmartDropTag`, `OptionPoolId`, `BaseDurabilityMax`, `RepairCostRate`, `EquipLevelMin`, `TradeLimitCount`, `AnimationSetId`, `IconKey`, `ModelKey`, `DisplayOrder`, `HandType`, `CombatRoleTag`, `RangeProfile`, `BalanceVersion`
 - 목적: 전투 수치와 무기 메타를 분리해 참조하기 위함
 
 ## PK / FK 규칙

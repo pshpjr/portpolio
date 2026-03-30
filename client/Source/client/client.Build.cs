@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+using System.IO;
 using UnrealBuildTool;
 
 public class client : ModuleRules
@@ -8,7 +9,9 @@ public class client : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Json" });
+
+		PublicIncludePaths.Add(Path.GetFullPath(Path.Combine(ModuleDirectory, "../../../shared/generated/unreal")));
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
