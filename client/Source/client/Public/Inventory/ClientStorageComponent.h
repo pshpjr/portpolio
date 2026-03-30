@@ -24,7 +24,7 @@ public:
     void InitializeDefaultSharedStorage(int32 TabCount = 1, int32 SlotsPerTab = 48);
 
     UFUNCTION(BlueprintCallable, Category = "Storage")
-    bool AddItemToTab(UClientItemInstance* Item, int32 TabIndex, int32 PreferredSlotIndex = INDEX_NONE);
+    bool AddItemToTab(UClientItemInstance* Item, int32 TabIndex, int32 PreferredSlotIndex = -1);
 
     UFUNCTION(BlueprintCallable, Category = "Storage")
     bool MoveItem(int32 FromTabIndex, int32 FromSlotIndex, int32 ToTabIndex, int32 ToSlotIndex);

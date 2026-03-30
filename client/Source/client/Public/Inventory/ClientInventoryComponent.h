@@ -21,7 +21,7 @@ public:
     void InitializeInventory(int32 InSlotCount = 32);
 
     UFUNCTION(BlueprintCallable, Category = "Inventory")
-    bool AddItem(UClientItemInstance* Item, int32 PreferredSlotIndex = INDEX_NONE);
+    bool AddItem(UClientItemInstance* Item, int32 PreferredSlotIndex = -1);
 
     UFUNCTION(BlueprintCallable, Category = "Inventory")
     bool RemoveItemByKey(const FString& ItemKey);
