@@ -45,6 +45,8 @@
 
 ## 관련 문서
 
+- [combat_stats.md](./combat_stats.md)
+- [combat_formulas.md](./combat_formulas.md)
 - [../common/skill.md](../common/skill.md)
 - [../common/item.md](../common/item.md)
 - [boss_pattern.md](./boss_pattern.md)

@@ -4,6 +4,15 @@
 
 ## 현재 활성 계획
 
+### `20260330-combat-stat-foundation.md`
+
+- 목적: 전투 스탯 목록과 전투 공식 기반 문서를 추가해 후속 밸런스/엑셀 작업의 기준을 마련
+- 주 영향 경로: `docs/proposal/ingame/combat_stats.md`, `docs/proposal/ingame/combat_formulas.md`, `docs/proposal/ingame/combat.md`, `docs/proposal/main.md`
+- 이 plan을 읽어야 하는 경우:
+  - 전투 스탯 체계를 처음 정의할 때
+  - 전투 수식의 기본 구조를 합의할 때
+  - 밸런스 엑셀 전 단계에서 컬럼과 계산식을 정리할 때
+
 ### `20260316-proposal-restructure.md`
 
 - 목적: `docs/proposal/`을 에이전트 친화적인 허브/세부 문서 구조로 재정리하고, 진행 중 작업 문서 체계를 추가
