@@ -4,6 +4,24 @@
 
 ## 현재 활성 계획
 
+### `20260330-v1-slice-and-item-stat-clarity.md`
+
+- 목적: `main.md`에 첫 완성 범위를 명시하고, item/equipment/stat 문서의 부족한 책임 경계를 보강한다.
+- 주 영향 경로: `docs/proposal/main.md`, `docs/proposal/common/item.md`, `docs/proposal/ingame/combat_stats.md`, `docs/proposal/ingame/combat_formulas.md`, `docs/proposal/ingame/combat_data_tables.md`
+- 이 plan을 읽어야 하는 경우:
+  - `v1 showcase slice`와 defer 목록을 proposal 허브에 추가할 때
+  - 아이템/장비/스탯 시스템의 역할 분리를 다시 다듬을 때
+  - 장비 슬롯, 옵션 출처, 최종 스탯 조립 규칙을 문서화할 때
+
+### `20260330-game-design-agent-roundtable.md`
+
+- 목적: 다양한 관점의 게임 기획자 agent를 추가하고, 현재 `Dungeon of Spirits` 기획 수정 후보를 빠르게 토론할 수 있는 기반을 만든다.
+- 주 영향 경로: `.codex/agents/`, `.claude/agents/`, `docs/proposal/exec-plans/active/`
+- 이 plan을 읽어야 하는 경우:
+  - 기획 토론용 agent 프롬프트를 추가하거나 수정할 때
+  - 여러 성격의 기획자 시점으로 proposal을 리뷰할 때
+  - 토론 결과를 바탕으로 proposal 수정 우선순위를 잡을 때
+
 ### `20260330-combat-controls-and-view.md`
 
 - 목적: 전투 기획 문서에 권장 시점, 기본 입력 체계, 스킬 사용 방식, 무기별 조작 예시를 추가

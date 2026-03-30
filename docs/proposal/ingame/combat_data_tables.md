@@ -71,6 +71,21 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId
 - 담당 값: `WeaponCode`, `WeaponName`, `WeaponType`, `BaseWeaponStatTableId`, `MaxEnhanceLevel`, `SkillSetId`, `IdentitySkillId`, `SmartDropTag`, `OptionPoolId`, `BaseDurabilityMax`, `RepairCostRate`, `EquipLevelMin`, `TradeLimitCount`, `AnimationSetId`, `IconKey`, `ModelKey`, `DisplayOrder`, `HandType`, `CombatRoleTag`, `RangeProfile`, `ResourceType`
 - 목적: 전투 수치와 무기 메타를 분리해 참조하기 위함
 
+## v1 장비 데이터 책임
+
+### 방어구/장신구 템플릿
+
+- v1에서는 무기처럼 별도 강화 단계 테이블을 크게 벌리지 않고, `ItemTemplate + FixedStatSet + OptionPool` 조합으로 시작한다.
+- 방어구 템플릿은 `SlotType`, `EquipLevelMin`, `BaseDefense`, `BaseHP`, `OptionPoolId`, `TradeLimitCount`를 중심으로 관리한다.
+- 장신구 템플릿은 `SlotType`, `EquipLevelMin`, `BaseCritChance`, `BaseCritDamage`, `BaseCooldownReduction`, `OptionPoolId`, `TradeLimitCount`를 중심으로 관리한다.
+- 강화 단계가 늘어나거나 등급별 반복 행이 많아지면 후속 단계에서 `EquipStatTable` 계열로 분리할 수 있다.
+
+### 옵션 풀
+
+- `OptionPoolId`는 장비군별로 분리한다.
+- 무기 옵션 풀은 공격/무력화/아이덴티티 계열, 방어구 옵션 풀은 생존 계열, 장신구 옵션 풀은 운용 보조 계열을 우선한다.
+- 재련은 `OptionPoolId` 안에서 단일 옵션 재굴림을 수행하는 구조를 전제로 한다.
+
 ## PK / FK 규칙
 
 - `PlayerStatTable`
@@ -97,6 +112,7 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId
 
 - `PlayerStatTable`는 유저 기본 성장만 담당하고, 무기 성장 값은 넣지 않는다.
 - `WeaponStatTable`는 전투 수치만 담당하고, 템플릿 메타는 `WeaponTable`에 둔다.
+- 방어구/장신구는 v1에서 무기와 같은 복잡한 강화 테이블을 강제하지 않는다.
 - `WeaponStatTableId`는 안정적인 규칙으로 생성하고, 스크립트가 임의 재배치하지 않게 유지한다.
 - 강화 단계가 실제 장비 상태라면 구현 단계에서 별도 소유 테이블이 필요하다.
 
