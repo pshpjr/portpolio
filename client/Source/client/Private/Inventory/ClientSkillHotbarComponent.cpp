@@ -94,10 +94,10 @@ const TMap<EClientSkillHotSlot, FClientSkillDefinition>& UClientSkillHotbarCompo
 
 bool UClientSkillHotbarComponent::IsActiveSkillSlot(EClientSkillHotSlot Slot) const
 {
-    return Slot == EClientSkillHotSlot::Q
-        || Slot == EClientSkillHotSlot::E
-        || Slot == EClientSkillHotSlot::R
-        || Slot == EClientSkillHotSlot::F;
+    return Slot == EClientSkillHotSlot::Active1
+        || Slot == EClientSkillHotSlot::Active2
+        || Slot == EClientSkillHotSlot::Active3
+        || Slot == EClientSkillHotSlot::Active4;
 }
 
 void UClientSkillHotbarComponent::BroadcastHotbarUpdated()
