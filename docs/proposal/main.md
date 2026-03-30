@@ -129,6 +129,8 @@
 ### 인게임
 
 - [ingame/combat.md](./ingame/combat.md): 전투 핵심 규칙
+- [ingame/combat_stats.md](./ingame/combat_stats.md): 전투 스탯 초안과 분류
+- [ingame/combat_formulas.md](./ingame/combat_formulas.md): 전투 공식 초안과 계산 구조
 - [ingame/monster_ai.md](./ingame/monster_ai.md): 몬스터 역할과 어그로
 - [ingame/boss_pattern.md](./ingame/boss_pattern.md): 보스 패턴과 공략 구조
 - [ingame/dungeon_progress.md](./ingame/dungeon_progress.md): 구역 진행, 드롭, 기믹 실패

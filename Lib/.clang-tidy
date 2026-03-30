@@ -1,0 +1,73 @@
+Checks: "readability-identifier-naming"
+
+CheckOptions:
+  # 함수명
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+
+  # private 멤버 변수: camelBack + _
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: camelBack
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: "_"
+
+  # 상수
+  # ── 상수: k 붙일 대상 ──
+  # 전역/네임스페이스 스코프 상수
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.GlobalConstantPrefix
+    value: "k"
+
+  # 클래스 static const/constexpr 멤버 (clang-tidy에서 ClassConstant = static const member)
+  - key: readability-identifier-naming.ClassConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassConstantPrefix
+    value: "k"
+
+  # static 상수 (파일 스코프 static 등)
+  - key: readability-identifier-naming.StaticConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.StaticConstantPrefix
+    value: "k"
+
+  # constexpr 변수 (모든 스코프)
+  - key: readability-identifier-naming.ConstexprVariableCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstexprVariablePrefix
+    value: "k"
+
+  # ── 상수: k 안 붙일 대상 ──
+  # 비-static const 멤버 변수
+  - key: readability-identifier-naming.ConstantMemberCase
+    value: camelBack
+
+  # 로컬 const 변수
+  - key: readability-identifier-naming.LocalConstantCase
+    value: camelBack
+
+  # const 파라미터
+  - key: readability-identifier-naming.ConstantParameterCase
+    value: camelBack
+
+  # enum 타입명
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+
+  # enum 값
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantPrefix
+    value: "e"
+
+  # 클래스명
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+
+  # 지역 변수
+  - key: readability-identifier-naming.LocalVariableCase
+    value: camelBack
+
+  # 파라미터
+  - key: readability-identifier-naming.ParameterCase
+    value: camelBack

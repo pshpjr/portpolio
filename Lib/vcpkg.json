@@ -11,6 +11,14 @@
     {
       "name": "gtest",
       "version>=": "1.14.0"
+    },
+    {
+      "name": "boost-asio",
+      "version>=": "1.90.0"
+    },
+    {
+      "name": "concurrentqueue",
+      "version>=": "1.0.4#1"
     }
   ]
 }
