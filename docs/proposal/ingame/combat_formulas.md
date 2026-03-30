@@ -2,14 +2,14 @@
 
 ## 목적
 
-전투 스탯 초안을 기반으로 우리 게임에서 사용할 전투 계산 구조를 정의한다.
+전투 스탯 초안을 기반으로 포트폴리오 1차 구현에서 실제로 재현 가능한 전투 계산 구조를 정의한다.
 
 ## 핵심 규칙
 
-- 이 문서는 PvE 기준 공식 초안이다.
-- 실제 밸런스 수치는 후속 엑셀에서 조정하되, 계산 구조와 입력 스탯은 여기서 먼저 고정한다.
-- 공식은 서버 권위 판정과 틱 단위 검증을 전제로 한다.
-- 무기 기반 정체성, 패링 중심 전투, 무력화, 부위 파괴, 속성 상호작용, 위협도 운용을 모두 표현할 수 있어야 한다.
+- 이 문서는 PvE 기준 구현용 `v1 코어 공식`만 우선 고정한다.
+- 서버는 30fps 틱 루프 기준으로 전투 검증을 수행한다.
+- 계산 순서와 입력 필드는 이 문서를 기준으로 고정하고, 복잡한 파생 규칙은 후속 확장으로 넘긴다.
+- 1차 전투 코어는 `피해`, `치명타`, `무력화`, `아이덴티티`, `패링/카운터`다.
 
 ## 공통 표기
 
@@ -20,7 +20,31 @@
 - `Clamp(x, min, max)`: 최소/최대 범위 제한
 - `Final`: 최종 결과값
 
-## 기반 공식
+## v1 기본 상수
+
+| 상수 | 값 | 설명 |
+|---|---:|---|
+| `DefenseK` | 300 | 방어 감쇠 곡선 기준값 |
+| `StaggerK` | 180 | 무력화 저항 감쇠 기준값 |
+| `BaseCritRate` | 0.05 | 기본 치명타 확률 |
+| `BaseCritDamage` | 0.50 | 기본 치명타 추가 피해 |
+| `CritMin` | 0.00 | 치명타 하한 |
+| `CritMax` | 0.40 | 치명타 상한 |
+| `DefaultParryWindow` | 0.18 | 기본 패링 판정 시간(초) |
+| `CounterWindow` | 1.20 | 패링/카운터 성공 후 카운터 가능 시간(초) |
+| `BossDownTime` | 6.00 | 보스 무력화 성공 시 기본 다운 시간(초) |
+| `ThreatDamageRatio` | 0.25 | 피해 1당 발생 위협도 비율 |
+
+## 서버 처리 순서
+
+1. 입력 커맨드와 캐릭터 상태를 검증한다.
+2. 사거리, 각도, 시전 가능 상태, 자원 보유량, 쿨다운을 확인한다.
+3. 타격 대상과 충돌 시점을 계산한다.
+4. 패링, 카운터, 가드 같은 특수 판정을 먼저 처리한다.
+5. 피해, 치명타, 무력화, 아이덴티티 게이지 변경을 순서대로 적용한다.
+6. HP/게이지/위협도 변경 이벤트를 확정하고 브로드캐스트한다.
+
+## v1 기반 공식
 
 ### 1. 기본 공격력
 
@@ -28,20 +52,41 @@
 BaseAttack = A.AttackPower + A.WeaponPower
 ```
 
-- 플레이어의 공격 성장은 `AttackPower`와 `WeaponPower`의 합을 기준으로 본다.
-- 후속 단순화가 필요하면 둘 중 하나를 제거할 수 있지만, 현재는 캐릭터 성장과 무기 성장을 분리하기 위해 두 축을 유지한다.
+- `AttackPower`는 유저 레벨 성장 축, `WeaponPower`는 장착 무기 축으로 유지한다.
+- 기본 공격 한 번당 기준 피해 목표는 같은 레벨 일반 몬스터 HP의 `6% ~ 9%`다.
 
 ### 2. 스킬 기본 피해
 
 ```text
-SkillBaseDamage = BaseAttack * SkillCoeff + A.SkillPower
-PositionMultiplier = 1 + A.PositionalBonus
+SkillBaseDamage = BaseAttack * SkillCoeff
 CriticalMultiplier = CritSuccess ? (1 + BaseCritDamage + A.CriticalDamage) : 1
-DamageBeforeDefense = SkillBaseDamage * PositionMultiplier * CriticalMultiplier
+DamageBeforeDefense = SkillBaseDamage * CriticalMultiplier
 ```
 
-- 평타는 낮은 `SkillCoeff`, 핵심 스킬은 높은 `SkillCoeff`를 사용한다.
-- `SkillPower`는 스킬 특화 성장이나 버프 효과를 실을 수 있는 보정 슬롯이다.
+- `SkillCoeff`는 스킬 데이터에서 관리한다.
+- `SkillPower`, `PositionalBonus` 같은 추가 배율 계열은 후속 확장으로 넘긴다.
+
+### 스킬 계수 기준
+
+| 스킬 등급 | `SkillCoeff` | 설명 |
+|---|---:|---|
+| 기본 공격 1타 | 0.70 | 필러 공격 |
+| 기본 공격 피니시 | 1.10 | 평타 마무리 |
+| 일반 액티브 | 1.40 | 주력 스킬 |
+| 강한 액티브 | 1.90 | 긴 쿨다운 고위력 |
+| 아이덴티티 스킬 | 2.40 | 무기 정체성 핵심기 |
+
+### 무기별 시작 계수 가이드
+
+| 스킬 | 검방 | 대검 | 지팡이 |
+|---|---:|---:|---:|
+| 기본 공격 | 0.72 | 0.68 | 0.64 |
+| 일반 액티브 | 1.28 | 1.40 | 1.34 |
+| 강한 액티브 | 1.70 | 1.98 | 1.82 |
+| 아이덴티티 | 2.02 | 2.42 | 2.26 |
+
+- 검방은 안정성과 패링 보상을 우선하고, 대검은 단일 강타 보상을 극대화한다.
+- 지팡이는 강한 한 방보다 지속 회전과 리소스 운용을 더 잘 살리도록 잡는다.
 
 ### 3. 방어 및 최종 피해
 
@@ -53,6 +98,7 @@ FinalDamage = max(1, FinalDamage)
 
 - 방어는 감쇠형 공식을 사용해 값이 커질수록 효율 증가가 둔화되게 한다.
 - `DamageReduction`은 버프, 실드, 패턴 특수 효과 같은 최종 단계 보정치에 사용한다.
+- 같은 레벨 기준 일반 몬스터 `Defense`는 `80`, 정예 `140`, 보스 `220`를 기본값으로 둔다.
 
 ### 4. 치명타
 
@@ -64,78 +110,78 @@ CritSuccess = Roll01() < CritRate
 - 치명타는 단순 확률 + 배율 구조로 유지한다.
 - 현재 PvE 기준에서는 별도 치명 저항을 두지 않고 필요 시 보스 데이터에서만 예외 처리한다.
 
-### 5. 속성 피해
+### 5. 무력화
 
 ```text
-ElementDelta = A.ElementAttack_X - D.ElementResist_X
-ElementMultiplier = 1 + Clamp(ElementDelta / ElementScale, ElementMin, ElementMax)
-WeaknessMultiplier = IsWeakElement ? (1 + A.WeakPointPower) : 1
-FinalElementDamage = FinalDamage * ElementMultiplier * WeaknessMultiplier
-```
-
-- `X`는 화염, 냉기, 번개, 독 중 하나다.
-- 현재 보스 기획 기준 약점 속성은 추가 피해 배율, 저항 속성은 감소 배율로 처리한다.
-- 완전 무효보다는 증감 배율 구조가 협동 액션 RPG 흐름과 잘 맞는다.
-
-### 6. 무력화
-
-```text
-StaggerBase = SkillStaggerCoeff * (A.StaggerPower + BaseAttack * StaggerAttackRatio)
+StaggerBase = SkillStaggerCoeff * A.StaggerPower
 StaggerMitigation = D.StaggerResistance / (D.StaggerResistance + StaggerK)
-StaggerApplied = StaggerBase * (1 - StaggerMitigation)
-StaggerApplied = StaggerApplied * PatternBonus * CounterBonus * WeaknessMultiplier
+StaggerApplied = StaggerBase * (1 - StaggerMitigation) * CounterBonus
 D.StaggerGauge = max(0, D.StaggerGauge - StaggerApplied)
 ```
 
 - 무력화는 데미지와 분리된 별도 게이지를 사용한다.
-- 패링, 카운터, 약점 속성 적중은 무력화에 추가 보너스를 준다.
-- 보스는 무력화 후 `StaggerRecovery` 또는 누적 저항 상승으로 연속 다운을 방지한다.
+- `SkillStaggerCoeff`는 스킬 데이터에서 관리한다.
+- `CounterBonus`는 일반 적중 `1.0`, 카운터 성공 `1.5`, 패링 직후 반격 `1.35`를 사용한다.
 
-### 7. 부위 파괴
+### 무력화 기준값
+
+| 대상 | `StaggerGauge` | `StaggerResistance` |
+|---|---:|---:|
+| 일반 몬스터 | 120 | 40 |
+| 정예 몬스터 | 350 | 90 |
+| 보스 | 1000 | 180 |
+
+| 스킬 분류 | `SkillStaggerCoeff` |
+|---|---:|
+| 낮음 | 0.7 |
+| 보통 | 1.0 |
+| 높음 | 1.4 |
+| 매우 높음 | 1.8 |
+
+### 무기별 무력화 계수 가이드
+
+| 스킬 | 검방 | 대검 | 지팡이 |
+|---|---:|---:|---:|
+| 기본 공격 | 0.90 | 0.80 | 0.65 |
+| 일반 액티브 | 1.05 | 1.00 | 0.85 |
+| 강한 액티브 | 1.25 | 1.45 | 1.10 |
+| 아이덴티티 | 1.50 | 1.80 | 1.30 |
+
+- 검방은 자주 누적시키는 무력화, 대검은 한 번에 크게 깎는 무력화, 지팡이는 보조형 무력화로 구분한다.
+
+### 무력화 상태 전이 규칙
+
+| 단계 | 조건 | 효과 |
+|---|---|---|
+| `NORMAL` | 기본 상태 | 일반 패턴 수행 |
+| `STAGGER_BREAK` | `StaggerGauge <= 0` | 즉시 현재 행동 중단 |
+| `DOWNED` | `STAGGER_BREAK` 직후 | `BossDownTime = 6초`, 받는 피해 `+20%` |
+| `RECOVERY` | 다운 종료 직후 | `StaggerGauge`를 최대치의 60%로 복구, 재무력화 불가 |
+| `NORMAL` | `RECOVERY` 종료 | 일반 상태 복귀 |
+
+- 1차 구현에서는 다운 시간과 회복 규칙만 공통값으로 두고, 연속 무력화 누적 저항은 후속 확장으로 넘긴다.
+
+### 6. 위협도
 
 ```text
-PartBreakBase = SkillPartBreakCoeff * A.PartBreakPower
-PartBreakMitigation = D.PartBreakResistance / (D.PartBreakResistance + PartBreakK)
-PartBreakApplied = PartBreakBase * (1 - PartBreakMitigation)
-TargetPartGauge = max(0, TargetPartGauge - PartBreakApplied)
-```
-
-- 부위 파괴는 전체 HP와 분리된 부위별 게이지를 사용한다.
-- 성공 시 패턴 약화, 기술 봉쇄, 무력화 추가 기여 중 하나를 제공한다.
-
-### 8. 상태 이상 축적
-
-```text
-StatusBuildBase = SkillStatusCoeff * (A.StatusBuildUp + A.ElementAttack_X)
-StatusMitigation = D.StatusResistance / (D.StatusResistance + StatusK)
-StatusApplied = StatusBuildBase * (1 - StatusMitigation)
-TargetStatusGauge = TargetStatusGauge + StatusApplied
-
-If TargetStatusGauge >= StatusThreshold:
-    ApplyStatus()
-    TargetStatusGauge = 0
-    D.StatusResistance = D.StatusResistance + StatusResistStep
-```
-
-- 상태 이상은 확률 즉발형보다 누적 게이지형을 사용한다.
-- 반복 발동 시 저항이 상승하도록 해 보스전에서 제어 루프를 완화한다.
-
-### 9. 위협도
-
-```text
-ThreatFromDamage = FinalElementDamage * ThreatDamageRatio
-ThreatFromSkill = SkillThreatBase
+ThreatFromDamage = FinalDamage * ThreatDamageRatio
 ThreatFromTaunt = TauntValue
-ThreatGenerated = (ThreatFromDamage + ThreatFromSkill + ThreatFromTaunt) * (1 + A.ThreatGen)
-
+ThreatGenerated = (ThreatFromDamage + ThreatFromTaunt) * (1 + A.ThreatGen)
 TargetThreat[A] = TargetThreat[A] + ThreatGenerated
-TargetThreat[A] = TargetThreat[A] * (1 - ThreatDecayPerTick)
 ```
 
-- 탱커형 스킬은 별도 고정 위협값 또는 도발값을 가진다.
-- 강제 타게팅 패턴은 위협도 계산보다 우선한다.
+- 1차 구현에서는 `피해 기반 위협도 + 고정 도발값`만 사용한다.
+- 힐, 보호막, 자연 감쇠, 최근 피격 보너스, 강제 타게팅 복귀 규칙은 후속 확장으로 넘긴다.
 
-### 10. 아이덴티티 게이지
+### 위협도 기준
+
+| 행동 | 생성 위협도 |
+|---|---:|
+| 최종 피해 100 | 25 |
+| 일반 도발 스킬 | 250 고정 |
+| 강한 도발 스킬 | 400 고정 |
+
+### 7. 아이덴티티 게이지
 
 ```text
 IdentityGain = HitBaseGauge * SkillGaugeCoeff * (1 + A.IdentityGaugeGain)
@@ -147,43 +193,125 @@ OnIdentityUse:
 ```
 
 - 무기별 차이는 `HitBaseGauge`, `SkillGaugeCoeff`, `IdentityCost` 조합으로 표현한다.
-- 평타, 핵심 스킬, 패링 성공에 서로 다른 게이지 보너스를 줄 수 있다.
+- 위 값들은 스킬 데이터에서 관리한다.
 
-### 11. 자원과 쿨다운
+### 아이덴티티 게이지 기준
+
+| 행동 | `HitBaseGauge` |
+|---|---:|
+| 평타 1회 적중 | 35 |
+| 일반 액티브 적중 | 70 |
+| 강한 액티브 적중 | 110 |
+| 패링 성공 | 150 |
+| 카운터 성공 | 180 |
+
+| 스킬 분류 | `SkillGaugeCoeff` |
+|---|---:|
+| 평타 | 1.0 |
+| 일반 액티브 | 1.0 |
+| 강한 액티브 | 1.1 |
+| 광역 다단히트 | 0.65 |
+
+### 무기별 게이지 계수 가이드
+
+| 항목 | 검방 | 대검 | 지팡이 |
+|---|---:|---:|---:|
+| 기본 공격 | 1.05 | 0.95 | 1.00 |
+| 일반 액티브 | 1.00 | 1.00 | 1.05 |
+| 강한 액티브 | 1.00 | 1.05 | 1.10 |
+| 다단히트 | 0.65 | 0.60 | 0.70 |
+| 패링 | 1.30 | 1.10 | 1.00 |
+| 카운터 | 1.45 | 1.25 | 1.10 |
+
+| 무기 | `IdentityCost` |
+|---|---:|
+| 검방 | 900 |
+| 대검 | 1000 |
+| 지팡이 | 950 |
+
+- 검방은 패링 성공 보상으로 게이지 순환을 자주 만들고, 대검은 표준 회전 위에 큰 보상기를 얹는다.
+- 지팡이는 다단히트가 많더라도 과도한 충전이 나오지 않게 다단히트 계수를 더 낮게 둔다.
+
+### 8. 자원과 쿨다운
 
 ```text
 FinalCooldown = BaseCooldown / (1 + A.CooldownReduction)
-FinalResourceCost = BaseResourceCost * CostMultiplier
+FinalResourceCost = BaseResourceCost
 ResourceAfterUse = CurrentResource - FinalResourceCost
 ```
 
 - 쿨다운 감소는 분모형 구조를 사용해 과도한 100% 근접을 막는다.
-- 자원 소모는 기본적으로 선형으로 두고 특정 버프 상태에서만 예외 배율을 붙인다.
+- 자원 소모는 기본적으로 선형으로 두고, v1에서는 별도 코스트 배율 시스템을 두지 않는다.
 
-### 12. 공속, 시전 속도, 이동 속도
+### 자원/쿨다운 기준
+
+| 스킬 분류 | 기본 쿨다운 | 기본 자원 소모 |
+|---|---:|---:|
+| 일반 액티브 | 8초 | 20 |
+| 강한 액티브 | 16초 | 35 |
+| 이동기 | 12초 | 15 |
+| 아이덴티티 | 24초 | 0 |
+
+## TTK 및 적 수치 기준선
+
+### 설계 원칙
+
+- 일반 몬스터는 `1 ~ 2사이클` 안에 정리돼 전투 템포를 끊지 않게 한다.
+- 정예 몬스터는 `2 ~ 4사이클`을 요구해 패링, 무력화, 자원 운용이 한 번 이상 의미 있게 들어가게 한다.
+- 보스는 `7 ~ 10사이클` 이상을 요구해 패턴 학습과 다운 타이밍 집중이 전투의 핵심이 되게 한다.
+- 여기서 `1사이클`은 `평타 3 ~ 5타 + 일반 액티브 1회`를 기준으로 본다.
+
+### 레벨 구간별 TTK 목표
+
+| 레벨 | 일반 몬스터 | 정예 | 보스 |
+|---|---|---|---|
+| 1 | 검방 `4 ~ 6초`, 대검 `3 ~ 5초`, 지팡이 `3 ~ 5초` | 검방 `14 ~ 18초`, 대검 `12 ~ 16초`, 지팡이 `13 ~ 17초` | 검방 `90 ~ 120초`, 대검 `75 ~ 100초`, 지팡이 `85 ~ 110초` |
+| 20 | 검방 `4 ~ 5초`, 대검 `3 ~ 4초`, 지팡이 `3 ~ 4초` | 검방 `15 ~ 20초`, 대검 `11 ~ 15초`, 지팡이 `12 ~ 16초` | 검방 `95 ~ 125초`, 대검 `80 ~ 105초`, 지팡이 `88 ~ 115초` |
+| 40 | 검방 `3 ~ 5초`, 대검 `3 ~ 4초`, 지팡이 `3 ~ 4초` | 검방 `16 ~ 22초`, 대검 `12 ~ 16초`, 지팡이 `13 ~ 18초` | 검방 `100 ~ 130초`, 대검 `85 ~ 110초`, 지팡이 `90 ~ 120초` |
+
+### 적 타입별 시작 수치 가이드
+
+| 레벨 | 일반 몬스터 | 정예 | 보스 |
+|---|---|---|---|
+| 1 | `HP 500 ~ 650`, `Defense 80`, `StaggerGauge 120` | `HP 1400 ~ 1800`, `Defense 140`, `StaggerGauge 350` | `HP 9000 ~ 12000`, `Defense 220`, `StaggerGauge 1000` |
+| 20 | `HP 950 ~ 1250`, `Defense 90`, `StaggerGauge 140` | `HP 2800 ~ 3600`, `Defense 160`, `StaggerGauge 420` | `HP 13000 ~ 16000`, `Defense 235`, `StaggerGauge 1100` |
+| 40 | `HP 1600 ~ 2200`, `Defense 110`, `StaggerGauge 160` | `HP 4500 ~ 6000`, `Defense 190`, `StaggerGauge 500` | `HP 19000 ~ 25000`, `Defense 250`, `StaggerGauge 1200` |
+
+- 이 표는 `1인 플레이 기준 v1 초기값`이다.
+- `AttackPower + WeaponPower` 성장폭과 HP 성장폭을 비슷한 비율로 유지해 레벨이 올라가도 TTK가 크게 흔들리지 않게 한다.
+- 파티 플레이에서는 기믹 수행과 다운 딜 집중 때문에 체감 TTK가 더 짧아질 수 있다.
+
+### 9. 공속, 시전 속도, 이동 속도
 
 ```text
 FinalAttackInterval = BaseAttackInterval / (1 + A.AttackSpeed)
 FinalCastTime = BaseCastTime / (1 + A.CastSpeed)
-FinalMoveSpeed = BaseMoveSpeed * (1 + A.MoveSpeed)
+FinalMoveSpeed = A.BaseMoveSpeed * (1 + A.MoveSpeedBonus)
 ```
 
-- 패링 중심 전투에서는 이동 속도와 시전 속도의 체감 영향이 크므로 상한선을 둘 가능성이 높다.
+- `BaseMoveSpeed`와 `MoveSpeedBonus`는 분리 유지한다.
+- `AttackSpeed`, `CastSpeed`, `MoveSpeedBonus`는 각각 최종값이 기본값 대비 `+40%`, `+50%`, `+25%`를 넘지 못한다.
 
-## 판정 규칙
+## v1 판정 규칙
 
 ### 패링
 
 ```text
 ParrySuccess = AttackContactTime within [ParryStart, ParryEnd + A.ParryWindowBonus]
 If ParrySuccess:
-    NegateOrReduceDamage()
-    AddStaggerBonus()
+    NegateDamageForThisHitOnly()
     OpenCounterWindow()
 ```
 
 - 패링은 단순 회피가 아니라 보상형 방어 판정이다.
-- 성공 시 피해 무효 또는 큰 감소, 무력화 보너스, 카운터 창 생성 중 최소 2개를 제공한다.
+- 1차 구현에서는 패링 성공한 해당 공격 1건의 피해만 `100%` 무효화한다.
+- 패링 성공 시 `1.20초` 동안 카운터 가능 창을 연다.
+
+### 패링 세부 규칙
+
+- 기본 패링 판정 시간은 `0.18초`다.
+- 검방은 `+0.04초`, 대검은 `+0.00초`, 지팡이는 `-0.02초`를 기본 직업 보정으로 가진다.
+- 1차 구현에서는 단일 히트 기준 패링만 보장하고, 다단히트/동시 공격/투사체 우선순위 세부 규칙은 후속 확장으로 넘긴다.
 
 ### 카운터 및 캔슬
 
@@ -192,15 +320,49 @@ CanCounter = IncomingPattern.CounterTag matches Skill.CounterTag
 CanCancel = IncomingCast.CancelGrade <= Skill.CancelGrade
 ```
 
-- `Heavy`, `Crush` 같은 캔슬 등급은 보스 문서 규칙을 따른다.
 - 카운터 성공 시 추가 무력화 보너스를 적용한다.
+- 캔슬 등급과 태그 체계는 보스 문서와 함께 맞춘다.
+
+## 확장으로 넘기는 항목
+
+- `SkillPower`, `PositionalBonus`, `WeakPointPower` 기반 추가 배율
+- 속성 약점/저항의 세부 상성 규칙
+- 상태 이상 축적, 상태 저항 누적, 상태별 지속시간 보정
+- 위협도 자연 감쇠, 힐/보호막 위협, 최근 피격 보너스
+- 다중 히트 패링 잠금, `Parryable`/`Unparryable` 태그 우선순위
+- 연속 무력화 누적 저항
+
+## 구현용 예시
+
+### 대검 액티브가 보스를 타격한 경우
+
+```text
+가정:
+- A.AttackPower = 95
+- A.WeaponPower = 85
+- SkillCoeff = 1.9
+- A.CriticalChance = 0.08
+- A.CriticalDamage = 0.60
+- D.Defense = 220
+- D.DamageReduction = 0.00
+
+계산:
+BaseAttack = 180
+SkillBaseDamage = 180 * 1.9 = 342
+DefenseMitigation = 220 / (220 + 300) = 0.423
+방어 적용 후 피해 = 342 * (1 - 0.423) = 197.3
+최종 확정 피해 = 197
+```
+
+- 이 예시는 같은 레벨 보스 상대로 강한 액티브 1회의 기준 피해량을 보여준다.
+- 치명타가 발생하면 여기서 추가 배율을 곱한다.
 
 ## 후속 확정 항목
 
-- `DefenseK`, `StaggerK`, `PartBreakK`, `StatusK`, `ElementScale` 같은 상수
-- 치명타 최소/최대치와 공속/이속 상한선
-- 상태 이상 종류별 `StatusThreshold`와 `StatusResistStep`
-- 무기 타입별 `SkillCoeff`, `SkillStaggerCoeff`, `SkillPartBreakCoeff`, `SkillGaugeCoeff`
+- 무기 타입별 `SkillCoeff`, `SkillStaggerCoeff`, `SkillGaugeCoeff`의 실제 스킬별 배분
+- 각 던전 티어별 일반/정예/보스 HP 목표치
+- 스킬별 자원 소모량 개별 오버라이드 값
+- 확장 단계 상태 이상/속성 시스템 범위
 
 ## 관련 문서
 

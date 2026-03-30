@@ -2,153 +2,225 @@
 
 ## 목적
 
-현재 기획서에 정의된 전투 루프, 스킬 구조, 장비 옵션, 보스 규칙을 기준으로 전투 스탯의 공통 목록을 정리한다.
+전투 공식, 밸런스 엑셀, 서버 로그 검증에서 공통으로 사용할 `v1 전투 스키마`를 먼저 고정한다.
 
 ## 핵심 규칙
 
-- 이 문서는 수치 확정 문서가 아니라 스탯 목록과 역할 정의를 위한 초안이다.
-- 스탯은 플레이어, 몬스터, 보스, 장비, 스킬이 공통으로 참조할 수 있는 전투 언어를 만드는 것이 목적이다.
-- 상세 공식은 후속 밸런스 문서 또는 구현 문서에서 확정하되, 어떤 스탯이 필요한지는 여기서 먼저 고정한다.
-- 무기별 정체성, 패링, 무력화, 부위 파괴, 속성 상호작용, 위협도 운용을 표현할 수 있어야 한다.
+- 이 문서는 포트폴리오 기준 1차 구현에 필요한 전투 스탯만 우선 고정한다.
+- 플레이어 공통 전투 스탯과, 스킬/보스 데이터에서 관리할 값을 분리한다.
+- 수치 밸런스는 후속 엑셀에서 조정할 수 있지만 필드 이름과 책임 경계는 여기서 먼저 닫는다.
+- 패링, 무력화, 무기 정체성을 1차 코어로 보고 속성/위협도/상태 이상은 단순형 또는 확장형으로 관리한다.
 
-## 주요 스탯 목록
+## 기본 단위와 범위
 
-### 1. 생존 계열
+- 캐릭터 레벨 기준 범위는 `1 ~ 40`을 사용한다.
+- 1차 구현 기준 기본 플레이어는 레벨 1에서 방어구 미장착 상태로 시작한다.
+- 기본 전투 스탯은 정수값을 사용하고, 퍼센트형 보정은 소수 둘째 자리까지 허용한다.
+- 서버 내부 계산은 부동소수점으로 처리하되, 최종 피해와 게이지 감소량은 소수 첫째 자리에서 반올림 후 정수로 확정한다.
+- 모든 퍼센트형 증감 스탯은 내부적으로 `0.15 = 15%` 형식을 사용한다.
 
-- `MaxHP`: 체력 최대치. 플레이어, 몬스터, 보스의 기본 생존력을 정의한다.
-- `HPRegen` 또는 `RecoverPower`: 초당 회복 또는 회복 효과 증폭. 현재 기획에서는 비중이 낮지만 소모품과 지원 스킬 확장을 고려해 확보한다.
-- `Defense`: 일반 피해 완화용 기본 방어 계열 값.
-- `DamageReduction`: 스킬, 버프, 장비 옵션으로 얻는 최종 피해 감소 보정치.
-- `GuardPower`: 검방 같은 방어형 무기의 가드 성능 보정치.
-- `ParryWindowBonus`: 패링 가능 시간 확대 또는 난이도 완화 보정치.
-- `StatusResistance`: 상태 이상 축적 저항 또는 지속 시간 감소에 쓰는 저항 계열 값.
+## v1 플레이어 기본값
 
-### 2. 공격 계열
+| 스탯 | 값 |
+|---|---:|
+| `MaxHP` | 1000 |
+| `AttackPower` | 80 |
+| `Defense` | 100 |
+| `CriticalChance` | 0.05 |
+| `CriticalDamage` | 0.50 |
+| `CooldownReduction` | 0.00 |
+| `DamageReduction` | 0.00 |
+| `MoveSpeedBonus` | 0.00 |
 
-- `AttackPower`: 기본 피해 계산의 중심이 되는 공격 계열 값.
-- `WeaponPower`: 무기 기반 올인 빌드를 반영하기 위한 무기 성능 축.
-- `SkillPower`: 스킬 계수형 피해와 보조 효과의 기반 값.
+- 위 표는 "무기 미반영, 노옵션, 노버프, 레벨 1 유저 공통값"이다.
+- 어떤 무기를 들더라도 유저 레벨 테이블은 유지되고, 무기 장착으로 최종값이 보정된다.
+
+## 레벨 성장 규칙
+
+### 플레이어 레벨업 당 증가량
+
+| 스탯 | 증가량 |
+|---|---:|
+| `MaxHP` | +80 |
+| `AttackPower` | +6 |
+| `Defense` | +9 |
+
+- 레벨 성장으로 `CriticalChance`, `CriticalDamage`, `CooldownReduction`, `DamageReduction`은 직접 증가하지 않는다.
+- 이런 보조 스탯은 무기, 장비, 룬, 스킬 변형, 버프로만 확보한다.
+
+## v1 무기 기본값
+
+| 스탯 | 검방 | 대검 | 지팡이 |
+|---|---:|---:|---:|
+| `WeaponPower` | 60 | 85 | 110 |
+| `BaseMoveSpeed` | 4.2 | 4.0 | 4.3 |
+| `AttackSpeed` | 0.00 | -0.05 | 0.05 |
+| `CastSpeed` | -0.05 | -0.10 | 0.15 |
+| `IdentityGaugeMax` | 1000 | 1000 | 1000 |
+| `IdentityGaugeGain` | 0.00 | 0.00 | 0.00 |
+| `ResourceMax` | 100 | 100 | 140 |
+| `ResourceRegen` | 6 | 5 | 8 |
+| `StaggerPower` | 110 | 135 | 90 |
+| `ThreatGen` | 0.30 | 0.05 | -0.10 |
+| `ParryWindowBonus` | 0.04 | 0.00 | -0.02 |
+
+- 위 표는 "해당 무기 장착 시 적용되는 기본 무기 스탯"이다.
+- `BaseMoveSpeed`, `AttackSpeed`, `CastSpeed`, `ThreatGen`, `ParryWindowBonus`는 무기 장착으로 바뀌는 값이다.
+
+## v1 상한선
+
+| 스탯 | 상한 |
+|---|---:|
+| `CriticalChance` | 0.40 |
+| `CriticalDamage` 추가분 | 1.00 |
+| `CooldownReduction` | 0.35 |
+| `AttackSpeed` | 0.40 |
+| `CastSpeed` | 0.50 |
+| `MoveSpeedBonus` | 0.25 |
+| `DamageReduction` | 0.60 |
+| `ThreatGen` | 2.00 |
+| `ParryWindowBonus` | 0.08 |
+
+- 상한선은 장비와 버프를 모두 포함한 최종값 기준이다.
+- 서버는 상한 적용 후 공식 계산에 들어간다.
+
+## v1 필수 전투 스키마
+
+### 1. 플레이어/몬스터 공통 기본 스탯
+
+- `MaxHP`: 체력 최대치.
+- `AttackPower`: 캐릭터 성장 중심 공격 값.
+- `Defense`: 상시 방어 감쇠용 값.
 - `CriticalChance`: 치명타 발생 확률.
 - `CriticalDamage`: 치명타 성공 시 추가 피해 배율.
-- `WeakPointPower`: 약점 속성 또는 약점 상태 대상에게 주는 피해 보정치.
-- `PositionalBonus`: 후방 또는 측면 보정치 후보.
+- `CooldownReduction`: 재사용 대기시간 단축.
+- `DamageReduction`: 최종 단계 피해 감소 보정.
+- `MoveSpeedBonus`: 기본 이동 속도에 곱해지는 공통 이동 속도 보정.
 
-### 3. 자원 및 템포 계열
+### 2. 무기 공통 기본 스탯
 
-- `IdentityGaugeGain`: 공격 적중 시 아이덴티티 게이지 획득량.
-- `IdentityGaugeMax`: 아이덴티티 발동에 필요한 최대 게이지.
-- `ResourceMax`: 마나, 기력, 탄환 같은 무기별 자원의 최대치.
+- `WeaponPower`: 무기 성장 중심 공격 값.
+- `BaseMoveSpeed`: 기본 이동 속도.
+- `ResourceMax`: 무기별 자원 최대치.
 - `ResourceRegen`: 전투 중 자원 회복 속도.
-- `CooldownReduction`: 스킬 재사용 대기시간 단축 계열.
-- `CastSpeed`: 시전형 스킬의 준비 속도.
-- `AttackSpeed`: 기본 공격과 일부 스킬의 실행 속도.
-- `MoveSpeed`: 회피와 포지셔닝 중심 전투를 위한 이동 속도.
-- `DodgeCount`: 회피기 사용 가능 횟수 또는 충전 수.
+- `IdentityGaugeMax`: 아이덴티티 발동에 필요한 최대 게이지.
+- `IdentityGaugeGain`: 적중 시 아이덴티티 획득량 보정.
+- `StaggerPower`: 무력화 게이지 감소 성능.
+- `StaggerResistance`: 무력화 저항 값.
+- `ThreatGen`: 피해/도발 기반 위협도 보정.
+- `ParryWindowBonus`: 패링 가능 시간 보정.
 
-### 4. 전투 기믹 계열
+### 3. v1 보조 스탯
 
-- `StaggerPower`: 무력화 게이지 감소량에 기여하는 공격 성능.
-- `StaggerResistance`: 무력화에 대한 저항.
-- `StaggerRecovery`: 무력화 저항 회복 또는 누적 저항 관리에 쓰는 값.
-- `PartBreakPower`: 부위 파괴 게이지 감소량에 기여하는 성능.
-- `PartBreakResistance`: 부위 파괴 저항치.
-- `CounterPower`: 카운터 성공 시 추가 기여도나 경직 유발 성능.
-- `ThreatGen`: 탱커형 스킬과 장비가 생성하는 위협도 보정치.
-- `ThreatDecay`: 시간 경과 또는 상태 전환에 따른 위협도 감소율.
-- `ControlPower`: 넉백, 경직, 띄우기 같은 제어 성능의 강도.
-- `ControlResistance`: 반복 제어 저항과 보스 면역 규칙을 위한 값.
+- `AttackSpeed`: 기본 공격 및 일부 스킬 실행 속도 보정.
+- `CastSpeed`: 시전형 스킬 준비 속도 보정.
+- `ElementAttack_X`: 속성 추가 피해용 공격 값.
+- `ElementResist_X`: 속성 저항 값.
 
-### 5. 속성 및 상태 이상 계열
+### 4. 스킬 데이터로 내려야 하는 값
 
-- `ElementAttack_Fire`
-- `ElementAttack_Ice`
-- `ElementAttack_Lightning`
-- `ElementAttack_Poison`
-- `ElementResist_Fire`
-- `ElementResist_Ice`
-- `ElementResist_Lightning`
-- `ElementResist_Poison`
-- `StatusBuildUp`: 상태 이상 축적량 증가 보정.
-- `StatusDuration`: 부여한 상태 이상의 지속 시간 보정.
-- `StatusAmplify`: 이미 걸린 상태 이상 대상에게 추가 효과를 주는 보정치 후보.
+- `SkillCoeff`
+- `SkillStaggerCoeff`
+- `SkillGaugeCoeff`
+- `SkillThreatBase`
+- `IdentityCost`
+- `BaseCooldown`
+- `BaseResourceCost`
+- `StatusBuildUpPerHit`
 
-### 6. 보스 및 몬스터 전용 계열
+- 위 값들은 캐릭터 기본 스탯이 아니라 스킬 정의 데이터 또는 밸런스 테이블에서 관리한다.
 
-- `PhaseThresholdHP`: 체력 구간 기반 페이즈 전환 기준값.
-- `EnrageTime`: 광폭화 발동 시간.
-- `DetectionRange`: 일반 몬스터의 탐지 범위.
-- `AggroPriority`: 위협도 테이블 외 우선 타게팅 보정치.
-- `PatternWeight`: AI가 특정 패턴을 선택할 확률 가중치.
-- `StatusImmunityFlag`: 특정 상태 이상 면역 여부.
-- `ForcedTargetingFlag`: 기믹 구간 강제 타게팅 사용 여부.
+### 5. 보스/몬스터 데이터로 내려야 하는 값
 
-### 7. 장비/드롭 연동 계열
+- `StaggerGaugeMax`
+- `DownDuration`
+- `RecoveryDuration`
+- `AggroChangeThreshold`
+- `PatternWeight`
+- `DetectionRange`
+- `ForcedTargetingFlag`
+- `StatusImmunityFlag`
 
-- `Durability`: 사망 패널티와 수리 비용의 기준이 되는 내구도.
-- `DurabilityLossOnDeath`: 사망 시 내구도 감소량.
-- `RepairCostRate`: 수리 비용 계산 계수.
-- `OptionSlotCount`: 아이템 등급별 랜덤 옵션 수.
-- `SmartDropWeight`: 장착 무기 기준 스마트 드롭 보정치.
-- `TradeLimitCount`: 거래 가능 횟수.
+- 위 값들은 보스 패턴과 AI 문서가 책임지는 데이터다.
 
-## 스탯 묶음 초안
+## 확장 후보 스탯
 
-### 플레이어 기본 스탯
+### 1. 상태 이상/제어 확장
 
-- `MaxHP`
-- `AttackPower`
-- `Defense`
-- `MoveSpeed`
-- `IdentityGaugeMax`
-- `IdentityGaugeGain`
-- `ResourceMax`
-- `ResourceRegen`
-
-### 전투 보조 스탯
-
-- `CooldownReduction`
-- `AttackSpeed`
-- `CastSpeed`
-- `CriticalChance`
-- `CriticalDamage`
-- `ThreatGen`
-- `ParryWindowBonus`
+- `StatusBuildUp`
+- `StatusDuration`
+- `StatusAmplify`
 - `StatusResistance`
-
-### 특수 전투 스탯
-
-- `StaggerPower`
-- `PartBreakPower`
-- `CounterPower`
 - `ControlPower`
+- `ControlResistance`
+
+### 2. 포지셔닝/특수 피해 확장
+
 - `WeakPointPower`
-- 속성 공격/저항
+- `PositionalBonus`
+- `CounterPower`
+- `ThreatDecay`
 
-### 장비 옵션 후보 스탯
+### 3. 장비/경제 연동 확장
 
-- `AttackPower`
-- `Defense`
-- `MaxHP`
-- `StaggerPower`
-- `PartBreakPower`
-- `ParryWindowBonus`
-- `ThreatGen`
-- 속성 공격/저항
-- `CooldownReduction`
-- `CriticalChance`
-- `CriticalDamage`
+- `Durability`
+- `DurabilityLossOnDeath`
+
+- `RepairCostRate`, `OptionSlotCount`, `SmartDropWeight`, `TradeLimitCount`는 전투 스탯이 아니라 아이템/경제 문서에서 관리한다.
+
+## 장비 옵션 수치 범위
+
+### 무기 옵션
+
+| 옵션 | 레어 | 에픽 |
+|---|---:|---:|
+| `AttackPower` | +12 ~ +24 | +24 ~ +42 |
+| `WeaponPower` | +10 ~ +20 | +20 ~ +36 |
+| `CriticalChance` | +0.02 ~ +0.05 | +0.05 ~ +0.09 |
+| `CriticalDamage` | +0.08 ~ +0.16 | +0.16 ~ +0.28 |
+| `StaggerPower` | +12 ~ +30 | +30 ~ +55 |
+| `ElementAttack_X` | +15 ~ +35 | +35 ~ +65 |
+
+### 방어구/장신구 옵션
+
+| 옵션 | 레어 | 에픽 |
+|---|---:|---:|
+| `MaxHP` | +80 ~ +180 | +180 ~ +320 |
+| `Defense` | +15 ~ +35 | +35 ~ +60 |
+| `DamageReduction` | +0.01 ~ +0.03 | +0.03 ~ +0.05 |
+| `ParryWindowBonus` | +0.01 ~ +0.03 | +0.03 ~ +0.05 |
+| `CooldownReduction` | +0.01 ~ +0.03 | +0.03 ~ +0.05 |
+| `ThreatGen` | +0.10 ~ +0.25 | +0.25 ~ +0.45 |
+| `MoveSpeedBonus` | +0.01 ~ +0.03 | +0.03 ~ +0.05 |
+
+## 구현 우선 필드
+
+- Phase 2까지 반드시 구현할 필드:
+  - `MaxHP`, `AttackPower`, `WeaponPower`, `Defense`, `BaseMoveSpeed`
+  - `IdentityGaugeMax`, `IdentityGaugeGain`, `ResourceMax`, `ResourceRegen`
+  - `StaggerPower`, `StaggerResistance`
+  - `CriticalChance`, `CriticalDamage`
+  - `ParryWindowBonus`
+- Phase 3 이후 확장 필드:
+  - `ThreatGen`, `ElementAttack_X`, `ElementResist_X`
+  - `CooldownReduction`, `AttackSpeed`, `CastSpeed`, `MoveSpeedBonus`
+  - `StatusBuildUp`, `StatusDuration`, `StatusAmplify`
+  - `ControlPower`, `ControlResistance`, `ThreatDecay`
 
 ## 제약과 예외
 
-- `CriticalChance`, `CriticalDamage`, `PositionalBonus`는 현재 문서에서 직접 요구되진 않지만 성장 다양성 확보를 위한 후보군으로 포함한다.
-- `AttackPower`와 `WeaponPower`를 분리할지, `Defense`와 `DamageReduction`을 별도 관리할지는 후속 공식 문서에서 확정한다.
-- 상태 이상 종류 자체는 아직 별도 문서가 없으므로 현재는 공통 슬롯만 정의한다.
-- 수식, 계수, 상한선, 최소값, 내림/반올림 규칙은 구현 또는 밸런스 문서에서 확정한다.
+- `AttackPower`와 `WeaponPower`는 1차 구현에서는 분리 유지한다.
+- 유저 레벨 성장과 무기 장착 스탯은 분리 유지한다.
+- `BaseMoveSpeed`와 `MoveSpeedBonus`는 분리 유지한다.
+- `Defense`와 `DamageReduction`도 분리 유지한다. 전자는 상시 감쇠용, 후자는 특수 효과용이다.
+- 상태 이상 종류 자체는 아직 별도 문서가 없으므로 1차 전투 코어에서는 필수 스키마로 고정하지 않는다.
+- 수치 범위는 1차 구현 기준이며, 실제 던전 TTK와 로그를 보고 조정할 수 있다.
 
 ## 관련 문서
 
 - [combat.md](./combat.md)
 - [combat_formulas.md](./combat_formulas.md)
+- [combat_data_tables.md](./combat_data_tables.md)
 - [boss_pattern.md](./boss_pattern.md)
 - [monster_ai.md](./monster_ai.md)
 - [../common/skill.md](../common/skill.md)
