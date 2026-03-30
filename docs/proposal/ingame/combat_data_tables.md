@@ -27,8 +27,8 @@
 
 ```text
 Player.Level -> UserLevelStatLinkTable.Level -> PlayerStatTableId
-Weapon.Type + Weapon.EnhanceLevel -> WeaponLevelStatLinkTable -> WeaponStatTableId
-WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId (기본 참조 시작점)
+Weapon.Id + Weapon.EnhanceLevel -> WeaponLevelStatLinkTable -> WeaponStatTableId
+WeaponTable.WeaponStatTableId + EnhanceLevel -> WeaponStatTable 복합 키 조회
 ```
 
 - `md`는 계약서 역할만 한다.
@@ -78,9 +78,8 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId (기본 참조 시작점)
 
 | 컬럼 | 타입 | 설명 |
 |---|---|---|
-| `WeaponStatTableId` | PK int | 무기 스탯 인덱스 |
-| `WeaponType` | enum | `SWORD_SHIELD`, `GREATSWORD`, `STAFF` |
-| `EnhanceLevel` | int | 무기 강화 레벨. `1 ~ 25` |
+| `WeaponStatTableId` | PK int | 무기 스탯 묶음 인덱스 |
+| `EnhanceLevel` | PK int | 무기 강화 레벨. `1 ~ 25` |
 | `WeaponPower` | int | 무기 공격 성장값 |
 | `BaseMoveSpeed` | float | 무기 장착 기준 기본 이동 속도 |
 | `AttackSpeed` | float | 무기 공격 속도 보정 |
@@ -95,21 +94,22 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId (기본 참조 시작점)
 | `ParryWindowBonus` | float | 무기 패링 보정 |
 | `BalanceVersion` | int | 밸런스 버전 |
 
+- `WeaponStatTableId + EnhanceLevel`이 실제 스탯 행의 복합 키다.
 - 강화 단계별로 주로 `WeaponPower`, `StaggerPower`, `ResourceMax`, `ResourceRegen`을 조정한다.
 - `BaseMoveSpeed`, `AttackSpeed`, `CastSpeed`, `ThreatGen`, `ParryWindowBonus` 같은 무기 정체성 값은 v1에서 고정 유지한다.
 
 ### 4. `WeaponLevelStatLinkTable`
 
-무기 종류별 강화 레벨을 `WeaponStatTableId`에 연결하는 링크 테이블이다.
+무기 인스턴스가 가진 `WeaponId + 강화 레벨`을 `WeaponStatTableId`에 연결하는 조회용 링크 테이블이다.
 
 | 컬럼 | 타입 | 설명 |
 |---|---|---|
-| `WeaponType` | PK enum | 무기 종류 |
+| `WeaponId` | PK int | 무기 템플릿 인덱스 |
 | `EnhanceLevel` | PK int | 무기 강화 레벨. `1 ~ 25` |
 | `WeaponStatTableId` | FK int | `WeaponStatTable.WeaponStatTableId` |
 | `BalanceVersion` | PK int | 밸런스 버전 |
 
-- 이 테이블은 `무기 종류 + 강화 단계별 밸런싱`을 분리하기 위한 구조다.
+- 이 테이블은 `무기 ID + 강화 단계` 기준 조회 경로를 명시하기 위한 구조다.
 - 무기 강화는 캐릭터 레벨과 별도 축이므로 `UserLevelStatLinkTable`과 분리 유지한다.
 
 ### 5. `WeaponTable`
@@ -122,7 +122,7 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId (기본 참조 시작점)
 | `WeaponCode` | UK string | 데이터/툴링용 코드 |
 | `WeaponName` | string | 표시 이름 |
 | `WeaponType` | enum | 무기 분류 |
-| `BaseWeaponStatTableId` | FK int | 강화 1 기준 기본 무기 스탯 인덱스 |
+| `WeaponStatTableId` | FK int | 무기 스탯 묶음 인덱스 |
 | `MaxEnhanceLevel` | int | 무기 강화 최대치 |
 | `SkillSetId` | FK | 무기 공용 스킬 세트 |
 | `IdentitySkillId` | FK | 아이덴티티 스킬 |
@@ -139,7 +139,6 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId (기본 참조 시작점)
 | `HandType` | enum | 장착 방식. `ONE_HAND_SHIELD`, `TWO_HAND`, `CHANNELING` |
 | `CombatRoleTag` | enum | 전투 역할 태그. `GUARD`, `BURST`, `CASTER` |
 | `RangeProfile` | enum | 사거리 프로필. `MELEE`, `RANGED` |
-| `ResourceType` | enum | 무기 패밀리 자원 타입 |
 | `BalanceVersion` | int | 밸런스 버전 |
 
 - `WeaponTable`은 템플릿과 메타데이터가 본체다.
@@ -155,15 +154,15 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId (기본 참조 시작점)
   - FK: `PlayerStatTableId -> PlayerStatTable.PlayerStatTableId`
   - Check: `Level BETWEEN 1 AND 40`
 - `WeaponStatTable`
-  - PK: `WeaponStatTableId`
-  - Unique: `WeaponType + EnhanceLevel + BalanceVersion`
+  - PK: `WeaponStatTableId + EnhanceLevel + BalanceVersion`
 - `WeaponLevelStatLinkTable`
-  - PK: `WeaponType + EnhanceLevel + BalanceVersion`
+  - PK: `WeaponId + EnhanceLevel + BalanceVersion`
+  - FK: `WeaponId -> WeaponTable.WeaponId`
   - FK: `WeaponStatTableId -> WeaponStatTable.WeaponStatTableId`
   - Check: `EnhanceLevel BETWEEN 1 AND 25`
 - `WeaponTable`
   - PK: `WeaponId`
-  - FK: `BaseWeaponStatTableId -> WeaponStatTable.WeaponStatTableId`
+  - FK: `WeaponStatTableId -> WeaponStatTable.WeaponStatTableId`
   - FK: `SkillSetId -> SkillSetTable.SkillSetId`
   - FK: `IdentitySkillId -> SkillTable.SkillId`
 
@@ -185,7 +184,7 @@ Defense = 100 + (Level - 1) * 9
 검방:
 
 ```text
-WeaponStatTableId = 2000 + EnhanceLevel
+WeaponStatTableId = 200
 WeaponPower = 60 + (EnhanceLevel - 1) * 4
 StaggerPower = 110 + (EnhanceLevel - 1) * 2
 ResourceMax = 100 + floor((EnhanceLevel - 1) / 5) * 2
@@ -195,7 +194,7 @@ ResourceRegen = 6 + floor((EnhanceLevel - 1) / 10)
 대검:
 
 ```text
-WeaponStatTableId = 2100 + EnhanceLevel
+WeaponStatTableId = 210
 WeaponPower = 85 + (EnhanceLevel - 1) * 5
 StaggerPower = 135 + (EnhanceLevel - 1) * 3
 ResourceMax = 100 + floor((EnhanceLevel - 1) / 5) * 2
@@ -205,7 +204,7 @@ ResourceRegen = 5 + floor((EnhanceLevel - 1) / 10)
 지팡이:
 
 ```text
-WeaponStatTableId = 2200 + EnhanceLevel
+WeaponStatTableId = 220
 WeaponPower = 110 + (EnhanceLevel - 1) * 5
 StaggerPower = 90 + (EnhanceLevel - 1) * 2
 ResourceMax = 140 + floor((EnhanceLevel - 1) / 5) * 3
@@ -226,7 +225,7 @@ ResourceRegen = 8 + floor((EnhanceLevel - 1) / 10)
 ## 주의할 점
 
 - `AttackPower`와 `WeaponPower`를 같은 성장 축으로 합치지 않는다.
-- `ResourceType`는 정체성 필드에 가깝기 때문에 `WeaponTable`과 `WeaponStatTable`에 모두 보이더라도, 템플릿 의미는 `WeaponTable` 쪽이 더 강하다.
+- `ResourceType`는 현재 `WeaponStatTable`을 단일 소스로 사용한다.
 - 강화 단계가 실제 장비 상태라면 구현 단계에서는 `WeaponInstance` 또는 동등한 소유 테이블이 따로 필요하다.
 - `WeaponStatTableId`는 안정적인 규칙으로 생성하고, 스크립트가 임의 재배치하지 않게 유지한다.
 
