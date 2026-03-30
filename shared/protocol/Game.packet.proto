@@ -9,5 +9,6 @@ import "xxx.Common.proto";
 // SECTION X: ITEM MODELS (아이템 패킷)
 // =======================================================================
 
-message
+
+
 
