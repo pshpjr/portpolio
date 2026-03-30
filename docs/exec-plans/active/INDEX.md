@@ -6,6 +6,7 @@
 
 
 - [20260330-client-inventory-foundation.md](./20260330-client-inventory-foundation.md) - 언리얼 클라이언트 인벤토리, 장비, 창고, 스킬 핫슬롯 초안 추가
+- [20260330-client-ui-shell-foundation.md](./20260330-client-ui-shell-foundation.md) - 언리얼 클라이언트 파티 가입, 파티 상태, 동의 팝업, 업적 노티 UI 골격 추가
 
 ## 운영 규칙
 
