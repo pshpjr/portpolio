@@ -4,7 +4,7 @@
 
 ## 현재 활성 계획
 
-- 현재 활성 계획 없음
+- [20260330-auto-commit-push-workflow.md](./20260330-auto-commit-push-workflow.md) - 완료 후 자동 commit/push 규칙을 workflow와 agent 프롬프트에 반영
 
 ## 운영 규칙
 

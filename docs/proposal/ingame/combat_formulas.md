@@ -20,6 +20,41 @@
 - `Clamp(x, min, max)`: 최소/최대 범위 제한
 - `Final`: 최종 결과값
 
+## 최종 전투 스탯 조립
+
+### 조립 식
+
+```text
+BaseFromLevel = PlayerLevelStats
+BaseFromWeapon = WeaponBaseStats
+BaseFromEquipment = ArmorFixedStats + AccessoryFixedStats
+BaseFromOptions = EquipmentOptionStats
+BaseFromTemporary = PassiveStats + BuffStats - DebuffStats
+
+FinalCombatStat =
+    Clamp(
+        BaseFromLevel
+        + BaseFromWeapon
+        + BaseFromEquipment
+        + BaseFromOptions
+        + BaseFromTemporary,
+        StatMin,
+        StatCap
+    )
+```
+
+- 레벨은 캐릭터 공통 성장축이다.
+- 무기는 공격 리듬과 자원 구조를 정한다.
+- 방어구/장신구는 최종값을 보완한다.
+- 임시 효과는 항상 가장 마지막에 합산/감산한다.
+- 실제 상한은 [combat_stats.md](./combat_stats.md)의 `v1 상한선`을 따른다.
+
+### 전투 시작 전 스냅샷 원칙
+
+- 입장 시점 또는 장비 변경 확정 시 서버가 최종 전투 스탯 스냅샷을 다시 계산한다.
+- 던전 중 장비 교체는 허용하지 않으므로, 전투 중 갱신 대상은 버프/디버프와 자원 관련 값이 중심이다.
+- 수리 필요 여부, 귀속 상태, 옵션 재련 결과는 전투 공식이 아니라 아이템 상태 검증에서 먼저 확정한다.
+
 ## v1 기본 상수
 
 | 상수 | 값 | 설명 |

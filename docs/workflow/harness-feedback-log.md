@@ -38,4 +38,11 @@
 
 ## Entries
 
+## 2026-03-30 - branch-owned-commit-push-default
+- kind: requested-change
+- area: workflow
+- summary: 사용자가 각 에이전트가 자기 브랜치에서 작업하고 주기적으로 `dev`를 merge 해 오며, 완료 시 자기 브랜치 푸시 후 `dev`에도 반영하도록 기본 동작을 바꿔 달라고 요청했다.
+- impact: 브랜치 소유권과 `dev` 동기화 규칙이 명확하지 않으면 작업 완료 후 통합 방식이 세션마다 흔들릴 수 있었다.
+- suggested-follow-up: 공용 workflow와 worker/scaffolder 프롬프트에 자기 브랜치 작업, 주기적 `dev` merge, 완료 후 `dev` 반영 규칙을 추가한다.
+
 
