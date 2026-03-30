@@ -18,22 +18,21 @@ class WeaponCurve:
     weapon_name: str
     weapon_type: str
     stat_id_prefix: int
-    skill_set_id: str
-    identity_skill_id: str
+    skill_set_id: int
+    identity_skill_id: int
     smart_drop_tag: str
-    option_pool_id: str
+    option_pool_id: int
     base_durability_max: int
     repair_cost_rate: float
     equip_level_min: int
     trade_limit_count: int
-    animation_set_id: str
+    animation_set_id: int
     icon_key: str
     model_key: str
     display_order: int
     hand_type: str
     combat_role_tag: str
     range_profile: str
-    weapon_stat_table_id: int
     resource_type: str
     base_weapon_power: int
     weapon_power_per_level: int
@@ -59,22 +58,21 @@ WEAPON_CURVES = (
         weapon_name="검방",
         weapon_type="SWORD_SHIELD",
         stat_id_prefix=2000,
-        skill_set_id="SKILLSET_SWORD_SHIELD_V1",
-        identity_skill_id="SKILL_IDENTITY_SHIELD_COUNTER",
+        skill_set_id=5001,
+        identity_skill_id=6001,
         smart_drop_tag="SWORD_SHIELD",
-        option_pool_id="OPT_POOL_DEFENSE",
+        option_pool_id=7001,
         base_durability_max=120,
         repair_cost_rate=1.00,
         equip_level_min=1,
         trade_limit_count=3,
-        animation_set_id="ANIMSET_SWORD_SHIELD",
+        animation_set_id=8001,
         icon_key="weapon_sword_shield",
         model_key="mdl_weapon_sword_shield",
         display_order=10,
         hand_type="ONE_HAND_SHIELD",
         combat_role_tag="GUARD",
         range_profile="MELEE",
-        weapon_stat_table_id=200,
         resource_type="STAMINA",
         base_weapon_power=60,
         weapon_power_per_level=4,
@@ -98,22 +96,21 @@ WEAPON_CURVES = (
         weapon_name="대검",
         weapon_type="GREATSWORD",
         stat_id_prefix=2100,
-        skill_set_id="SKILLSET_GREAT_SWORD_V1",
-        identity_skill_id="SKILL_IDENTITY_BLADE_BREAK",
+        skill_set_id=5002,
+        identity_skill_id=6002,
         smart_drop_tag="GREATSWORD",
-        option_pool_id="OPT_POOL_BRUISER",
+        option_pool_id=7002,
         base_durability_max=110,
         repair_cost_rate=1.10,
         equip_level_min=1,
         trade_limit_count=3,
-        animation_set_id="ANIMSET_GREATSWORD",
+        animation_set_id=8002,
         icon_key="weapon_greatsword",
         model_key="mdl_weapon_greatsword",
         display_order=20,
         hand_type="TWO_HAND",
         combat_role_tag="BURST",
         range_profile="MELEE",
-        weapon_stat_table_id=210,
         resource_type="STAMINA",
         base_weapon_power=85,
         weapon_power_per_level=5,
@@ -137,22 +134,21 @@ WEAPON_CURVES = (
         weapon_name="지팡이",
         weapon_type="STAFF",
         stat_id_prefix=2200,
-        skill_set_id="SKILLSET_STAFF_V1",
-        identity_skill_id="SKILL_IDENTITY_ARCANE_BURST",
+        skill_set_id=5003,
+        identity_skill_id=6003,
         smart_drop_tag="STAFF",
-        option_pool_id="OPT_POOL_CASTER",
+        option_pool_id=7003,
         base_durability_max=90,
         repair_cost_rate=0.90,
         equip_level_min=1,
         trade_limit_count=3,
-        animation_set_id="ANIMSET_STAFF",
+        animation_set_id=8003,
         icon_key="weapon_staff",
         model_key="mdl_weapon_staff",
         display_order=30,
         hand_type="CHANNELING",
         combat_role_tag="CASTER",
         range_profile="RANGED",
-        weapon_stat_table_id=220,
         resource_type="MANA",
         base_weapon_power=110,
         weapon_power_per_level=5,
@@ -223,7 +219,7 @@ def build_weapon_stat_rows() -> list[dict[str, str]]:
         for level in range(1, WEAPON_ENHANCE_MAX + 1):
             rows.append(
                 {
-                    "WeaponStatTableId": str(curve.weapon_stat_table_id),
+                    "WeaponStatTableId": str(curve.stat_id_prefix + level),
                     "EnhanceLevel": str(level),
                     "WeaponPower": str(curve.base_weapon_power + (level - 1) * curve.weapon_power_per_level),
                     "BaseMoveSpeed": float_text(curve.base_move_speed),
@@ -249,9 +245,9 @@ def build_weapon_level_link_rows() -> list[dict[str, str]]:
         for level in range(1, WEAPON_ENHANCE_MAX + 1):
             rows.append(
                 {
-                    "WeaponId": str(curve.weapon_id),
+                    "WeaponType": curve.weapon_type,
                     "EnhanceLevel": str(level),
-                    "WeaponStatTableId": str(curve.weapon_stat_table_id),
+                    "WeaponStatTableId": str(curve.stat_id_prefix + level),
                     "BalanceVersion": str(BALANCE_VERSION),
                 }
             )
@@ -267,7 +263,7 @@ def build_weapon_table_rows() -> list[dict[str, str]]:
                 "WeaponCode": curve.weapon_code,
                 "WeaponName": curve.weapon_name,
                 "WeaponType": curve.weapon_type,
-                "WeaponStatTableId": str(curve.weapon_stat_table_id),
+                "BaseWeaponStatTableId": str(curve.stat_id_prefix + 1),
                 "MaxEnhanceLevel": str(WEAPON_ENHANCE_MAX),
                 "SkillSetId": curve.skill_set_id,
                 "IdentitySkillId": curve.identity_skill_id,
@@ -324,8 +320,10 @@ def validate_rows(
         prev_attack = attack
         prev_defense = defense
 
-    for curve in WEAPON_CURVES:
-        type_rows = [row for row in weapon_rows if row["WeaponStatTableId"] == str(curve.weapon_stat_table_id)]
+    for index, curve in enumerate(WEAPON_CURVES):
+        start = index * WEAPON_ENHANCE_MAX
+        end = start + WEAPON_ENHANCE_MAX
+        type_rows = weapon_rows[start:end]
         prev_power = 0
         prev_stagger = 0
         for row in type_rows:
@@ -362,8 +360,8 @@ def main() -> int:
     write_csv(args.output_dir / "player_stat_table.csv", ["PlayerStatTableId", "Level", "MaxHP", "AttackPower", "Defense", "CriticalChance", "CriticalDamage", "CooldownReduction", "DamageReduction", "MoveSpeedBonus", "BalanceVersion"], player_rows)
     write_csv(args.output_dir / "user_level_stat_link_table.csv", ["Level", "PlayerStatTableId", "BalanceVersion"], user_level_rows)
     write_csv(args.output_dir / "weapon_stat_table.csv", ["WeaponStatTableId", "EnhanceLevel", "WeaponPower", "BaseMoveSpeed", "AttackSpeed", "CastSpeed", "IdentityGaugeMax", "IdentityGaugeGain", "ResourceType", "ResourceMax", "ResourceRegen", "StaggerPower", "ThreatGen", "ParryWindowBonus", "BalanceVersion"], weapon_stat_rows)
-    write_csv(args.output_dir / "weapon_level_stat_link_table.csv", ["WeaponId", "EnhanceLevel", "WeaponStatTableId", "BalanceVersion"], weapon_level_rows)
-    write_csv(args.output_dir / "weapon_table.csv", ["WeaponId", "WeaponCode", "WeaponName", "WeaponType", "WeaponStatTableId", "MaxEnhanceLevel", "SkillSetId", "IdentitySkillId", "SmartDropTag", "OptionPoolId", "BaseDurabilityMax", "RepairCostRate", "EquipLevelMin", "TradeLimitCount", "AnimationSetId", "IconKey", "ModelKey", "DisplayOrder", "HandType", "CombatRoleTag", "RangeProfile", "BalanceVersion"], weapon_table_rows)
+    write_csv(args.output_dir / "weapon_level_stat_link_table.csv", ["WeaponType", "EnhanceLevel", "WeaponStatTableId", "BalanceVersion"], weapon_level_rows)
+    write_csv(args.output_dir / "weapon_table.csv", ["WeaponId", "WeaponCode", "WeaponName", "WeaponType", "BaseWeaponStatTableId", "MaxEnhanceLevel", "SkillSetId", "IdentitySkillId", "SmartDropTag", "OptionPoolId", "BaseDurabilityMax", "RepairCostRate", "EquipLevelMin", "TradeLimitCount", "AnimationSetId", "IconKey", "ModelKey", "DisplayOrder", "HandType", "CombatRoleTag", "RangeProfile", "BalanceVersion"], weapon_table_rows)
 
     print(f"Generated combat tables in {args.output_dir}")
     return 0
