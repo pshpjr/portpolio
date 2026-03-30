@@ -19,6 +19,7 @@ EXCLUDED_PARTS = {
     "build",
     "vcpkg_installed",
     "blds",
+    ".vcpkg-downloads"
 }
 ACTIVE_PLAN_DIRS = (
     REPO_ROOT / "docs" / "exec-plans" / "active",

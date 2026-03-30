@@ -3,6 +3,39 @@ cmake_minimum_required(VERSION 3.23)
 project(portpolio VERSION 0.1.0 LANGUAGES CXX)
 
 include(CTest)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+set(PORTPOLIO_SHARED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../shared")
+set(PORTPOLIO_PROTOCOL_DIR "${PORTPOLIO_SHARED_DIR}/protocol")
+set(PORTPOLIO_GENERATED_SERVER_DIR "${PORTPOLIO_SHARED_DIR}/generated/server")
+set(PORTPOLIO_GENERATED_UNREAL_DIR "${PORTPOLIO_SHARED_DIR}/generated/unreal")
+set(PORTPOLIO_CODEGEN_STAMP "${CMAKE_CURRENT_BINARY_DIR}/packet_codegen.stamp")
+
+file(GLOB PORTPOLIO_PROTOCOL_INPUTS CONFIGURE_DEPENDS
+    "${PORTPOLIO_PROTOCOL_DIR}/*.proto"
+    "${PORTPOLIO_PROTOCOL_DIR}/*.py"
+    "${PORTPOLIO_PROTOCOL_DIR}/*.j2"
+)
+
+add_custom_command(
+    OUTPUT "${PORTPOLIO_CODEGEN_STAMP}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${PORTPOLIO_GENERATED_SERVER_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${PORTPOLIO_GENERATED_UNREAL_DIR}"
+    COMMAND ${Python3_EXECUTABLE}
+        "${CMAKE_CURRENT_SOURCE_DIR}/tools/codegen/packet_gen.py"
+        --schema-dir "${PORTPOLIO_PROTOCOL_DIR}"
+        --server-out "${PORTPOLIO_GENERATED_SERVER_DIR}"
+        --unreal-out "${PORTPOLIO_GENERATED_UNREAL_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E touch "${PORTPOLIO_CODEGEN_STAMP}"
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/tools/codegen/packet_gen.py"
+        ${PORTPOLIO_PROTOCOL_INPUTS}
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMENT "Generating shared protocol code"
+    VERBATIM
+)
+
+add_custom_target(generate_packets DEPENDS "${PORTPOLIO_CODEGEN_STAMP}")
 
 add_subdirectory(
     "${CMAKE_CURRENT_SOURCE_DIR}/../Lib"
@@ -21,10 +54,12 @@ file(GLOB_RECURSE PORTPOLIO_SOURCES CONFIGURE_DEPENDS
 
 add_library(portpolio_server STATIC ${PORTPOLIO_SOURCES})
 add_library(psh::server ALIAS portpolio_server)
+add_dependencies(portpolio_server generate_packets)
 
 target_include_directories(portpolio_server
     PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
+        "${PORTPOLIO_GENERATED_SERVER_DIR}"
 )
 
 target_compile_features(portpolio_server PUBLIC cxx_std_20)

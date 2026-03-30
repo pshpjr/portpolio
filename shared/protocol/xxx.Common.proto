@@ -1,0 +1,6 @@
+﻿syntax = "proto3";
+
+message InstanceKey
+{
+	uint64 value = 1;
+}

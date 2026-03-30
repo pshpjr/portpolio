@@ -1,0 +1,46 @@
+// Auto-generated. Do not edit.
+#pragma once
+
+#include <type_traits>
+#include <concepts>
+
+{% for line in model.include_lines -%}
+{{ line }}
+{% endfor %}
+
+namespace {{ model.prefix }} {
+enum class PACKET_TYPE
+{
+    NONE,
+{% for msg_name in model.msg_names -%}
+    {{ msg_name }},
+{% endfor %}
+};
+
+{{ "template <typename T> inline constexpr PACKET_TYPE kPacketType" | ljust(model.max_len) }} = PACKET_TYPE::NONE;
+{% for msg_name in model.msg_names -%}
+{{ ("template <> inline constexpr PACKET_TYPE kPacketType<" ~ model.prefix ~ "::" ~ msg_name ~ ">") | ljust(model.max_len) }} = PACKET_TYPE::{{ msg_name }};
+{% endfor %}
+} // namespace {{ model.prefix }}
+
+
+// Concepts
+template <class T>
+concept Is{{ model.prefix }} = ({{ model.prefix }}::kPacketType<std::remove_cvref_t<T>> != {{ model.prefix }}::PACKET_TYPE::NONE);
+
+template <class T>
+inline constexpr bool exactly_{{ model.prefix }} = Is{{ model.prefix }}<T>;
+
+
+// Traits
+struct {{ model.prefix }}_Traits
+{
+    using PacketType = {{ model.prefix }}::PACKET_TYPE;
+
+    template <typename T>
+    static consteval PacketType GetType()
+    {
+        using Msg = std::remove_cvref_t<T>;
+        return {{ model.prefix }}::kPacketType<Msg>;
+    }
+};
