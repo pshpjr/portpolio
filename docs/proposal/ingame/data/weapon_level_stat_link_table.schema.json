@@ -1,0 +1,26 @@
+{
+  "table": "WeaponLevelStatLinkTable",
+  "primary_key": ["WeaponType", "EnhanceLevel", "BalanceVersion"],
+  "foreign_keys": [
+    {
+      "field": "WeaponStatTableId",
+      "references": {
+        "table": "WeaponStatTable",
+        "field": "WeaponStatTableId"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "field": "EnhanceLevel",
+      "min": 1,
+      "max": 25
+    }
+  ],
+  "fields": [
+    { "name": "WeaponType", "type": "enum", "enum_name": "EWeaponType" },
+    { "name": "EnhanceLevel", "type": "int32" },
+    { "name": "WeaponStatTableId", "type": "int32" },
+    { "name": "BalanceVersion", "type": "int32" }
+  ]
+}

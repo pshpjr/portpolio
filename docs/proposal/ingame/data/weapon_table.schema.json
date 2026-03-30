@@ -1,0 +1,51 @@
+{
+  "table": "WeaponTable",
+  "primary_key": ["WeaponId"],
+  "foreign_keys": [
+    {
+      "field": "BaseWeaponStatTableId",
+      "references": {
+        "table": "WeaponStatTable",
+        "field": "WeaponStatTableId"
+      }
+    },
+    {
+      "field": "SkillSetId",
+      "references": {
+        "table": "SkillSetTable",
+        "field": "SkillSetId"
+      }
+    },
+    {
+      "field": "IdentitySkillId",
+      "references": {
+        "table": "SkillTable",
+        "field": "SkillId"
+      }
+    }
+  ],
+  "fields": [
+    { "name": "WeaponId", "type": "int32" },
+    { "name": "WeaponCode", "type": "string" },
+    { "name": "WeaponName", "type": "string" },
+    { "name": "WeaponType", "type": "enum", "enum_name": "EWeaponType" },
+    { "name": "BaseWeaponStatTableId", "type": "int32" },
+    { "name": "MaxEnhanceLevel", "type": "int32" },
+    { "name": "SkillSetId", "type": "int32" },
+    { "name": "IdentitySkillId", "type": "int32" },
+    { "name": "SmartDropTag", "type": "string" },
+    { "name": "OptionPoolId", "type": "int32" },
+    { "name": "BaseDurabilityMax", "type": "int32" },
+    { "name": "RepairCostRate", "type": "float" },
+    { "name": "EquipLevelMin", "type": "int32" },
+    { "name": "TradeLimitCount", "type": "int32" },
+    { "name": "AnimationSetId", "type": "int32" },
+    { "name": "IconKey", "type": "string" },
+    { "name": "ModelKey", "type": "string" },
+    { "name": "DisplayOrder", "type": "int32" },
+    { "name": "HandType", "type": "enum", "enum_name": "EWeaponHandType" },
+    { "name": "CombatRoleTag", "type": "string" },
+    { "name": "RangeProfile", "type": "enum", "enum_name": "ERangeProfile" },
+    { "name": "BalanceVersion", "type": "int32" }
+  ]
+}

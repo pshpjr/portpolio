@@ -1,0 +1,29 @@
+{
+  "table": "WeaponStatTable",
+  "primary_key": ["WeaponStatTableId"],
+  "unique_keys": [["WeaponType", "EnhanceLevel", "BalanceVersion"]],
+  "checks": [
+    {
+      "field": "EnhanceLevel",
+      "min": 1,
+      "max": 25
+    }
+  ],
+  "fields": [
+    { "name": "WeaponStatTableId", "type": "int32" },
+    { "name": "EnhanceLevel", "type": "int32" },
+    { "name": "WeaponPower", "type": "int32" },
+    { "name": "BaseMoveSpeed", "type": "float" },
+    { "name": "AttackSpeed", "type": "float" },
+    { "name": "CastSpeed", "type": "float" },
+    { "name": "IdentityGaugeMax", "type": "int32" },
+    { "name": "IdentityGaugeGain", "type": "float" },
+    { "name": "ResourceType", "type": "enum", "enum_name": "EResourceType" },
+    { "name": "ResourceMax", "type": "int32" },
+    { "name": "ResourceRegen", "type": "int32" },
+    { "name": "StaggerPower", "type": "int32" },
+    { "name": "ThreatGen", "type": "float" },
+    { "name": "ParryWindowBonus", "type": "float" },
+    { "name": "BalanceVersion", "type": "int32" }
+  ]
+}

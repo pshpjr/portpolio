@@ -77,10 +77,10 @@ UENUM(BlueprintType)
 enum class EClientSkillHotSlot : uint8
 {
     None,
-    Q,
-    E,
-    R,
-    F,
+    Active1,
+    Active2,
+    Active3,
+    Active4,
     Identity
 };
 

@@ -42,6 +42,7 @@ bool UClientItemInstance::CanStackWith(const UClientItemInstance* OtherItem) con
 
     return StaticData.ItemTid == OtherStaticData.ItemTid
         && StaticData.MaxStackCount > 1
+        && RuntimeData.Durability == OtherRuntimeData.Durability
         && RuntimeData.bIsAccountBound == OtherRuntimeData.bIsAccountBound
         && RuntimeData.RemainingTradeCount == OtherRuntimeData.RemainingTradeCount;
 }

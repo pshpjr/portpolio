@@ -7,9 +7,11 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 set(PORTPOLIO_SHARED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../shared")
 set(PORTPOLIO_PROTOCOL_DIR "${PORTPOLIO_SHARED_DIR}/protocol")
+set(PORTPOLIO_COMBAT_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../docs/proposal/ingame/data")
 set(PORTPOLIO_GENERATED_SERVER_DIR "${PORTPOLIO_SHARED_DIR}/generated/server")
 set(PORTPOLIO_GENERATED_UNREAL_DIR "${PORTPOLIO_SHARED_DIR}/generated/unreal")
 set(PORTPOLIO_CODEGEN_STAMP "${CMAKE_CURRENT_BINARY_DIR}/packet_codegen.stamp")
+set(PORTPOLIO_COMBAT_CODEGEN_STAMP "${CMAKE_CURRENT_BINARY_DIR}/combat_data_codegen.stamp")
 
 file(GLOB PORTPOLIO_PROTOCOL_INPUTS CONFIGURE_DEPENDS
     "${PORTPOLIO_PROTOCOL_DIR}/*.proto"
@@ -37,6 +39,32 @@ add_custom_command(
 
 add_custom_target(generate_packets DEPENDS "${PORTPOLIO_CODEGEN_STAMP}")
 
+file(GLOB PORTPOLIO_COMBAT_DATA_INPUTS CONFIGURE_DEPENDS
+    "${PORTPOLIO_COMBAT_DATA_DIR}/*.schema.json"
+    "${PORTPOLIO_COMBAT_DATA_DIR}/*.data.json"
+)
+
+add_custom_command(
+    OUTPUT "${PORTPOLIO_COMBAT_CODEGEN_STAMP}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${PORTPOLIO_GENERATED_SERVER_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${PORTPOLIO_GENERATED_UNREAL_DIR}"
+    COMMAND ${Python3_EXECUTABLE}
+        "${CMAKE_CURRENT_SOURCE_DIR}/tools/codegen/combat_data_gen.py"
+        --schema-dir "${PORTPOLIO_COMBAT_DATA_DIR}"
+        --server-out "${PORTPOLIO_GENERATED_SERVER_DIR}"
+        --unreal-out "${PORTPOLIO_GENERATED_UNREAL_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E touch "${PORTPOLIO_COMBAT_CODEGEN_STAMP}"
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/tools/codegen/combat_data_gen.py"
+        ${PORTPOLIO_COMBAT_DATA_INPUTS}
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMENT "Generating combat data code"
+    VERBATIM
+)
+
+add_custom_target(generate_combat_data DEPENDS "${PORTPOLIO_COMBAT_CODEGEN_STAMP}")
+add_dependencies(generate_combat_data generate_packets)
+
 add_subdirectory(
     "${CMAKE_CURRENT_SOURCE_DIR}/../Lib"
     "${CMAKE_CURRENT_BINARY_DIR}/Lib"
@@ -54,7 +82,7 @@ file(GLOB_RECURSE PORTPOLIO_SOURCES CONFIGURE_DEPENDS
 
 add_library(portpolio_server STATIC ${PORTPOLIO_SOURCES})
 add_library(psh::server ALIAS portpolio_server)
-add_dependencies(portpolio_server generate_packets)
+add_dependencies(portpolio_server generate_packets generate_combat_data)
 
 target_include_directories(portpolio_server
     PUBLIC
