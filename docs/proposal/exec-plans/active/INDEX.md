@@ -40,14 +40,13 @@
   - 전투 수식의 기본 구조를 합의할 때
   - 밸런스 엑셀 전 단계에서 컬럼과 계산식을 정리할 때
 
-### `20260316-proposal-restructure.md`
+### `20260403-phase1-2-proposal-foundation.md`
 
-- 목적: `docs/proposal/`을 에이전트 친화적인 허브/세부 문서 구조로 재정리하고, 진행 중 작업 문서 체계를 추가
-- 주 영향 경로: `docs/proposal/AGENTS.md`, `docs/proposal/main.md`, `docs/proposal/exec-plans/`, `docs/proposal/common/`, `docs/proposal/ingame/`, `docs/proposal/outgame/`
+- 목적: Phase 1~2 구현 전 필요한 기획 문서 신규 작성 및 기존 문서 보강
+- 주 영향 경로: `docs/proposal/common/`, `docs/proposal/ingame/`, `docs/proposal/outgame/`
 - 이 plan을 읽어야 하는 경우:
-  - 기획서 구조, 허브 문서, 하위 문서 템플릿을 수정할 때
-  - 다른 에이전트에게 기획 문서 정리 작업을 넘길 때
-  - 문서 간 중복 제거와 역할 분리를 이어서 진행할 때
+  - 로그인, 캐릭터 생성, 레벨업, 사망 처리, 스킬 데이터 구조를 처음 정의할 때
+  - Phase 1~2 구현 전 기획 기준점을 확인할 때
 
 ## 운영 규칙
 

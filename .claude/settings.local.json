@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(cd:*)",
-      "Bash(cmd.exe /c \"dir \\\\\"C:\\\\\\\\Program Files\\\\\\\\Microsoft Visual Studio\\\\\" /b\")"
+      "Bash(cmd.exe /c \"dir \\\\\"C:\\\\\\\\Program Files\\\\\\\\Microsoft Visual Studio\\\\\" /b\")",
+      "Find *",
+      "Ls *"
     ]
   }
 }

@@ -16,37 +16,15 @@
 
 ---
 
-## 실행 계획 파일 (exec-plan) 형식
+## 실행 계획 파일 (exec-plan)
 
-`docs/exec-plans/active/` 에 작성. 파일명: `YYYYMMDD-작업명.md`
+exec-plan 작성 기준과 템플릿: [exec-plan-template.md](./exec-plan-template.md)
 
-```markdown
-# [작업명]
+- 위치: 해당 앱/영역의 `docs/exec-plans/active/`
+- 파일명: `YYYYMMDD-작업명.md`
+- 완료 시: `docs/exec-plans/completed/`로 이동
 
-## 목표
-한 문장으로 이 작업이 달성해야 할 것.
-
-## 범위
-- 수정/생성할 파일 목록
-- 영향받는 레이어
-
-## 완료 기준
-- [ ] 빌드 통과
-- [ ] 테스트 통과
-- [ ] check_layers.py 통과
-- [ ] 구체적인 기능 기준 1
-- [ ] 구체적인 기능 기준 2
-
-## 진행 상황
-- [x] 완료된 항목
-- [ ] 남은 항목
-
-## 설계 결정 기록
-작업 중 내린 결정과 이유를 여기에 기록.
-(나중에 docs/design/으로 이동 가능)
-```
-
-작업 완료 시 `docs/exec-plans/completed/`로 이동.
+---
 
 ## 브랜치 운영
 
@@ -89,10 +67,12 @@
 
 ## Skill / Agent 저장 위치
 
-- 저장소 공용 skill은 루트 `.codex/skills/` 와 `.claude/skills/` 아래에 생성한다.
-- 저장소 공용 agent 프롬프트는 루트 `.codex/agents/` 와 `.claude/agents/` 아래에 생성한다.
-- 앱 디렉터리 아래에 skill 저장소를 만들지 않는다.
-- Codex UI용 `openai.yaml`은 `.codex/skills/<skill>/agents/openai.yaml`에만 둔다.
+- 에이전트 정의의 **단일 소스**는 루트 `.claude/agents/`다.
+- 저장소 공용 skill은 루트 `.claude/skills/` 아래에 생성한다.
+- `.codex/agents/`에는 아무것도 생성하지 않는다.
+- Codex에서 에이전트를 사용할 때는 `.claude/agents/<name>.md`를 읽어 prompt로 전달한다.
+- Codex UI용 메타데이터는 `.codex/skills/<skill>/agents/openai.yaml`에만 둔다.
+- 앱 디렉터리(`server/` 등) 아래에는 skill 또는 agent 저장소를 만들지 않는다.
 
 ---
 
@@ -128,49 +108,16 @@ PR 설명 필수 포함:
 
 ## 피드백 로그
 
-- 사용자 피드백, 요청된 수정, 구현 중 발생한 프로세스/도구 이슈 중 재발 가능성이 있는 항목은 [harness-feedback-log.md](./harness-feedback-log.md)에 짧게 남긴다.
-- 전체 대화를 옮기지 말고, 나중에 개선 액션으로 이어질 핵심만 기록한다.
-- 권장 기록 시점:
-  - 사용자가 작업 방식이나 응답 방식 수정을 요구했을 때
-  - 문서/도구/프롬프트의 빈틈 때문에 작업이 막혔을 때
-  - 반복될 가능성이 높은 혼선이나 우회가 발생했을 때
-- 각 기록은 `kind`, `area`, `summary`, `impact`, `suggested-follow-up`를 포함한다.
+사용자 피드백, 요청된 수정, 구현 중 발생한 프로세스/도구 이슈 중 재발 가능성이 있는 항목은 [harness-feedback-log.md](./harness-feedback-log.md)에 짧게 남긴다.
 
----
+전체 대화를 옮기지 말고, 나중에 개선 액션으로 이어질 핵심만 기록한다.
 
-## 피드백 로그
+권장 기록 시점:
+- 사용자가 작업 방식이나 응답 방식 수정을 요구했을 때
+- 문서/도구/프롬프트의 빈틈 때문에 작업이 막혔을 때
+- 반복될 가능성이 높은 혼선이나 우회가 발생했을 때
 
-- 사용자 피드백, 요청된 수정, 구현 중 발생한 프로세스/도구 이슈 중 재발 가능성이 있는 항목은 [harness-feedback-log.md](./harness-feedback-log.md)에 짧게 남긴다.
-- 전체 대화를 옮기지 말고, 나중에 개선 액션으로 이어질 핵심만 기록한다.
-- 권장 기록 시점:
-  - 사용자가 작업 방식이나 응답 방식 수정을 요구했을 때
-  - 문서/도구/프롬프트의 빈틈 때문에 작업이 막혔을 때
-  - 반복될 가능성이 높은 혼선이나 우회가 발생했을 때
-- 각 기록은 `kind`, `area`, `summary`, `impact`, `suggested-follow-up`를 포함한다.
-
----
-
-## 피드백 로그
-
-- 사용자 피드백, 요청된 수정, 구현 중 발생한 프로세스/도구 이슈 중 재발 가능성이 있는 항목은 [harness-feedback-log.md](./harness-feedback-log.md)에 짧게 남긴다.
-- 전체 대화를 옮기지 말고, 나중에 개선 액션으로 이어질 핵심만 기록한다.
-- 권장 기록 시점:
-  - 사용자가 작업 방식이나 응답 방식 수정을 요구했을 때
-  - 문서/도구/프롬프트의 빈틈 때문에 작업이 막혔을 때
-  - 반복될 가능성이 높은 혼선이나 우회가 발생했을 때
-- 각 기록은 `kind`, `area`, `summary`, `impact`, `suggested-follow-up`를 포함한다.
-
----
-
-## 피드백 로그
-
-- 사용자 피드백, 요청된 수정, 구현 중 발생한 프로세스/도구 이슈 중 재발 가능성이 있는 항목은 [harness-feedback-log.md](./harness-feedback-log.md)에 짧게 남긴다.
-- 전체 대화를 옮기지 말고, 나중에 개선 액션으로 이어질 핵심만 기록한다.
-- 권장 기록 시점:
-  - 사용자가 작업 방식이나 응답 방식 수정을 요구했을 때
-  - 문서/도구/프롬프트의 빈틈 때문에 작업이 막혔을 때
-  - 반복될 가능성이 높은 혼선이나 우회가 발생했을 때
-- 각 기록은 `kind`, `area`, `summary`, `impact`, `suggested-follow-up`를 포함한다.
+각 기록은 `kind`, `area`, `summary`, `impact`, `suggested-follow-up`를 포함한다.
 
 ---
 
@@ -193,3 +140,4 @@ PR 설명 필수 포함:
 - exec-plan 없이 대형 작업 시작 (300줄 이상 변경 예상 시)
 - 문서를 코드보다 나중에 작성 (설계 결정은 코딩 전 또는 동시에)
 - 문서 검증 스크립트가 있는데도 문서 변경 후 확인하지 않기
+- `.codex/agents/`에 에이전트 파일 생성 (`.claude/agents/`가 단일 소스)

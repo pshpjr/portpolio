@@ -47,10 +47,11 @@
 
 ## Skill / Agent 위치 규칙
 
-- 저장소 공용 skill은 `./../.codex/skills/` 와 `./../.claude/skills/` 아래에 둔다.
-- 저장소 공용 agent 프롬프트는 `./../.codex/agents/` 와 `./../.claude/agents/` 아래에 둔다.
+- 에이전트 정의의 **단일 소스**는 루트 `.claude/agents/`다. `.codex/agents/`에는 아무것도 생성하지 않는다.
+- 저장소 공용 skill은 루트 `.claude/skills/` 아래에 생성한다.
+- Codex에서 에이전트를 사용할 때는 `.claude/agents/<name>.md`를 읽어 prompt로 전달한다.
+- Codex UI 전용 메타데이터는 `.codex/skills/<skill>/agents/openai.yaml`에만 둔다.
 - 앱 디렉터리(`server/` 등) 아래에는 skill 또는 agent 저장소를 만들지 않는다.
-- Codex 전용 UI 메타데이터는 `.codex/skills/<skill>/agents/openai.yaml`에 둔다.
 
 ---
 
