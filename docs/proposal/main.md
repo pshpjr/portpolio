@@ -198,4 +198,5 @@
 
 - [server/architecture.md](./server/architecture.md): 서버 구조와 스레드 모델
 - [server/data_driven.md](./server/data_driven.md): 데이터 드리븐과 핫 리로드
+- [server/protocol.md](./server/protocol.md): v1 프로토콜 범위와 메시지 그룹
 - [server/performance_test.md](./server/performance_test.md): 부하 목표와 검증 방식

@@ -31,6 +31,36 @@
 | `IconKey` | 아이콘 리소스 키 |
 | `UiStateTag` | UI 표기 그룹 |
 
+### `BaseStatSetTable`
+
+| 컬럼 | 설명 |
+|---|---|
+| `BaseStatSetId` | PK |
+| `StatProfileType` | `WEAPON`, `ARMOR`, `ACCESSORY`, `CONSUMABLE` |
+| `AttackPower` | 공격력 |
+| `WeaponPower` | 무기 공격력 |
+| `Defense` | 방어력 |
+| `MaxHP` | 최대 HP |
+| `CriticalChance` | 치명타 확률 |
+| `CriticalDamage` | 치명타 추가 피해 |
+| `CooldownReduction` | 쿨다운 감소 |
+| `ParryWindowBonus` | 패링 보정 |
+| `MoveSpeedBonus` | 이동 속도 보정 |
+| `BalanceVersion` | 밸런스 버전 |
+
+### `OptionPoolTable`
+
+| 컬럼 | 설명 |
+|---|---|
+| `OptionPoolId` | PK |
+| `PoolName` | 옵션 풀 이름 |
+| `ItemCategory` | 적용 아이템 분류 |
+| `OptionTag` | 옵션 종류 |
+| `MinValue` | 최솟값 |
+| `MaxValue` | 최댓값 |
+| `Weight` | 가중치 |
+| `BalanceVersion` | 밸런스 버전 |
+
 ### `DropTable`
 
 | 컬럼 | 설명 |
@@ -55,6 +85,7 @@
 | `TargetWeaponType` | 드롭 대상 무기 타입 |
 | `WeightMultiplier` | 가중치 배율 |
 | `Mode` | `PURIFICATION`, `SCOUTING`, `BOTH` |
+| `BalanceVersion` | 밸런스 버전 |
 
 ### `ReforgeCostTable`
 
