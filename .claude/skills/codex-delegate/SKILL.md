@@ -19,9 +19,9 @@ Claude는 설계·조율·사용자 소통에 집중하고, 반복적·결정적
 | 유형 | 예시 |
 |------|------|
 | 파일 생성·scaffolding | 레이어별 C++ 헤더/소스 초안, 디렉터리 구조 생성 |
-| 코드 생성 스크립트 실행 | `tools/` 하위 Python 스크립트, 스탯/프로토콜 생성 |
+| 코드 생성 스크립트 실행 | `generate_combat_tables.py`처럼 의도적 실행이 필요한 생성 스크립트 |
 | 반복 편집 | 동일한 패턴의 여러 파일 수정, 명칭 일괄 변경 |
-| 빌드·검증 도구 실행 | `check_layers.py`, `doc_check.py`, CMake 빌드 |
+| 빌드 실행 | CMake 빌드 (외부 도구라 훅 부적합) |
 | 독립적 조사 | 특정 파일의 구조 분석, 의존성 추적 |
 
 **Claude가 직접 처리하는 작업:**
@@ -78,15 +78,15 @@ Codex 작업 완료 후:
 
 ### 시나리오 B: 코드 생성 스크립트 실행
 ```
-위임 내용: tools/ 하위 Python 스크립트 실행 및 출력 파일 생성
+위임 내용: generate_combat_tables.py 등 의도적 생성 스크립트 실행 및 출력 파일 생성
 컨텍스트: tools/AGENTS.md (있을 경우), exec-plan
 검증: 생성된 파일 존재 확인, 파싱 오류 없음 확인
 ```
 
-### 시나리오 C: 문서 검증
+### 시나리오 C: 문서·레이어 검증
 ```
-위임 내용: doc_check.py, check_encoding.py 실행 및 결과 보고
-컨텍스트: docs/AGENTS.md
+위임 내용: check_layers.py, doc_check.py, check_encoding.py 실행 및 결과 보고
+컨텍스트: docs/AGENTS.md, server/AGENTS.md
 검증: 스크립트 종료 코드
 ```
 

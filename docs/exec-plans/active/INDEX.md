@@ -5,7 +5,6 @@
 ## 현재 활성 계획
 
 - [20260403-client-inventory-build-fix.md](./20260403-client-inventory-build-fix.md) - 클라이언트 인벤토리 빌드 충돌(ItemDataAsset.h) 해소
-- [20260330-client-inventory-foundation.md](./20260330-client-inventory-foundation.md) - 언리얼 클라이언트 인벤토리, 장비, 창고, 스킬 핫슬롯 초안 추가
 
 ## 운영 규칙
 

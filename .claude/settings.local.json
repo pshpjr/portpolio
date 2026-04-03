@@ -4,7 +4,11 @@
       "Bash(cd:*)",
       "Bash(cmd.exe /c \"dir \\\\\"C:\\\\\\\\Program Files\\\\\\\\Microsoft Visual Studio\\\\\" /b\")",
       "Find *",
-      "Ls *"
+      "Ls *",
+      "Bash(git mv:*)"
     ]
+  },
+  "env": {
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-5.1"
   }
 }
