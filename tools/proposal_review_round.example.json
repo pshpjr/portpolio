@@ -1,0 +1,15 @@
+{
+  "title": "Proposal Review Round Self-Test",
+  "output_path": "../build/proposal_review_round-self-test.md",
+  "jobs": [
+    {
+      "persona": "Sanity reviewer",
+      "model_id": "glm-4.7-flash",
+      "provider_id": "zai-coding-plan",
+      "prompt": "Confirm that you received the attached file and summarize one concrete observation in one sentence.",
+      "files": [
+        "AGENTS.md"
+      ]
+    }
+  ]
+}
