@@ -7,8 +7,5 @@
       "Ls *",
       "Bash(git mv:*)"
     ]
-  },
-  "env": {
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-5.1"
   }
 }

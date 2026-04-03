@@ -69,10 +69,36 @@ exec-plan 작성 기준과 템플릿: [exec-plan-template.md](./exec-plan-templa
 
 - 에이전트 정의의 **단일 소스**는 루트 `.claude/agents/`다.
 - 저장소 공용 skill은 루트 `.claude/skills/` 아래에 생성한다.
-- `.codex/agents/`에는 아무것도 생성하지 않는다.
+- `.codex/agents/`는 `.claude/agents/`의 참조 스텁만 둔다 (내용 복제 금지).
 - Codex에서 에이전트를 사용할 때는 `.claude/agents/<name>.md`를 읽어 prompt로 전달한다.
 - Codex UI용 메타데이터는 `.codex/skills/<skill>/agents/openai.yaml`에만 둔다.
 - 앱 디렉터리(`server/` 등) 아래에는 skill 또는 agent 저장소를 만들지 않는다.
+
+---
+
+## OpenCode 리뷰 (2nd-opinion)
+
+로컬 OpenCode AI(`http://127.0.0.1:4096`)를 추가 리뷰어로 활용한다.
+
+**사용 시점:**
+
+- 큰 PR 또는 아키텍처 변경 전 독립적 검토가 필요할 때
+- Claude의 1차 리뷰 후 2nd-opinion이 필요할 때
+- 기획 결정의 논리적 결함을 다각도로 확인할 때
+
+**호출 방법:**
+
+```
+서브에이전트: opencode-reviewer
+스킬: opencode-review
+```
+
+**결과 통합 원칙:**
+
+- OpenCode와 Claude 결과가 일치 → 높은 신뢰로 결론
+- OpenCode만 발견 → 반드시 재검토
+- 상충 → 사용자에게 두 관점 전달 후 판단 요청
+- OpenCode 미실행 시 → 건너뛰고 이유 보고 (강행 금지)
 
 ---
 
@@ -140,4 +166,4 @@ PR 설명 필수 포함:
 - exec-plan 없이 대형 작업 시작 (300줄 이상 변경 예상 시)
 - 문서를 코드보다 나중에 작성 (설계 결정은 코딩 전 또는 동시에)
 - 문서 검증 스크립트가 있는데도 문서 변경 후 확인하지 않기
-- `.codex/agents/`에 에이전트 파일 생성 (`.claude/agents/`가 단일 소스)
+- `.codex/agents/`에 내용이 있는 에이전트 파일 생성 (참조 스텁만 허용, `.claude/agents/`가 단일 소스)

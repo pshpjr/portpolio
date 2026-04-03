@@ -1,0 +1,4 @@
+version: 1
+display_name: Harness
+short_description: Configure domain harnesses, define specialist agents, and design skills.
+default_prompt: Use $harness to design or extend the agent harness for this repository.

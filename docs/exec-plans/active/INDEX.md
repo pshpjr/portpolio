@@ -4,6 +4,7 @@
 
 ## 현재 활성 계획
 
+- [20260403-harness-consolidation.md](./20260403-harness-consolidation.md) - .claude/ 원본 소스 확립, .codex/ 참조 래퍼 통일, 누락 폴더 추가
 - [20260403-client-inventory-build-fix.md](./20260403-client-inventory-build-fix.md) - 클라이언트 인벤토리 빌드 충돌(ItemDataAsset.h) 해소
 
 ## 운영 규칙
