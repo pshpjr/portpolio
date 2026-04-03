@@ -123,6 +123,9 @@
 ### 공통
 
 - [common/user.md](./common/user.md): 계정, 캐릭터, 공유 창고
+- [common/login.md](./common/login.md): 로그인, 세션, 계정 생성
+- [common/character_creation.md](./common/character_creation.md): 캐릭터 생성, 초기 지급
+- [common/progression.md](./common/progression.md): 경험치, 레벨업, 스킬 포인트
 - [common/item.md](./common/item.md): 아이템, 귀속, 랜덤 옵션
 - [common/skill.md](./common/skill.md): 무기별 스킬, 성장, 스마트 드롭
 
@@ -135,6 +138,8 @@
 - [ingame/monster_ai.md](./ingame/monster_ai.md): 몬스터 역할과 어그로
 - [ingame/boss_pattern.md](./ingame/boss_pattern.md): 보스 패턴과 공략 구조
 - [ingame/dungeon_progress.md](./ingame/dungeon_progress.md): 구역 진행, 드롭, 기믹 실패
+- [ingame/death_revival.md](./ingame/death_revival.md): 사망, 부활, 전멸 처리
+- [ingame/skill_data_table.md](./ingame/skill_data_table.md): 스킬 테이블 구조와 v1 스킬 목록
 
 ### 아웃게임
 

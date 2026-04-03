@@ -22,6 +22,14 @@
   - 전투 수식의 기본 구조를 합의할 때
   - 밸런스 엑셀 전 단계에서 컬럼과 계산식을 정리할 때
 
+### `20260403-phase1-2-proposal-foundation.md`
+
+- 목적: Phase 1~2 구현 전 필요한 기획 문서 신규 작성 및 기존 문서 보강
+- 주 영향 경로: `docs/proposal/common/`, `docs/proposal/ingame/`, `docs/proposal/outgame/`
+- 이 plan을 읽어야 하는 경우:
+  - 로그인, 캐릭터 생성, 레벨업, 사망 처리, 스킬 데이터 구조를 처음 정의할 때
+  - Phase 1~2 구현 전 기획 기준점을 확인할 때
+
 ## 운영 규칙
 
 - 현재 작업과 직접 무관한 활성 plan은 열지 않는다.
