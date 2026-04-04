@@ -42,7 +42,7 @@
 
 ### v1에서 고정할 범위
 
-- 장비 구조는 `무기 1 + 방어구 4 + 장신구 2`의 단순 슬롯 체계로 시작한다.
+- 장비 구조는 `무기 1 + 방어구 3(상의/하의/장갑) + 장신구 3(목걸이/반지 2)`의 슬롯 체계로 시작한다.
 - 전투 스탯은 `레벨 기본값 + 무기 기본값 + 장비 고정 스탯 + 랜덤 옵션 + 임시 버프` 조합으로 설명 가능해야 한다.
 - 스마트 드롭은 특정 무기를 완전히 고정하지 않고, 던전 입장 시 선택한 전리품 선호 무기에 soft bias를 준다.
 - 보상 모드, 경제, 속성, 위협도는 v1 코어를 보조하는 수준까지만 문서화한다.
@@ -172,6 +172,7 @@
 - [common/item.md](./common/item.md): 아이템, 귀속, 랜덤 옵션, 전리품 선호 무기
 - [common/item_data_table.md](./common/item_data_table.md): 아이템/드롭 authoring 테이블 구조
 - [common/skill.md](./common/skill.md): 무기별 스킬, 성장, 무기 전환 규칙
+- [common/data-table-conventions.md](./common/data-table-conventions.md): 데이터 테이블 문서 작성 규칙 (단일 소스)
 
 ### 인게임
 

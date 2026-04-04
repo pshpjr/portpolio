@@ -1,8 +1,25 @@
-# 전투 데이터 테이블 초안
+# 전투 데이터 테이블 구조
 
 ## 목적
 
 전투 스탯 데이터의 책임 범위와 테이블 연결 규칙만 정의한다. 실제 행 데이터는 `data.json`, 필드 계약과 생성 메타는 `schema.json`, 서버/언리얼 코드 생성은 `combat_data_gen.py`가 담당한다.
+
+## 테이블 전체 관계 다이어그램
+
+```
+Player.Level + BalanceVersion
+  → UserLevelStatLinkTable              (레벨 → 스탯 스냅샷 ID)
+    → PlayerStatTable.PlayerStatTableId (유저 기본 스탯)
+
+Weapon.WeaponType + Weapon.EnhanceLevel + BalanceVersion
+  → WeaponLevelStatLinkTable            (무기 타입 + 강화 → 전투 스탯 ID)
+    → WeaponStatTable.WeaponStatTableId (무기 전투 수치)
+
+WeaponTable.WeaponId
+  → WeaponStatTable (BaseWeaponStatTableId)   (기본 전투 수치)
+  → WeaponDefaultSkillTable (WeaponType)      (기본 지급 스킬)
+  ← ItemTemplateTable.ItemId (ItemCategory=WEAPON) (공통 아이템 메타)
+```
 
 ## 핵심 규칙
 
@@ -51,38 +68,39 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId
 
 ### `PlayerStatTable`
 
-유저 레벨 성장에 따라 변하는 공통 스탯 스냅샷이다.
+> PlayerStatTable은 유저 레벨별 공통 스탯 스냅샷을 저장하며, 레벨업 시 단일 ID 조회로 전체 기본 스탯을 반환할 수 있게 한다.
 
 - 담당 값: `MaxHP`, `AttackPower`, `Defense`, `CriticalChance`, `CriticalDamage`, `CooldownReduction`, `DamageReduction`, `MoveSpeedBonus`
 - 제외 값: `WeaponPower`, `AttackSpeed`, `CastSpeed`, `ResourceMax`, `IdentityGaugeMax`
 
 ### `UserLevelStatLinkTable`
 
-유저 레벨을 `PlayerStatTableId`에 연결하는 링크 테이블이다.
+> UserLevelStatLinkTable은 유저 레벨을 PlayerStatTableId에 연결하는 링크 테이블로, 레벨 → 스탯 스냅샷 경로를 단일 키 조회로 처리할 수 있게 한다.
 
 - 역할: `Level -> PlayerStatTableId`
 - 목적: 레벨별 스탯 스냅샷을 안정적으로 참조하기 위함
 
 ### `WeaponStatTable`
 
-무기 타입과 강화 단계가 제공하는 전투 스탯 스냅샷이다.
+> WeaponStatTable은 무기 타입과 강화 단계별 전투 수치 스냅샷을 저장하며, 무기 장착/강화 시 단일 ID 조회로 전투 스탯을 반환할 수 있게 한다.
 
 - 담당 값: `WeaponPower`, `BaseMoveSpeed`, `AttackSpeed`, `CastSpeed`, `IdentityGaugeMax`, `IdentityGaugeGain`, `ResourceType`, `ResourceMax`, `ResourceRegen`, `StaggerPower`, `ThreatGen`, `ParryWindowBonus`
 - 목적: 무기 강화에 따른 전투 성능 변화를 저장하기 위함
 
 ### `WeaponLevelStatLinkTable`
 
-무기 종류와 강화 레벨을 `WeaponStatTableId`에 연결하는 링크 테이블이다.
+> WeaponLevelStatLinkTable은 무기 타입과 강화 단계를 WeaponStatTableId에 연결하는 링크 테이블로, 무기 강화 스탯을 단일 키 조회로 처리할 수 있게 한다.
 
 - 역할: `WeaponType + EnhanceLevel -> WeaponStatTableId`
 - 목적: 무기 강화 스탯을 직접 참조하기 위함
 
 ### `WeaponTable`
 
-무기 템플릿과 메타데이터를 저장하는 테이블이다.
+> WeaponTable은 무기 전투 전용 메타(전투 수치 참조, 애니메이션, 역할 태그)를 저장하며, ItemTemplateTable(공통 아이템 메타)과 FK로 연결해 아이템 시스템과 전투 시스템을 분리할 수 있게 한다.
 
-- 담당 값: `WeaponCode`, `WeaponName`, `WeaponType`, `BaseWeaponStatTableId`, `MaxEnhanceLevel`, `SkillSetId`, `IdentitySkillId`, `SmartDropTag`, `OptionPoolId`, `BaseDurabilityMax`, `RepairCostRate`, `EquipLevelMin`, `TradeLimitCount`, `AnimationSetId`, `IconKey`, `ModelKey`, `DisplayOrder`, `HandType`, `CombatRoleTag`, `RangeProfile`, `BalanceVersion`
+- 담당 값: `WeaponCode`, `WeaponName`, `WeaponType`, `BaseWeaponStatTableId`, `MaxEnhanceLevel`, `SmartDropTag`, `OptionPoolId`, `BaseDurabilityMax`, `RepairCostRate`, `EquipLevelMin`, `TradeLimitCount`, `AnimationSetId`, `IconKey`, `ModelKey`, `DisplayOrder`, `HandType`, `CombatRoleTag`, `RangeProfile`, `BalanceVersion`
 - 목적: 전투 수치와 무기 메타를 분리해 참조하기 위함
+- 기본 공격, 기본 지급 액티브, 아이덴티티, 이동기는 `WeaponType + BalanceVersion -> WeaponDefaultSkillTable` 경로로 연결한다.
 
 ## v1 장비 데이터 책임
 
@@ -118,8 +136,7 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId
 - `WeaponTable`
   - PK: `WeaponId`
   - FK: `BaseWeaponStatTableId -> WeaponStatTable.WeaponStatTableId`
-  - FK: `SkillSetId -> SkillSetTable.SkillSetId`
-  - FK: `IdentitySkillId -> SkillTable.SkillId`
+  - Logical FK: `WeaponType + BalanceVersion -> WeaponDefaultSkillTable.(WeaponType + BalanceVersion)`
 
 ## 주의할 점
 
