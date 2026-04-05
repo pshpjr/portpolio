@@ -76,21 +76,25 @@ exec-plan 작성 기준과 템플릿: [exec-plan-template.md](./exec-plan-templa
 
 ---
 
-## OpenCode 리뷰 (2nd-opinion)
+## OpenCode 리뷰 / 구현 보조
 
-로컬 OpenCode AI(`http://127.0.0.1:4096`)를 추가 리뷰어로 활용한다.
+프로젝트 레벨 OpenCode 설정(`opencode.json`, `.opencode/agents/`)을 통해 로컬 OpenCode CLI를 헤드리스 실행 경로로 활용한다.
 
 **사용 시점:**
 
 - 큰 PR 또는 아키텍처 변경 전 독립적 검토가 필요할 때
 - Claude의 1차 리뷰 후 2nd-opinion이 필요할 때
 - 기획 결정의 논리적 결함을 다각도로 확인할 때
+- OpenCode가 직접 읽기/수정 작업을 맡아도 되는 별도 write scope가 있을 때
 
 **호출 방법:**
 
 ```
 서브에이전트: opencode-reviewer
 스킬: opencode-review
+기본 리뷰 호출: opencode run --agent portpolio-review
+제안 전용 구현 호출: opencode run --agent portpolio-propose
+직접 수정 호출: opencode run --agent portpolio-implement
 ```
 
 **결과 통합 원칙:**
@@ -98,7 +102,19 @@ exec-plan 작성 기준과 템플릿: [exec-plan-template.md](./exec-plan-templa
 - OpenCode와 Claude 결과가 일치 → 높은 신뢰로 결론
 - OpenCode만 발견 → 반드시 재검토
 - 상충 → 사용자에게 두 관점 전달 후 판단 요청
-- OpenCode 미실행 시 → 건너뛰고 이유 보고 (강행 금지)
+- OpenCode CLI 미설치 또는 실행 실패 시 → 건너뛰고 이유 보고 (강행 금지)
+- `portpolio-implement`는 다른 실행자와 같은 write scope를 공유하지 않는다
+
+---
+
+## Gstack 적응 규칙
+
+`gstack`를 참고해 하네스를 확장할 때는 웹 제품 전제를 그대로 들여오지 않는다.
+
+- 유지: `office-hours`, `plan-ceo-review`, `plan-eng-review`, `architecture-eval`, `performance-analysis`, `tradeoff-resolution`, 독립 리뷰, 회고
+- 폐기: 브라우저 QA, 웹 배포, CDP/쿠키/스크린샷 흐름
+- 세부 운영은 [gstack-office-hours-loop.md](./gstack-office-hours-loop.md)를 따른다
+- GLM 교차 검토 슬롯은 기존 `opencode-review`와 `opencode.json` 설정을 사용한다
 
 ---
 

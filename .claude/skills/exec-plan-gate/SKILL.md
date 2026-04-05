@@ -1,6 +1,6 @@
 ---
 name: exec-plan-gate
-description: Require an exec-plan before starting any repository work. Use when a user asks for implementation, refactoring, documentation, tests, scripts, build changes, or any other task so Codex first finds or creates the relevant exec-plan, updates the active plan index, summarizes the plan briefly, and keeps it current while implementing.
+description: Require an exec-plan before starting any repository work — applies to both Claude and Codex. Use when a user asks for implementation, refactoring, documentation, tests, scripts, build changes, or any other task. Find or create the relevant exec-plan, update the active plan index, summarize the plan briefly, and keep it current while implementing.
 ---
 
 # Exec Plan Gate

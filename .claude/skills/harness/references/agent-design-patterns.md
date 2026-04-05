@@ -1,285 +1,287 @@
 # Agent Team Design Patterns
 
-## 실행 모드: 에이전트 팀 vs 서브 에이전트
+## Execution Modes: Agent Teams vs Sub-agents
 
-두 가지 실행 모드의 핵심 차이를 이해하고 적합한 모드를 선택한다.
+Understand the core difference between the two execution modes and choose the one that fits.
 
-### 에이전트 팀 (Agent Teams) — 기본 모드
+### Agent Teams — Default Mode
 
-팀 리더가 `TeamCreate`로 팀을 구성하고, 팀원들은 독립적인 Claude Code 인스턴스로 실행된다. 팀원들은 `SendMessage`로 직접 통신하고, 공유 작업 목록(`TaskCreate`/`TaskUpdate`)으로 자체 조율한다.
-
-```
-[리더] ←→ [팀원A] ←→ [팀원B]
-  ↕          ↕          ↕
-  └──── 공유 작업 목록 ────┘
-```
-
-**핵심 도구:**
-- `TeamCreate`: 팀 생성 + 팀원 스폰
-- `SendMessage({to: name})`: 특정 팀원에게 메시지
-- `SendMessage({to: "all"})`: 브로드캐스트 (비용 높음, 드물게)
-- `TaskCreate`/`TaskUpdate`: 공유 작업 목록 관리
-
-**특징:**
-- 팀원끼리 직접 대화, 도전, 검증 가능
-- 리더가 거치지 않고 팀원 간 정보 교환
-- 공유 작업 목록으로 자체 조율 (자체 작업 요청 가능)
-- 팀원이 유휴 상태가 되면 자동으로 리더에게 알림
-- 계획 승인 모드로 위험한 작업 전 검토 가능
-
-**제약:**
-- 세션당 한 팀만 **활성화** 가능 (단, Phase 간에 팀을 해체하고 새 팀 구성은 가능)
-- 중첩 팀 불가 (팀원이 자신의 팀 생성 불가)
-- 리더 고정 (이전 불가)
-- 토큰 비용 높음
-
-**팀 재구성 패턴:**
-Phase별로 다른 전문가 조합이 필요하면, 이전 팀의 산출물을 파일로 저장 → 팀 정리 → 새 팀 생성 순서로 진행한다. 이전 팀의 산출물은 `_workspace/` 에 보존되므로 새 팀이 Read로 접근 가능하다.
-
-### 서브 에이전트 (Sub-agents) — 경량 모드
-
-메인 에이전트가 `Agent` 도구로 서브 에이전트를 생성한다. 서브 에이전트는 작업 결과를 메인에게만 반환하고 서로 통신하지 않는다.
+The team leader creates a team with `TeamCreate`, and team members run as independent Claude Code instances. Members communicate directly via `SendMessage` and self-coordinate through a shared task list (`TaskCreate`/`TaskUpdate`).
 
 ```
-[메인] → [서브A] → 결과 반환
-      → [서브B] → 결과 반환
-      → [서브C] → 결과 반환
+[Leader] ←→ [Member A] ←→ [Member B]
+  ↕              ↕              ↕
+  └──── Shared Task List ────┘
 ```
 
-**핵심 도구:**
-- `Agent(prompt, subagent_type, run_in_background)`: 서브 에이전트 생성
+**Core tools:**
+- `TeamCreate`: Create the team and spawn members
+- `SendMessage({to: name})`: Message a specific member
+- `SendMessage({to: "all"})`: Broadcast (high cost — use sparingly)
+- `TaskCreate`/`TaskUpdate`: Manage the shared task list
 
-**특징:**
-- 가볍고 빠름
-- 결과가 메인 컨텍스트로 요약 반환
-- 토큰 효율적
+**Characteristics:**
+- Members can talk directly, challenge each other, and cross-validate
+- Information flows between members without routing through the leader
+- Self-coordination via the shared task list (members can request their own tasks)
+- Leader is automatically notified when a member becomes idle
+- Plan-approval mode allows review before risky operations
 
-**제약:**
-- 서브 에이전트 간 통신 불가
-- 메인이 모든 조율 담당
-- 실시간 협업/도전 불가
+**Constraints:**
+- Only one team can be **active** per session (though a team can be dissolved between phases and a new one created)
+- No nested teams (a member cannot create its own team)
+- Leader is fixed (cannot be transferred)
+- High token cost
 
-### 모드 선택 의사결정 트리
+**Team reconstruction pattern:**
+When different specialist combinations are needed across phases, save the previous team's outputs to files, dissolve the team, then create a new team. Previous outputs are preserved under `_workspace/`, so the new team can access them via Read.
+
+### Sub-agents — Lightweight Mode
+
+The main agent spawns sub-agents using the `Agent` tool. Sub-agents return results only to the main agent and do not communicate with each other.
 
 ```
-에이전트가 2개 이상인가?
-├── Yes → 에이전트 간 통신이 필요한가?
-│         ├── Yes → 에이전트 팀 (기본값)
-│         │         교차 검증·발견 공유·실시간 피드백으로 품질 향상.
+[Main] → [Sub A] → return result
+       → [Sub B] → return result
+       → [Sub C] → return result
+```
+
+**Core tools:**
+- `Agent(prompt, subagent_type, run_in_background)`: Spawn a sub-agent
+
+**Characteristics:**
+- Lightweight and fast
+- Results are returned as a summary to the main agent's context
+- Token-efficient
+
+**Constraints:**
+- No communication between sub-agents
+- Main agent handles all coordination
+- No real-time collaboration or challenge
+
+### Mode Selection Decision Tree
+
+```
+Are there 2 or more agents?
+├── Yes → Do the agents need to communicate with each other?
+│         ├── Yes → Agent Team (default)
+│         │         Cross-validation, shared discoveries, and real-time feedback
+│         │         drive quality improvement.
 │         │
-│         └── No → 서브 에이전트도 가능
-│                  결과 전달만 필요한 생성-검증, 전문가 풀 등.
+│         └── No → Sub-agents are also viable
+│                  Produce-and-review pipelines or expert pools that only
+│                  need result handoff.
 │
-└── No (1개) → 서브 에이전트
-              단일 에이전트는 팀 구성 불필요.
+└── No (1 agent) → Sub-agent
+                   A single agent needs no team.
 ```
 
-> **핵심 원칙:** 에이전트 팀이 기본이다. 서브 에이전트를 선택할 때는 "팀원 간 통신이 정말 불필요한가?"를 자문한다.
+> **Core principle:** Agent teams are the default. When choosing sub-agents, ask yourself: "Is inter-member communication truly unnecessary?"
 
 ---
 
-## 에이전트 팀 아키텍처 유형
+## Agent Team Architecture Types
 
-### 1. 파이프라인 (Pipeline)
-순차적 작업 흐름. 이전 에이전트의 출력이 다음 에이전트의 입력.
-
-```
-[분석] → [설계] → [구현] → [검증]
-```
-
-**적합한 경우:** 각 단계가 이전 단계의 산출물에 강하게 의존
-**예시:** 소설 집필 — 세계관 → 캐릭터 → 플롯 → 집필 → 편집
-**주의:** 병목이 전체 파이프라인을 지연시킴. 각 단계를 가능한 독립적으로 설계할 것.
-**팀 모드 적합성:** 순차 의존이 강해 팀 모드의 이점이 제한적. 단, 파이프라인 내 병렬 구간이 있으면 팀 모드 유용.
-
-### 2. 팬아웃/팬인 (Fan-out/Fan-in)
-병렬 처리 후 결과 통합. 독립적 작업을 동시 수행.
+### 1. Pipeline
+Sequential task flow. The output of one agent becomes the input of the next.
 
 ```
-         ┌→ [전문가A] ─┐
-[분배] → ├→ [전문가B] ─┼→ [통합]
-         └→ [전문가C] ─┘
+[Analyze] → [Design] → [Implement] → [Verify]
 ```
 
-**적합한 경우:** 동일 입력에 대해 서로 다른 관점/영역의 분석이 필요
-**예시:** 종합 리서치 — 공식/미디어/커뮤니티/배경 동시 조사 → 통합 보고
-**주의:** 통합 단계의 품질이 전체 품질을 결정.
-**팀 모드 적합성:** 에이전트 팀의 가장 자연스러운 패턴. **반드시 에이전트 팀으로 구성해야 한다.** 팀원들이 서로 발견을 공유하고 도전하며, 한 에이전트의 발견이 다른 에이전트의 조사 방향을 실시간으로 수정할 수 있어 단독 조사 대비 품질이 크게 향상된다.
+**When to use:** Each stage depends heavily on the output of the previous one
+**Example:** Novel writing — worldbuilding → characters → plot → writing → editing
+**Caution:** A bottleneck stalls the entire pipeline. Design each stage to be as independent as possible.
+**Team mode fit:** Strong sequential dependencies limit the benefits of team mode. However, team mode is useful if the pipeline contains parallel segments.
 
-### 3. 전문가 풀 (Expert Pool)
-상황에 따라 적절한 전문가를 선택 호출.
-
-```
-[라우터] → { 전문가A | 전문가B | 전문가C }
-```
-
-**적합한 경우:** 입력 유형에 따라 다른 처리가 필요
-**예시:** 코드 리뷰 — 보안/성능/아키텍처 전문가 중 해당 영역만 호출
-**주의:** 라우터의 분류 정확도가 핵심.
-**팀 모드 적합성:** 서브 에이전트가 더 적합. 필요한 전문가만 호출하므로 상시 팀이 불필요.
-
-### 4. 생성-검증 (Producer-Reviewer)
-생성 에이전트와 검증 에이전트가 쌍으로 동작.
+### 2. Fan-out/Fan-in
+Parallel processing followed by result aggregation. Independent tasks run simultaneously.
 
 ```
-[생성] → [검증] → (문제시) → [생성] 재실행
+           ┌→ [Expert A] ─┐
+[Dispatch] → ├→ [Expert B] ─┼→ [Integrate]
+           └→ [Expert C] ─┘
 ```
 
-**적합한 경우:** 산출물의 품질 보장이 중요하고 객관적 검증 기준이 존재
-**예시:** 웹툰 — artist 생성 → reviewer 검수 → 문제 패널 재생성
-**주의:** 무한 루프 방지를 위해 최대 재시도 횟수(2~3회) 설정 필수.
-**팀 모드 적합성:** 에이전트 팀이 유용. SendMessage로 생성자↔검증자 간 실시간 피드백 교환.
+**When to use:** The same input requires analysis from multiple different perspectives or domains
+**Example:** Comprehensive research — official sources / media / community / background investigated simultaneously → consolidated report
+**Caution:** The quality of the integration stage determines the overall quality.
+**Team mode fit:** This is the most natural pattern for agent teams. **Always build this as an agent team.** Members share discoveries and challenge each other, so one agent's finding can redirect another's investigation in real time — yielding significantly higher quality than independent research.
 
-### 5. 감독자 (Supervisor)
-중앙 에이전트가 작업 상태를 관리하며 하위 에이전트에 동적으로 작업을 분배.
-
-```
-         ┌→ [워커A]
-[감독자] ─┼→ [워커B]    ← 감독자가 상태를 보고 동적 분배
-         └→ [워커C]
-```
-
-**적합한 경우:** 작업량이 가변적이거나 런타임에 작업 분배를 결정해야 할 때
-**예시:** 대규모 코드 마이그레이션 — 감독자가 파일 목록을 분석하고 워커들에게 배치 할당
-**팬아웃과의 차이:** 팬아웃은 사전에 작업을 고정 분배, 감독자는 진행 상황을 보며 동적 조정
-**주의:** 감독자가 병목이 되지 않도록 위임 단위를 충분히 크게 설정.
-**팀 모드 적합성:** 에이전트 팀의 공유 작업 목록이 감독자 패턴과 자연스럽게 매칭. TaskCreate로 작업 등록, 팀원들이 자체 요청.
-
-### 6. 계층적 위임 (Hierarchical Delegation)
-상위 에이전트가 하위 에이전트에 재귀적으로 위임. 복잡한 문제를 단계적으로 분해.
+### 3. Expert Pool
+Selectively invoke the right expert based on context.
 
 ```
-[총괄] → [팀장A] → [실무자A1]
-                  → [실무자A2]
-       → [팀장B] → [실무자B1]
+[Router] → { Expert A | Expert B | Expert C }
 ```
 
-**적합한 경우:** 문제가 자연스럽게 계층적으로 분해되는 구조
-**예시:** 풀스택 앱 개발 — 총괄 → 프론트엔드팀장 → (UI/로직/테스트) + 백엔드팀장 → (API/DB/테스트)
-**주의:** 깊이 3단계 이상은 지연과 컨텍스트 손실이 커짐. 2단계 이내 권장.
-**팀 모드 적합성:** 에이전트 팀은 중첩 불가 (팀원이 팀 생성 불가). 1단계는 팀, 2단계는 서브 에이전트로 구현하거나, 평탄화하여 단일 팀으로 구성.
+**When to use:** Different processing is needed depending on the type of input
+**Example:** Code review — invoke only the relevant specialist from security / performance / architecture experts
+**Caution:** The accuracy of the router's classification is critical.
+**Team mode fit:** Sub-agents are a better fit. Only the needed expert is called, so a standing team is unnecessary.
 
-## 복합 패턴
+### 4. Producer-Reviewer
+A producer agent and a reviewer agent operate as a pair.
 
-실전에서는 단일 패턴보다 복합 패턴이 흔하다:
+```
+[Produce] → [Review] → (if issues found) → [Produce] re-runs
+```
 
-| 복합 패턴 | 구성 | 예시 |
-|----------|------|------|
-| **팬아웃 + 생성-검증** | 병렬 생성 후 각각 검증 | 다국어 번역 — 4개 언어 병렬 번역 → 각각 네이티브 리뷰어 검수 |
-| **파이프라인 + 팬아웃** | 순차 단계 중 일부를 병렬화 | 분석(순차) → 구현(병렬) → 통합 테스트(순차) |
-| **감독자 + 전문가 풀** | 감독자가 전문가를 동적 호출 | 고객 문의 처리 — 감독자가 문의 분류 후 적합한 전문가 할당 |
+**When to use:** Output quality assurance matters and objective verification criteria exist
+**Example:** Webtoon — artist produces → reviewer inspects → problem panels are regenerated
+**Caution:** Set a maximum retry count (2–3) to prevent infinite loops.
+**Team mode fit:** Agent teams are useful here. SendMessage enables real-time feedback between producer and reviewer.
 
-### 복합 패턴에서의 실행 모드
+### 5. Supervisor
+A central agent manages task state and dynamically dispatches work to worker agents.
 
-**기본적으로 모든 복합 패턴에 에이전트 팀을 사용한다.** 팀원 간 활발한 커뮤니케이션이 결과 품질의 핵심 동력이다.
+```
+             ┌→ [Worker A]
+[Supervisor] ─┼→ [Worker B]    ← Supervisor monitors state and dispatches dynamically
+             └→ [Worker C]
+```
 
-| 시나리오 | 권장 모드 | 이유 |
-|---------|----------|------|
-| **리서치 + 분석** | 에이전트 팀 | 조사자 간 발견 공유, 상충 정보 실시간 토론 |
-| **설계 + 구현 + 검증** | 에이전트 팀 | 설계자↔구현자↔검증자 간 피드백 루프 |
-| **감독자 + 워커** | 에이전트 팀 | 공유 작업 목록으로 동적 할당, 워커 간 진행률 공유 |
-| **생성 + 검증** | 에이전트 팀 | 생성자↔검증자 간 실시간 피드백으로 재작업 최소화 |
+**When to use:** Workload is variable or task distribution must be decided at runtime
+**Example:** Large-scale code migration — supervisor analyzes the file list and assigns batches to workers
+**Difference from Fan-out:** Fan-out assigns tasks up front; supervisor adjusts distribution dynamically as work progresses
+**Caution:** Set delegation units large enough to prevent the supervisor from becoming a bottleneck.
+**Team mode fit:** The shared task list in agent teams maps naturally to the supervisor pattern. Register tasks with TaskCreate; team members claim them on their own.
 
-> 서브 에이전트로의 혼합은 단일 에이전트가 완전히 격리된 단발성 작업을 수행할 때만 고려한다.
+### 6. Hierarchical Delegation
+Higher-level agents delegate recursively to lower-level agents. Decomposes complex problems step by step.
 
-## 에이전트 타입 선택
+```
+[Director] → [Team Lead A] → [Worker A1]
+                            → [Worker A2]
+           → [Team Lead B] → [Worker B1]
+```
 
-에이전트를 호출할 때 Agent 도구의 `subagent_type` 파라미터로 타입을 지정한다. 에이전트 팀의 팀원도 커스텀 에이전트 정의를 사용할 수 있다.
+**When to use:** The problem naturally decomposes into a hierarchical structure
+**Example:** Full-stack app development — director → frontend lead → (UI / logic / tests) + backend lead → (API / DB / tests)
+**Caution:** Three or more levels of depth introduce significant latency and context loss. Keep it to two levels or fewer.
+**Team mode fit:** Agent teams cannot be nested (a member cannot create a team). Implement level 1 as a team and level 2 as sub-agents, or flatten the hierarchy into a single team.
 
-### 빌트인 타입
+## Composite Patterns
 
-| 타입 | 도구 접근 | 적합한 용도 |
-|------|----------|-----------|
-| `general-purpose` | 전체 (WebSearch, WebFetch 포함) | 웹 조사, 범용 작업 |
-| `Explore` | 읽기 전용 (Edit/Write 없음) | 코드베이스 탐색, 분석 |
-| `Plan` | 읽기 전용 (Edit/Write 없음) | 아키텍처 설계, 계획 수립 |
+Real-world scenarios more commonly use composite patterns than single ones:
 
-### 커스텀 타입
+| Composite Pattern | Composition | Example |
+|------------------|-------------|---------|
+| **Fan-out + Producer-Reviewer** | Parallel production, then individual review | Multilingual translation — 4 languages translated in parallel → each reviewed by a native-language reviewer |
+| **Pipeline + Fan-out** | Some sequential stages are parallelized | Analyze (sequential) → Implement (parallel) → Integration test (sequential) |
+| **Supervisor + Expert Pool** | Supervisor dynamically invokes experts | Customer inquiry handling — supervisor classifies the inquiry then assigns the right expert |
 
-`.claude/agents/{name}.md`에 에이전트를 정의하면 `subagent_type: "{name}"`으로 호출할 수 있다. 커스텀 에이전트는 전체 도구에 접근 가능.
+### Execution Mode in Composite Patterns
 
-### 선택 기준
+**By default, use agent teams for all composite patterns.** Active communication between members is the primary driver of output quality.
 
-| 상황 | 권장 | 이유 |
-|------|------|------|
-| 역할이 복잡하고 여러 세션에서 재사용 | **커스텀 타입** (`.claude/agents/`) | 페르소나와 작업 원칙을 파일로 관리 |
-| 단순 조사/수집이고 프롬프트만으로 충분 | **`general-purpose`** + 상세 프롬프트 | 에이전트 파일 불필요, 프롬프트에 지시 포함 |
-| 코드 읽기만 필요 (분석/리뷰) | **`Explore`** | 실수로 파일 수정하는 것을 방지 |
-| 설계/계획만 필요 | **`Plan`** | 분석에 집중, 코드 변경 방지 |
-| 파일 수정이 필요한 구현 작업 | **커스텀 타입** | 전체 도구 접근 + 전문 지시 |
+| Scenario | Recommended Mode | Reason |
+|---------|-----------------|--------|
+| **Research + Analysis** | Agent team | Investigators share findings; conflicting information is debated in real time |
+| **Design + Implementation + Verification** | Agent team | Feedback loops between designer ↔ implementer ↔ verifier |
+| **Supervisor + Workers** | Agent team | Dynamic assignment via shared task list; workers share progress with each other |
+| **Produce + Review** | Agent team | Real-time feedback between producer ↔ reviewer minimizes rework |
 
-**원칙:** 모든 에이전트는 반드시 `.claude/agents/{name}.md` 파일로 정의한다. 빌트인 타입이라도 에이전트 정의 파일을 생성하여 역할·원칙·프로토콜을 명시한다. 파일로 존재해야 다음 세션에서 재사용 가능하고, 팀 통신 프로토콜이 명시되어야 협업 품질이 보장된다.
+> Consider mixing in sub-agents only when a single agent performs a fully isolated, one-shot task.
 
-**모델:** 모든 에이전트는 `model: "opus"`를 사용한다. Agent 도구 호출 시 반드시 `model: "opus"` 파라미터를 명시한다.
+## Agent Type Selection
 
-## 에이전트 정의 구조
+When invoking an agent, specify the type via the `subagent_type` parameter of the Agent tool. Team members can also use custom agent definitions.
+
+### Built-in Types
+
+| Type | Tool Access | Best For |
+|------|------------|---------|
+| `general-purpose` | Full (includes WebSearch, WebFetch) | Web research, general-purpose tasks |
+| `Explore` | Read-only (no Edit/Write) | Codebase exploration, analysis |
+| `Plan` | Read-only (no Edit/Write) | Architecture design, planning |
+
+### Custom Types
+
+Define an agent in `.claude/agents/{name}.md` and invoke it with `subagent_type: "{name}"`. Custom agents have full tool access.
+
+### Selection Criteria
+
+| Situation | Recommended | Reason |
+|-----------|------------|--------|
+| Complex role reused across multiple sessions | **Custom type** (`.claude/agents/`) | Persona and task principles managed as a file |
+| Simple research/collection where a prompt is sufficient | **`general-purpose`** + detailed prompt | No agent file needed; instructions go in the prompt |
+| Only needs to read code (analysis/review) | **`Explore`** | Prevents accidental file modification |
+| Only needs to design/plan | **`Plan`** | Focused on analysis; prevents code changes |
+| Implementation work requiring file modification | **Custom type** | Full tool access + specialized instructions |
+
+**Principle:** Every agent must be defined as a `.claude/agents/{name}.md` file. Even when using a built-in type, create an agent definition file to spell out its role, principles, and protocol. A file must exist for reuse across sessions, and the team communication protocol must be stated explicitly to guarantee collaboration quality.
+
+**Model:** All agents use `model: "opus"`. Always include the `model: "opus"` parameter when calling the Agent tool.
+
+## Agent Definition Structure
 
 ```markdown
 ---
 name: agent-name
-description: "1-2문장 역할 설명. 트리거 키워드 나열."
+description: "1–2 sentence role description. List trigger keywords."
 ---
 
-# Agent Name — 역할 한줄 요약
+# Agent Name — One-line Role Summary
 
-당신은 [도메인]의 [역할] 전문가입니다.
+You are a [role] specialist in [domain].
 
-## 핵심 역할
-1. 역할1
-2. 역할2
+## Core Responsibilities
+1. Responsibility 1
+2. Responsibility 2
 
-## 작업 원칙
-- 원칙1
-- 원칙2
+## Working Principles
+- Principle 1
+- Principle 2
 
-## 입력/출력 프로토콜
-- 입력: [어디서 무엇을 받는지]
-- 출력: [어디에 무엇을 쓰는지]
-- 형식: [파일 포맷, 구조]
+## Input/Output Protocol
+- Input: [what you receive and from where]
+- Output: [what you produce and where it goes]
+- Format: [file format, structure]
 
-## 팀 통신 프로토콜 (에이전트 팀 모드)
-- 메시지 수신: [누구로부터 어떤 메시지를 받는지]
-- 메시지 발신: [누구에게 어떤 메시지를 보내는지]
-- 작업 요청: [공유 작업 목록에서 어떤 유형의 작업을 요청하는지]
+## Team Communication Protocol (Agent Team Mode)
+- Receive: [which messages you receive and from whom]
+- Send: [which messages you send and to whom]
+- Task requests: [what types of tasks you request from the shared task list]
 
-## 에러 핸들링
-- [실패 시 행동]
-- [타임아웃 시 행동]
+## Error Handling
+- [Action on failure]
+- [Action on timeout]
 
-## 협업
-- 다른 에이전트와의 관계
+## Collaboration
+- Relationships with other agents
 ```
 
-## 에이전트 분리 기준
+## Agent Separation Criteria
 
-| 기준 | 분리 | 통합 |
-|------|------|------|
-| 전문성 | 영역이 다르면 분리 | 영역이 겹치면 통합 |
-| 병렬성 | 독립 실행 가능하면 분리 | 순차 종속이면 통합 고려 |
-| 컨텍스트 | 컨텍스트 부담이 크면 분리 | 가볍고 빠르면 통합 |
-| 재사용성 | 다른 팀에서도 쓰면 분리 | 이 팀에서만 쓰면 통합 고려 |
+| Criterion | Separate | Merge |
+|-----------|---------|-------|
+| Expertise | Domains differ | Domains overlap |
+| Parallelism | Can run independently | Sequentially dependent |
+| Context | Heavy context burden | Lightweight and fast |
+| Reusability | Used by other teams as well | Used only by this team |
 
-## 스킬 vs 에이전트 구분
+## Skills vs Agents
 
-| 구분 | 스킬 (Skill) | 에이전트 (Agent) |
-|------|-------------|-----------------|
-| 정의 | 절차적 지식 + 도구 번들 | 전문가 페르소나 + 행동 원칙 |
-| 위치 | `.claude/skills/` | `.claude/agents/` |
-| 트리거 | 사용자 요청 키워드 매칭 | Agent 도구로 명시적 호출 |
-| 크기 | 작은~큰 (워크플로우) | 작은 (역할 정의) |
-| 용도 | "어떻게 하는가" | "누가 하는가" |
+| | Skill | Agent |
+|--|-------|-------|
+| Definition | Procedural knowledge + tool bundle | Expert persona + behavioral principles |
+| Location | `.claude/skills/` | `.claude/agents/` |
+| Trigger | User request keyword matching | Explicit invocation via Agent tool |
+| Size | Small to large (workflows) | Small (role definition) |
+| Purpose | "How to do it" | "Who does it" |
 
-스킬은 에이전트가 작업을 수행할 때 참조하는 **절차적 가이드**.
-에이전트는 스킬을 활용하는 **전문가 역할 정의**.
+A skill is a **procedural guide** that an agent references when performing a task.
+An agent is an **expert role definition** that leverages skills.
 
-## 스킬 ↔ 에이전트 연결 방식
+## Skill ↔ Agent Integration
 
-에이전트가 스킬을 활용하는 3가지 방식:
+Three ways an agent can make use of a skill:
 
-| 방식 | 구현 | 적합한 경우 |
-|------|------|-----------|
-| **Skill 도구 호출** | 에이전트 프롬프트에 `Skill 도구로 /skill-name 호출` 명시 | 스킬이 독립 워크플로우이고 사용자 호출 가능한 경우 |
-| **프롬프트 내 인라인** | 에이전트 정의 내에 스킬 내용을 직접 포함 | 스킬이 짧고(50줄 이하) 이 에이전트 전용인 경우 |
-| **레퍼런스 로드** | `Read`로 스킬의 references/ 파일을 필요 시 로드 | 스킬 내용이 크고 조건부로만 필요한 경우 |
+| Method | Implementation | When to Use |
+|--------|---------------|-------------|
+| **Skill tool invocation** | State `Call /skill-name via the Skill tool` in the agent prompt | When the skill is a standalone workflow and can also be called by users |
+| **Inline in prompt** | Embed skill content directly in the agent definition | When the skill is short (50 lines or fewer) and exclusive to this agent |
+| **Reference load** | Load the skill's `references/` file on demand via Read | When the skill content is large and only conditionally needed |
 
-권장: 재사용성이 높으면 Skill 도구, 전용이면 인라인, 대용량이면 레퍼런스 로드.
+Recommendation: use the Skill tool for high-reuse skills, inline for exclusive skills, and reference load for large-content skills.

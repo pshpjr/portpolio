@@ -1,5 +1,10 @@
 # Harness Consolidation: Single Source of Truth
 
+## 목표
+
+`.claude/`를 단일 소스로 확립하고 `.codex/`를 참조 래퍼 구조로 정리해,
+공용 하네스 자산의 중복과 누락을 없앤다.
+
 **목표**: `.claude/`를 원본 소스, `.codex/`를 참조 래퍼로 확립. 누락 폴더 추가.
 
 ## 현재 문제
@@ -42,9 +47,9 @@
 
 ## 확장: OpenCode 리뷰어 통합
 
-**목표**: http://127.0.0.1:4096 에서 실행 중인 OpenCode를 추가 리뷰어로 연동.
+**목표**: 로컬 OpenCode를 저장소 리뷰 보조 경로로 연동. 초기 통합은 HTTP API 기준으로 시작했으며, 현재 기본 경로는 `20260404-opencode-headless-integration.md`에서 정의한 headless CLI 방식으로 갱신 중이다.
 
-- [x] `.claude/agents/opencode-reviewer.md` 생성 (API 호출 에이전트)
+- [x] `.claude/agents/opencode-reviewer.md` 생성 (초기 API 호출 에이전트, 이후 headless CLI 브리지로 갱신)
 - [x] `.claude/skills/opencode-review/SKILL.md` 생성 (리뷰 위임 스킬)
 - [x] `.codex/agents/opencode-reviewer.md` 추가 (참조 스텁)
 - [x] `.codex/skills/opencode-review/` 추가 (참조 래퍼 + openai.yaml)

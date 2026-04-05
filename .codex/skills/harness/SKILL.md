@@ -1,6 +1,6 @@
 ---
 name: harness
-description: 하네스를 구성합니다. 전문 에이전트를 정의하며, 해당 에이전트가 사용할 스킬을 생성하는 메타 스킬.
+description: "Meta-skill for configuring a project harness: define specialist agents, generate the skills they use, and wire up the orchestration. Use when: 'set up agent team', 'build skill', 'define agents', 'configure automation harness', 'design agent architecture for this project', 'build a harness', 'design a harness'."
 source: .claude/skills/harness/SKILL.md
 ---
 

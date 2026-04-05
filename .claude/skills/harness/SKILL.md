@@ -1,284 +1,291 @@
 ---
 name: harness
-description: "하네스를 구성합니다. 전문 에이전트를 정의하며, 해당 에이전트가 사용할 스킬을 생성하는 메타 스킬. (1) '하네스 구성해줘', '하네스 구축해줘' 요청 시, (2) '하네스 설계', '하네스 엔지니어링' 요청 시, (3) 새로운 도메인/프로젝트에 대한 하네스 기반 자동화 체계를 구축할 때, (4) 하네스 구성을 재구성하거나 확장할 때 사용."
+description: "Meta-skill for configuring a project harness: define specialist agents, generate the skills they use, and wire up the orchestration. Use when: 'set up agent team', 'build skill', 'define agents', 'configure automation harness', 'design agent architecture for this project', 'build a harness', 'design a harness'."
 ---
 
 # Harness — Agent Team & Skill Architect
 
-도메인/프로젝트에 맞는 하네스를 구성하고, 각 에이전트의 역할을 정의하며, 에이전트가 사용할 스킬을 생성하는 메타 스킬.
+A meta-skill for configuring a harness suited to a domain or project, defining each agent's role, and generating the skills those agents will use.
 
-**핵심 원칙:**
-1. 에이전트 정의(`.claude/agents/`)와 스킬(`.claude/skills/`)을 생성한다.
-2. **에이전트 팀을 기본 실행 모드로 사용한다.** 
+**Core principles:**
+1. **Claude decides what to build** — scope, architecture, task decomposition, and task prompts only.
+2. **All file creation and modification is delegated** via `codex-delegate`: Codex and OpenCode headless agents handle execution, and Claude compares or selects the right path based on write ownership.
+3. Generate agent definitions (`.claude/agents/`) and skills (`.claude/skills/`) through the delegation model above.
+4. **Use an agent team as the default execution mode** for multi-agent collaboration.
+5. Harness work is repository work, so `exec-plan-gate` runs first. This is intentional.
 
-## 워크플로우
+## Workflow
 
-### Phase 1: 도메인 분석
-1. 사용자 요청에서 도메인/프로젝트 파악
-2. 핵심 작업 유형 식별 (생성, 검증, 편집, 분석 등)
-3. 기존 에이전트/스킬 확인 (충돌/중복 방지)
-4. 프로젝트 코드베이스 탐색 — 기술 스택, 데이터 모델, 주요 모듈 파악
-5. **사용자 숙련도 감지** — 대화의 맥락 단서(사용 용어, 질문 수준)로 기술 수준을 파악하고, 이후 커뮤니케이션 톤을 조절한다. 코딩 경험이 적은 사용자에게는 "assertion", "JSON schema" 같은 용어를 설명 없이 쓰지 않는다.
+### Phase 1: Domain Analysis
+1. Identify the domain or project from the user's request.
+2. Identify the core task types (creation, validation, editing, analysis, etc.).
+3. Check for existing agents and skills to avoid conflicts or duplication.
+4. Explore the project codebase — understand the tech stack, data models, and key modules.
+5. **Detect user proficiency** — read contextual cues in the conversation (terminology used, question depth) to gauge technical level, and adjust communication tone accordingly. Do not use terms like "assertion" or "JSON schema" without explanation when talking to users with limited coding experience.
 
-### Phase 2: 팀 아키텍처 설계
+### Phase 2: Team Architecture Design
 
-#### 2-1. 실행 모드 선택: 에이전트 팀 vs 서브 에이전트
+#### 2-1. Choosing an Execution Mode: Agent Team vs Sub-Agent
 
-**기본값은 에이전트 팀**이다. 2개 이상의 에이전트가 협업할 때는 에이전트 팀을 우선 고려한다. 팀원 간 직접 통신(SendMessage)과 공유 작업 목록(TaskCreate)으로 자체 조율하며, 발견 공유·상충 토론·누락 보완이 결과 품질을 높인다.
+**The default is an agent team.** When two or more agents need to collaborate, prefer the agent team approach. Team members self-coordinate through direct communication (SendMessage) and a shared task list (TaskCreate); sharing discoveries, debating trade-offs, and filling in gaps all improve output quality.
 
-서브 에이전트는 에이전트가 1개뿐이거나, 에이전트 간 통신이 불필요한 구조(결과 전달만 필요)일 때 선택한다.
+Use sub-agents when there is only one agent, or when inter-agent communication is unnecessary (results only need to be passed forward).
 
-> 비교표와 의사결정 트리는 `references/agent-design-patterns.md`의 "실행 모드" 섹션 참조.
+> For a comparison table and decision tree, see the "Execution Modes" section in `references/agent-design-patterns.md`.
 
-#### 2-2. 아키텍처 패턴 선택
+#### 2-2. Choosing an Architecture Pattern
 
-1. 작업을 전문 영역으로 분해
-2. 에이전트 팀 구조 결정 (아키텍처 패턴은 `references/agent-design-patterns.md` 참조)
-   - **파이프라인**: 순차 의존 작업
-   - **팬아웃/팬인**: 병렬 독립 작업
-   - **전문가 풀**: 상황별 선택 호출
-   - **생성-검증**: 생성 후 품질 검수
-   - **감독자**: 중앙 에이전트가 상태 관리 및 동적 분배
-   - **계층적 위임**: 상위 에이전트가 하위에 재귀적 위임
+1. Decompose the work into specialist domains.
+2. Decide on the agent team structure (see architecture patterns in `references/agent-design-patterns.md`):
+   - **Pipeline**: sequentially dependent tasks
+   - **Fan-out / Fan-in**: parallel independent tasks
+   - **Expert pool**: selective invocation based on context
+   - **Generate-and-validate**: generation followed by quality review
+   - **Supervisor**: a central agent manages state and dynamically distributes work
+   - **Hierarchical delegation**: a parent agent recursively delegates to children
 
-#### 2-3. 에이전트 분리 기준
+#### 2-3. Agent Separation Criteria
 
-전문성·병렬성·컨텍스트·재사용성 4축으로 판단한다. 상세 기준표는 `references/agent-design-patterns.md`의 "에이전트 분리 기준" 참조.
+Evaluate along four axes: specialization, parallelism, context isolation, and reusability. For detailed criteria, see the "Agent Separation Criteria" section in `references/agent-design-patterns.md`.
 
-### Phase 3: 에이전트 정의 생성
+### Phase 3: Agent Definition Generation
 
-**모든 에이전트는 반드시 `프로젝트/.claude/agents/{name}.md` 파일로 정의한다.** 에이전트 정의 파일 없이 Agent 도구의 prompt에 역할을 직접 넣는 것은 금지한다. 이유:
-- 에이전트 정의가 파일로 존재해야 다음 세션에서 재사용 가능
-- 팀 통신 프로토콜이 명시되어야 에이전트 간 협업 품질 보장
-- 하네스의 핵심 가치는 에이전트(누가)와 스킬(어떻게)의 분리
+**File writing is always delegated.** Claude writes the content spec and task prompt; the actual files are created through `codex-delegate`, which uses Codex and OpenCode headless agents in the appropriate mode. Compare outputs and apply the best result when the workflow is proposal-based.
 
-빌트인 타입(`general-purpose`, `Explore`, `Plan`)을 사용하더라도 에이전트 정의 파일은 생성한다. 빌트인 타입은 Agent 도구의 `subagent_type` 파라미터로 지정하고, 에이전트 정의 파일에는 역할·원칙·프로토콜을 담는다.
+**Every agent must be defined in a `project/.claude/agents/{name}.md` file.** Placing role descriptions directly in the Agent tool's prompt without a definition file is not allowed. Reasons:
+- Agent definitions must exist as files to be reusable across sessions.
+- Team communication protocols must be explicit to ensure reliable inter-agent collaboration.
+- The core value of a harness is the separation of agents (who) from skills (how).
 
-**모델 설정:** 모든 에이전트는 `model: "opus"`를 사용한다. Agent 도구 호출 시 반드시 `model: "opus"` 파라미터를 명시한다. 하네스의 품질은 에이전트의 추론 능력에 직결되며, opus가 최고 품질을 보장한다.
+Even when using built-in types (`general-purpose`, `Explore`, `Plan`), always create an agent definition file. Specify the built-in type via the `subagent_type` parameter on the Agent tool call, and put the role, principles, and protocols into the definition file.
 
-**팀 재구성:** 에이전트 팀은 세션당 한 팀만 활성화할 수 있지만, Phase 간에 팀을 해체하고 새 팀을 구성할 수 있다. 파이프라인 패턴처럼 Phase별로 다른 전문가 조합이 필요하면, 이전 팀의 산출물을 파일로 저장한 뒤 팀을 정리하고 새 팀을 생성한다.
+**Model setting:** All agents use `model: "opus"`. Always specify the `model: "opus"` parameter when invoking the Agent tool. Harness quality is directly tied to the reasoning capability of its agents, and opus delivers the highest quality.
 
-각 에이전트를 `프로젝트/.claude/agents/{name}.md`에 정의한다. 필수 섹션: 핵심 역할, 작업 원칙, 입력/출력 프로토콜, 에러 핸들링, 협업. 에이전트 팀 모드에서는 `## 팀 통신 프로토콜` 섹션을 추가하여 메시지 수신/발신 대상과 작업 요청 범위를 명시한다.
+**Team restructuring:** Only one team can be active per session, but teams can be disbanded and rebuilt between phases. If a pipeline pattern requires a different specialist composition per phase, save the current team's outputs to files, clean up the team, and form a new one.
 
-> 정의 템플릿과 실제 파일 전문은 `references/agent-design-patterns.md`의 "에이전트 정의 구조" + `references/team-examples.md` 참조.
+Define each agent in `project/.claude/agents/{name}.md`. Required sections: core role, working principles, input/output protocol, error handling, and collaboration. In agent team mode, add a `## Team Communication Protocol` section specifying which agents to send messages to and from, and the scope of work requests.
 
-**QA 에이전트 포함 시 필수 사항:**
-- QA 에이전트는 `general-purpose` 타입을 사용하라 (`Explore`는 읽기 전용이므로 검증 스크립트 실행 불가)
-- QA의 핵심은 "존재 확인"이 아니라 **"경계면 교차 비교"** — API 응답과 프론트 훅을 동시에 읽고 shape을 비교
-- QA는 전체 완성 후 1회가 아니라, **각 모듈 완성 직후 점진적으로 실행** (incremental QA)
-- 상세 가이드: `references/qa-agent-guide.md` 참조
+> For definition templates and full file examples, see "Agent Definition Structure" in `references/agent-design-patterns.md` and `references/team-examples.md`.
 
-### Phase 4: 스킬 생성
+**When including a QA agent — required notes:**
+- Use `general-purpose` type for QA agents (`Explore` is read-only and cannot run validation scripts).
+- The core of QA is **"cross-boundary comparison"**, not just existence checks — read API responses and frontend hooks simultaneously and compare shapes.
+- Run QA **incrementally after each module is complete**, not once at the very end.
+- Detailed guide: `references/qa-agent-guide.md`.
 
-각 에이전트가 사용할 스킬을 `프로젝트/.claude/skills/{name}/SKILL.md`에 생성한다. 상세 작성 가이드는 `references/skill-writing-guide.md` 참조.
+### Phase 4: Skill Generation
 
-#### 4-1. 스킬 구조
+Create the skills each agent will use at `project/.claude/skills/{name}/SKILL.md`. For a detailed writing guide, see `references/skill-writing-guide.md`.
+
+**File writing is always delegated.** Claude drafts the skill content spec (structure, trigger keywords, body outline); actual SKILL.md files are produced through `codex-delegate`, which uses Codex and OpenCode headless agents in the appropriate mode. Compare outputs and apply the best result when the workflow is proposal-based.
+
+#### 4-1. Skill Structure
 
 ```
 skill-name/
-├── SKILL.md (필수)
-│   ├── YAML frontmatter (name, description 필수)
-│   └── Markdown 본문
-└── Bundled Resources (선택)
-    ├── scripts/    - 반복/결정적 작업용 실행 코드
-    ├── references/ - 조건부 로딩하는 참조 문서
-    └── assets/     - 출력에 사용되는 파일 (템플릿, 이미지 등)
+├── SKILL.md (required)
+│   ├── YAML frontmatter (name, description required)
+│   └── Markdown body
+└── Bundled Resources (optional)
+    ├── scripts/    - executable code for repetitive or deterministic tasks
+    ├── references/ - reference documents loaded on demand
+    └── assets/     - files used in output (templates, images, etc.)
 ```
 
-#### 4-2. Description 작성 — 적극적 트리거 유도
+#### 4-2. Writing the Description — Actively Encourage Triggering
 
-description은 스킬의 유일한 트리거 메커니즘이다. Claude는 트리거를 보수적으로 판단하는 경향이 있으므로, description을 **적극적("pushy")**으로 작성한다.
+The description is the skill's sole trigger mechanism. Because Claude tends to be conservative about triggering, write descriptions **aggressively ("pushy")**.
 
-**나쁜 예:** `"PDF 문서를 처리하는 스킬"`
-**좋은 예:** `"PDF 파일 읽기, 텍스트/테이블 추출, 병합, 분할, 회전, 워터마크, 암호화, OCR 등 모든 PDF 작업을 수행. .pdf 파일을 언급하거나 PDF 산출물을 요청하면 반드시 이 스킬을 사용할 것."`
+**Bad example:** `"A skill for processing PDF documents"`
+**Good example:** `"Handles all PDF operations: reading, text/table extraction, merging, splitting, rotating, watermarking, encrypting, OCR, and more. This skill must be used whenever a .pdf file is mentioned or a PDF output is requested."`
 
-핵심: 스킬이 하는 일 + 구체적 트리거 상황을 모두 기술하고, 유사하지만 트리거하면 안 되는 경우와 구분되도록 작성.
+The key: describe both what the skill does and the specific trigger situations, and distinguish it clearly from similar cases where this skill should not fire.
 
-#### 4-3. 본문 작성 원칙
+#### 4-3. Body Writing Principles
 
-| 원칙 | 설명 |
-|------|------|
-| **Why를 설명하라** | "ALWAYS/NEVER" 같은 강압적 지시 대신, 왜 그렇게 해야 하는지 이유를 전달한다. LLM은 이유를 이해하면 엣지 케이스에서도 올바르게 판단한다. |
-| **Lean하게 유지** | 컨텍스트 윈도우는 공공재다. SKILL.md 본문은 500줄 이내를 목표로, 무게를 벌지 않는 내용은 삭제하거나 references/로 이동한다. |
-| **일반화하라** | 특정 예시에만 맞는 좁은 규칙보다, 원리를 설명하여 다양한 입력에 대응할 수 있게 한다. 오버피팅 금지. |
-| **반복 코드는 번들링** | 테스트 실행에서 에이전트들이 공통으로 작성하는 스크립트가 발견되면 `scripts/`에 미리 번들링한다. |
-| **명령형으로 작성** | "~한다", "~하라" 형태의 명령형/지시형 어조를 사용한다. |
+| Principle | Description |
+|-----------|-------------|
+| **Explain the why** | Instead of imperatives like "ALWAYS/NEVER", convey the reason behind each rule. When an LLM understands the reason, it makes correct decisions even in edge cases. |
+| **Keep it lean** | The context window is a shared resource. Aim to keep the SKILL.md body under 500 lines; move anything that adds weight without adding value into `references/`. |
+| **Generalize** | Explain underlying principles rather than narrow rules that only fit specific examples. Avoid overfitting. |
+| **Bundle repetitive code** | If agents are found to write the same helper scripts across tests, pre-bundle that code in `scripts/`. |
+| **Write in the imperative** | Use directive language: "do this", "always do X". |
 
-#### 4-4. Progressive Disclosure (단계적 정보 공개)
+#### 4-4. Progressive Disclosure
 
-스킬은 3단계 로딩 시스템으로 컨텍스트를 관리한다:
+Skills manage context through a three-tier loading system:
 
-| 단계 | 로딩 시점 | 크기 목표 |
-|------|----------|----------|
-| **Metadata** (name + description) | 항상 컨텍스트에 존재 | ~100단어 |
-| **SKILL.md 본문** | 스킬 트리거 시 | <500줄 |
-| **references/** | 필요할 때만 | 무제한 (스크립트는 로딩 없이 실행 가능) |
+| Tier | When loaded | Size target |
+|------|-------------|-------------|
+| **Metadata** (name + description) | Always in context | ~100 words |
+| **SKILL.md body** | When the skill is triggered | <500 lines |
+| **references/** | Only when needed | Unlimited (scripts can be executed without loading) |
 
-**크기 관리 규칙:**
-- SKILL.md가 500줄에 근접하면 세부 내용을 references/로 분리하고, 본문에 "언제 이 파일을 읽으라"는 포인터를 남긴다
-- 300줄 이상의 reference 파일에는 상단에 **목차(ToC)**를 포함한다
-- 도메인/프레임워크별 변형이 있으면 references/ 하위에 도메인별로 분리하여, 관련 파일만 로드한다
+**Size management rules:**
+- When SKILL.md approaches 500 lines, move detailed content to `references/` and leave a pointer in the body indicating when to read that file.
+- Reference files over 300 lines must include a **table of contents** at the top.
+- If there are domain- or framework-specific variants, split them under `references/` by domain so only the relevant file is loaded.
 
 ```
 cloud-deploy/
-├── SKILL.md (워크플로우 + 선택 가이드)
+├── SKILL.md (workflow + selection guide)
 └── references/
-    ├── aws.md    ← AWS 선택 시만 로드
+    ├── aws.md    ← load only when AWS is selected
     ├── gcp.md
     └── azure.md
 ```
 
-#### 4-5. 스킬-에이전트 연결 원칙
+#### 4-5. Skill-to-Agent Mapping Principles
 
-- 에이전트 1개 ↔ 스킬 1~N개 (1:1 또는 1:다)
-- 여러 에이전트가 공유하는 스킬도 가능
-- 스킬은 "어떻게 하는가"를 담고, 에이전트는 "누가 하는가"를 담는다
+- One agent ↔ one or more skills (1:1 or 1:many)
+- A skill can be shared by multiple agents
+- Skills capture "how to do it"; agents capture "who does it"
 
-> 상세 작성 패턴, 예시, 데이터 스키마 표준은 `references/skill-writing-guide.md` 참조.
+> For detailed writing patterns, examples, and data schema standards, see `references/skill-writing-guide.md`.
 
-### Phase 5: 통합 및 오케스트레이션
+### Phase 5: Integration and Orchestration
 
-오케스트레이터는 스킬의 특수한 형태로, 개별 에이전트와 스킬을 하나의 워크플로우로 엮어 팀 전체를 조율한다. Phase 4에서 생성한 개별 스킬이 "각 에이전트가 무엇을 어떻게 하는가"를 정의한다면, 오케스트레이터는 "누가 언제 어떤 순서로 협업하는가"를 정의한다. 구체적 템플릿은 `references/orchestrator-template.md` 참조.
+An orchestrator is a special form of skill that ties individual agents and skills into a single workflow and coordinates the entire team. Where the individual skills created in Phase 4 define "what each agent does and how", the orchestrator defines "who collaborates in what order and when". For a concrete template, see `references/orchestrator-template.md`.
 
-실행 모드에 따라 오케스트레이터 패턴이 달라진다:
+The orchestrator pattern differs depending on execution mode:
 
-#### 5-0. 모드별 오케스트레이터 패턴
+#### 5-0. Orchestrator Pattern by Mode
 
-**에이전트 팀 모드 (기본):**
-오케스트레이터가 `TeamCreate`로 팀을 구성하고, `TaskCreate`로 작업을 할당한다. 팀원들은 `SendMessage`로 직접 통신하며 자체 조율한다. 리더(오케스트레이터)는 진행 상황을 모니터링하고 결과를 종합한다.
+**Agent team mode (default):**
+The orchestrator forms the team with `TeamCreate` and assigns work with `TaskCreate`. Team members communicate directly via `SendMessage` and self-coordinate. The leader (orchestrator) monitors progress and consolidates results.
 
 ```
-[오케스트레이터/리더]
+[Orchestrator / Leader]
     ├── TeamCreate(team_name, members)
     ├── TaskCreate(tasks with dependencies)
-    ├── 팀원들이 자체 조율 (SendMessage)
-    ├── 결과 수집 및 종합
-    └── 팀 정리
+    ├── Team members self-coordinate (SendMessage)
+    ├── Collect and consolidate results
+    └── Clean up team
 ```
 
-**서브 에이전트 모드:**
-오케스트레이터가 `Agent` 도구로 서브 에이전트를 직접 호출한다. 서브 에이전트는 결과를 메인에게만 반환한다.
+**Sub-agent mode:**
+The orchestrator calls sub-agents directly via the `Agent` tool. Sub-agents return results only to the orchestrator.
 
 ```
-[오케스트레이터]
+[Orchestrator]
     ├── Agent(agent-1, run_in_background=true)
     ├── Agent(agent-2, run_in_background=true)
-    ├── 결과 대기 및 수집
-    └── 통합 산출물 생성
+    ├── Wait for and collect results
+    └── Generate consolidated output
 ```
 
-#### 5-1. 데이터 전달 프로토콜
+#### 5-1. Data Transfer Protocol
 
-오케스트레이터 내에 에이전트 간 데이터 전달 방식을 명시한다:
+Specify data-passing strategies between agents inside the orchestrator:
 
-| 전략 | 방식 | 실행 모드 | 적합한 경우 |
-|------|------|----------|-----------|
-| **메시지 기반** | `SendMessage`로 팀원 간 직접 통신 | 에이전트 팀 | 실시간 조율, 피드백 교환, 가벼운 상태 전달 |
-| **태스크 기반** | `TaskCreate`/`TaskUpdate`로 작업 상태 공유 | 에이전트 팀 | 진행상황 추적, 의존 관계 관리, 작업 자체 요청 |
-| **파일 기반** | 약속된 경로에 파일을 쓰고 읽음 | 둘 다 | 대용량 데이터, 구조화된 산출물, 감사 추적 필요 |
+| Strategy | Method | Execution mode | Best for |
+|----------|--------|----------------|----------|
+| **Message-based** | Direct communication between team members via `SendMessage` | Agent team | Real-time coordination, feedback exchange, lightweight state transfer |
+| **Task-based** | Share work status via `TaskCreate` / `TaskUpdate` | Agent team | Progress tracking, dependency management, explicit work requests |
+| **File-based** | Write and read files at agreed-upon paths | Both | Large data, structured outputs, audit trail requirements |
 
-**에이전트 팀 모드에서 권장 조합:** 태스크 기반(조율) + 파일 기반(산출물) + 메시지 기반(실시간 소통)
+**Recommended combination for agent team mode:** task-based (coordination) + file-based (outputs) + message-based (real-time communication)
 
-파일 기반 전달 시 규칙:
-- 작업 디렉토리 하위에 `_workspace/` 폴더를 만들어 중간 산출물 저장
-- 파일명 컨벤션: `{phase}_{agent}_{artifact}.{ext}` (예: `01_analyst_requirements.md`)
-- 최종 산출물만 사용자 지정 경로에 출력, 중간 파일(`_workspace/`)은 보존 (사후 검증·감사 추적용)
+Rules for file-based transfer:
+- Create a `_workspace/` folder under the working directory for intermediate outputs.
+- File naming convention: `{phase}_{agent}_{artifact}.{ext}` (e.g., `01_analyst_requirements.md`)
+- Output only final artifacts to user-specified paths; preserve intermediate files (`_workspace/`) for post-run verification and audit trails.
 
-#### 5-2. 에러 핸들링
+#### 5-2. Error Handling
 
-오케스트레이터 내에 에러 처리 방침을 포함한다. 핵심 원칙: 1회 재시도 후 재실패 시 해당 결과 없이 진행(보고서에 누락 명시), 상충 데이터는 삭제하지 않고 출처 병기.
+Include error-handling policy inside the orchestrator. Core principle: retry once; if it fails again, continue without that result (note the gap in the report); do not discard conflicting data — record it with its source.
 
-> 에러 유형별 전략표와 구현 상세는 `references/orchestrator-template.md`의 "에러 핸들링" 참조.
+> For a per-error-type strategy table and implementation details, see the "Error Handling" section in `references/orchestrator-template.md`.
 
-#### 5-3. 팀 모드 전용: 팀 크기 가이드라인
+#### 5-3. Team Mode Only: Team Size Guidelines
 
-| 작업 규모 | 권장 팀원 수 | 팀원당 작업 수 |
-|----------|------------|--------------|
-| 소규모 (5~10개 작업) | 2~3명 | 3~5개 |
-| 중규모 (10~20개 작업) | 3~5명 | 4~6개 |
-| 대규모 (20개+ 작업) | 5~7명 | 4~5개 |
+| Task scale | Recommended team size | Tasks per member |
+|------------|-----------------------|------------------|
+| Small (5–10 tasks) | 2–3 members | 3–5 tasks |
+| Medium (10–20 tasks) | 3–5 members | 4–6 tasks |
+| Large (20+ tasks) | 5–7 members | 4–5 tasks |
 
-> 팀원이 많을수록 조율 오버헤드가 커진다. 3명의 집중된 팀원이 5명의 산만한 팀원보다 낫다.
+> More team members means higher coordination overhead. Three focused members outperform five scattered ones.
 
-### Phase 6: 검증 및 테스트
+### Phase 6: Validation and Testing
 
-생성된 하네스를 검증한다. 상세 테스트 방법론은 `references/skill-testing-guide.md` 참조.
+Validate the generated harness. For detailed testing methodology, see `references/skill-testing-guide.md`.
 
-#### 6-1. 구조 검증
+#### 6-1. Structural Validation
 
-- 모든 에이전트 파일이 올바른 위치에 있는지 확인
-- 스킬의 frontmatter(name, description) 검증
-- 에이전트 간 참조 일관성 확인
-- 커맨드가 생성되지 않았는지 확인
+- Verify all agent files are in the correct locations.
+- Validate skill frontmatter (name, description).
+- Check cross-agent reference consistency.
+- Confirm no commands were generated.
 
-#### 6-2. 실행 모드별 검증
+#### 6-2. Validation by Execution Mode
 
-- 에이전트 팀 모드: 팀원 간 통신 경로, 작업 의존성, 팀 크기 적정성 확인
-- 서브 에이전트 모드: 각 에이전트의 입출력 연결, run_in_background 설정 확인
+- Agent team mode: verify communication paths between team members, task dependencies, and appropriate team size.
+- Sub-agent mode: verify input/output connections for each agent and `run_in_background` settings.
 
-#### 6-3. 스킬 실행 테스트
+#### 6-3. Skill Execution Testing
 
-생성된 각 스킬에 대해 실제 실행 테스트를 수행한다:
+Run actual execution tests for each generated skill:
 
-1. **테스트 프롬프트 작성** — 각 스킬에 대해 2~3개의 현실적인 테스트 프롬프트를 작성한다. 실제 사용자가 입력할 법한 구체적이고 자연스러운 문장으로 작성한다.
+1. **Write test prompts** — write 2–3 realistic test prompts per skill. Use concrete, natural sentences that an actual user would type.
 
-2. **With-skill vs Without-skill 비교 실행** — 가능하면 스킬 있는 실행과 없는 실행을 병렬로 수행하여 스킬의 부가가치를 확인한다. 서브에이전트를 두 개씩 스폰한다:
-   - **With-skill**: 스킬을 읽고 작업 수행
-   - **Without-skill (baseline)**: 같은 프롬프트를 스킬 없이 수행
+2. **Run with-skill vs without-skill comparisons** — where possible, run both in parallel to verify the skill's added value. Spawn two sub-agents for each test:
+   - **With-skill**: reads the skill and performs the task
+   - **Without-skill (baseline)**: performs the same prompt without the skill
 
-3. **결과 평가** — 산출물의 품질을 정성적(사용자 리뷰) + 정량적(assertion 기반) 으로 평가한다. 산출물이 객관적으로 검증 가능한 경우(파일 생성, 데이터 추출 등) assertion을 정의하고, 주관적인 경우(문체, 디자인) 사용자 피드백에 의존한다.
+3. **Evaluate results** — assess output quality both qualitatively (user review) and quantitatively (assertion-based). Define assertions when outputs are objectively verifiable (file creation, data extraction, etc.); rely on user feedback for subjective cases (writing style, design).
 
-4. **반복 개선 루프** — 테스트 결과에서 문제가 발견되면:
-   - 피드백을 **일반화**하여 스킬을 수정한다 (특정 예시에만 맞는 좁은 수정 금지)
-   - 수정 후 재테스트한다
-   - 사용자가 만족하거나 의미 있는 개선이 더 이상 없을 때까지 반복한다
+4. **Iterative improvement loop** — when issues are found in test results:
+   - **Generalize** the feedback and revise the skill (avoid narrow fixes that only address a specific example).
+   - Retest after revision.
+   - Repeat until the user is satisfied or further meaningful improvement is no longer possible.
 
-5. **반복 패턴 번들링** — 테스트 실행에서 에이전트들이 공통으로 작성하는 코드(예: 모든 테스트에서 동일한 헬퍼 스크립트를 생성)가 발견되면, 해당 코드를 `scripts/`에 미리 번들링한다.
+5. **Bundle recurring patterns** — if agents consistently produce the same code during test runs (e.g., the same helper script in every test), pre-bundle that code into `scripts/`.
 
-#### 6-4. 트리거 검증
+#### 6-4. Trigger Validation
 
-각 스킬의 description이 올바르게 트리거되는지 검증한다:
+Verify that each skill's description triggers correctly:
 
-1. **Should-trigger 쿼리** (8~10개) — 스킬을 트리거해야 하는 다양한 표현 (공식적/캐주얼, 명시적/암시적)
-2. **Should-NOT-trigger 쿼리** (8~10개) — 키워드가 유사하지만 이 스킬이 아닌 다른 도구/스킬이 적합한 "near-miss" 쿼리
+1. **Should-trigger queries** (8–10) — a variety of phrasings that should trigger the skill (formal/casual, explicit/implicit)
+2. **Should-NOT-trigger queries** (8–10) — "near-miss" queries whose keywords are similar but where a different tool or skill is more appropriate
 
-**near-miss 작성 핵심:** "피보나치 함수 작성" 같이 명백히 무관한 쿼리는 테스트 가치가 없다. "이 엑셀 파일의 차트를 PNG로 추출해줘" (xlsx 스킬 vs 이미지 변환)처럼 **경계가 모호한 쿼리**가 좋은 테스트 케이스다.
+**Key to writing near-miss queries:** Queries like "write a Fibonacci function" are obviously unrelated and have no test value. Good test cases are **queries with ambiguous boundaries**, such as "extract the chart from this Excel file as PNG" (xlsx skill vs image conversion).
 
-기존 스킬과의 트리거 충돌도 이 단계에서 확인한다.
+Also check for trigger conflicts with existing skills at this stage.
 
-#### 6-5. 드라이런 테스트
+#### 6-5. Dry-Run Test
 
-- 오케스트레이터 스킬의 Phase 순서가 논리적인지 검토
-- 데이터 전달 경로에 빈 구간(dead link)이 없는지 확인
-- 모든 에이전트의 입력이 이전 Phase의 출력과 매칭되는지 확인
-- 에러 시나리오별 폴백 경로가 실행 가능한지 확인
+- Review whether the orchestrator skill's phase order is logically sound.
+- Confirm there are no dead links in data transfer paths.
+- Verify that every agent's inputs match the outputs from the preceding phase.
+- Confirm that fallback paths for each error scenario are executable.
 
-#### 6-6. 테스트 시나리오 작성
+#### 6-6. Writing Test Scenarios
 
-- 오케스트레이터 스킬에 `## 테스트 시나리오` 섹션 추가
-- 정상 흐름 1개 + 에러 흐름 1개 이상 기술
+- Add a `## Test Scenarios` section to the orchestrator skill.
+- Document at least one normal flow and one error flow.
 
-## 산출물 체크리스트
+## Output Checklist
 
-생성 완료 후 확인:
+Verify after generation is complete:
 
-- [ ] `프로젝트/.claude/agents/` — **에이전트 정의 파일 필수 생성** (빌트인 타입이라도 파일 생성 필수)
-- [ ] `프로젝트/.claude/skills/` — 스킬 파일들 (SKILL.md + references/)
-- [ ] 오케스트레이터 스킬 1개 (데이터 흐름 + 에러 핸들링 + 테스트 시나리오 포함)
-- [ ] 실행 모드 명시 (에이전트 팀 또는 서브 에이전트)
-- [ ] 모든 Agent 호출에 `model: "opus"` 파라미터 명시
-- [ ] `.claude/commands/` — 아무것도 생성하지 않음
-- [ ] 기존 에이전트/스킬과 충돌 없음
-- [ ] 스킬 description이 적극적("pushy")으로 작성됨
-- [ ] SKILL.md 본문이 500줄 이내, 초과 시 references/ 분리
-- [ ] 테스트 프롬프트 2~3개로 실행 검증 완료
-- [ ] 트리거 검증 (should-trigger + should-NOT-trigger) 완료
+- [ ] `project/.claude/agents/` — **agent definition files must be created** (required even for built-in types)
+- [ ] `project/.claude/skills/` — skill files (SKILL.md + references/)
+- [ ] One orchestrator skill (includes data flow + error handling + test scenarios)
+- [ ] Execution mode stated explicitly (agent team or sub-agent)
+- [ ] `model: "opus"` parameter specified on all Agent tool calls
+- [ ] `.claude/commands/` — nothing created here
+- [ ] No conflicts with existing agents or skills
+- [ ] Skill descriptions written aggressively ("pushy")
+- [ ] SKILL.md body is under 500 lines; anything over that split into references/
+- [ ] Execution validated with 2–3 test prompts
+- [ ] Trigger validation (should-trigger + should-NOT-trigger) complete
 
-## 참고
+## References
 
-- 하네스 패턴: `references/agent-design-patterns.md`
-- 기존 하네스 예시 (실제 파일 전문 포함): `references/team-examples.md`
-- 오케스트레이터 템플릿: `references/orchestrator-template.md`
-- **스킬 작성 가이드**: `references/skill-writing-guide.md` — 작성 패턴, 예시, 데이터 스키마 표준
-- **스킬 테스트 가이드**: `references/skill-testing-guide.md` — 테스트/평가/반복 개선 방법론
-- **QA 에이전트 가이드**: `references/qa-agent-guide.md` — 빌드 하네스에 QA 에이전트를 포함할 때 참조. 통합 정합성 검증 방법론, 경계면 버그 패턴, QA 에이전트 정의 템플릿 포함. 실제 프로젝트에서 발견된 7개 버그 사례 기반.
+- Harness patterns: `references/agent-design-patterns.md`
+- Existing harness examples (full file contents): `references/team-examples.md`
+- Orchestrator template: `references/orchestrator-template.md`
+- **Skill writing guide**: `references/skill-writing-guide.md` — writing patterns, examples, data schema standards
+- **Skill testing guide**: `references/skill-testing-guide.md` — testing, evaluation, and iterative improvement methodology
+- **QA agent guide**: `references/qa-agent-guide.md` — reference when including a QA agent in a build harness. Covers integration consistency validation methodology, boundary-layer bug patterns, and QA agent definition templates. Based on 7 real bugs found in production projects.

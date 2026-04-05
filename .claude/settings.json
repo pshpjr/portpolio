@@ -1,4 +1,8 @@
 {
+  "enabledPlugins": {
+    "context-engineering@context-engineering-marketplace": true,
+    "codex@openai-codex": true
+  },
   "project": {
     "name": "portpolio",
     "entrypoint": "AGENTS.md",

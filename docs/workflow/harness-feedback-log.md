@@ -38,6 +38,20 @@
 
 ## Entries
 
+## 2026-04-04 - gstack-web-assumptions-must-be-trimmed
+- kind: requested-change
+- area: workflow
+- summary: 사용자가 `gstack`를 하네스에 녹이되, 현재 레포 워크플로에 맞지 않는 웹 전용 요소는 버려야 한다고 명시했다.
+- impact: 브라우저 QA와 배포 전제를 그대로 가져오면 문서 우선 게임 기획 루프가 오염되고 자동화 초점이 흐려질 수 있다.
+- suggested-follow-up: `gstack` 적응 문서에서 유지/폐기 목록을 명시하고, office-hours 기반 기획/분석/교차검토 루프만 공식 경로로 남긴다.
+
+## 2026-04-04 - separate-planning-skills-maximally
+- kind: requested-change
+- area: workflow
+- summary: 사용자가 `office-hours`, `plan-ceo-review`, `plan-eng-review`, 성능 분석, 아키텍처 평가, 트레이드오프 해소를 최대한 분리된 스킬로 두자고 요청했다.
+- impact: 평가 축이 한 스킬에 뭉치면 재실행 단위가 흐려지고 결과물 책임이 섞인다.
+- suggested-follow-up: 상위 오케스트레이터 하나와 독립 평가 스킬 여러 개로 나누고, 필요할 때만 선택적으로 호출할 수 있게 유지한다.
+
 ## 2026-03-30 - branch-owned-commit-push-default
 - kind: requested-change
 - area: workflow

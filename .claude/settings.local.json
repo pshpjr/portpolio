@@ -5,7 +5,23 @@
       "Bash(cmd.exe /c \"dir \\\\\"C:\\\\\\\\Program Files\\\\\\\\Microsoft Visual Studio\\\\\" /b\")",
       "Find *",
       "Ls *",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Read(//d/Users/pshpjr/AppData/Roaming/claude/**)",
+      "Read(//d/Users/pshpjr/AppData/Local/claude/**)",
+      "Read(//d/Users/pshpjr/**)",
+      "Bash(opencode run *)",
+      "Edit(//d/Users/pshpjr/source/repos/**)",
+      "Bash(python3 -c ':*)",
+      "Bash(python \"D:\\\\Users\\\\pshpjr\\\\source\\\\repos\\\\portpolio\\\\tools\\\\extract_opencode_text.py\")",
+      "Bash(python -c *)",
+      "Bash(python *)"
     ]
+  },
+  "sandbox": {
+    "filesystem": {
+      "allowWrite": [
+        "D:/Users/pshpjr/source/repos"
+      ]
+    }
   }
 }
