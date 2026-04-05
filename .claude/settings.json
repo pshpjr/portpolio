@@ -16,5 +16,18 @@
       "scaffolder"
     ],
     "memoryRoot": ".claude/agent-memory"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python tools/token_logger.py 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }

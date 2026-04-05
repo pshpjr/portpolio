@@ -1,0 +1,1 @@
+{"date": "2026-04-05", "timestamp": "2026-04-05T07:01:59.279825+00:00", "session_id": "039ab7e2-c872-45a2-a0ce-1c6b52a8f52f", "models": ["claude-sonnet-4-6"], "turns": 65, "input_tokens": 88, "output_tokens": 13607, "cache_creation_input_tokens": 173283, "cache_read_input_tokens": 3094573, "total_billed_tokens": 13695}
