@@ -1,0 +1,4 @@
+version: 1
+display_name: Office Hours
+short_description: Orchestrate a full planning round from one rough prompt.
+default_prompt: Use $office-hours to turn the current request into a proposal planning round with separated reviews.
