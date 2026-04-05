@@ -62,4 +62,4 @@
   - 참고: untracked 새 파일도 작업 분량에 포함하도록 `context_meter.py`를 보정했다
 - `python tools/record_agent_artifact.py ...` → `_workspace/agent-notes/20260405-151124-harness-improver.md` 생성 및 개선 큐 자동 추가 확인
 - `python tools/doc_check.py` → `OK: documentation checks passed.`
-- 참고: 기존 active plan 하나([20260404-office-hours-proposal-polish.md](./20260404-office-hours-proposal-polish.md))에 `목표` 섹션 경고 1건이 남아 있으며, 이는 개선 큐의 open task로 남겼다.
+- 참고: 기존 active plan 하나([20260404-office-hours-proposal-polish.md](../active/20260404-office-hours-proposal-polish.md))에 `목표` 섹션 경고 1건이 남아 있으며, 이는 개선 큐의 open task로 남겼다.

@@ -234,7 +234,7 @@ WeaponTable.WeaponId
 - `WeaponTable` (전투 전용 메타)와 이 문서의 `ItemTemplateTable` 연결 규칙은 `combat_data_tables.md`에 명시된다.
 - 장비 슬롯 구성(`EquipSlot` enum 값)은 pending decision #5(v1 장비 슬롯 고정)에 따라 확정된다.
 - 저장 구조와 패킷 구조는 서버 구현 문서에서 확정한다.
-- 원정 모드 단일화(pending decision #4)가 결정되면 `DungeonRewardProfileTable`과 `DropTable.RewardMode` 구조가 단순화된다.
+- pending decision #4는 정화/정찰 2모드 이원화 유지로 확정되었다. `DungeonRewardProfileTable`과 `DropTable.RewardMode`의 `PURIFICATION`/`SCOUTING` 구분은 현행 구조를 유지한다.
 
 ---
 

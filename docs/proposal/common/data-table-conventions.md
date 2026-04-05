@@ -164,6 +164,21 @@ Weapon.WeaponType + Weapon.EnhanceLevel
 
 ---
 
+## schema.json 기반 문서 예외
+
+전투 스탯처럼 코드 생성 파이프라인(`schema.json` + `data.json` + `codegen`)을 통해 관리되는 테이블 문서는 아래 조건 하에 표준 컬럼 표를 schema.json으로 위임할 수 있다.
+
+| 표준 요구사항 | schema.json 위임 허용 시 대체 방식 |
+|---|---|
+| 컬럼 표 (`컬럼 \| 타입 \| 역할 \| 설명`) | `schema.json`에 완전한 필드 계약 명시 |
+| PK / FK 선언 | `schema.json`의 `key` 섹션 또는 별도 PK/FK 섹션 집중 정리 |
+| 테이블 의도 한 문장 | 위임 불가 — 문서에 직접 포함 필수 |
+| 관계 다이어그램 | 위임 불가 — 문서에 직접 포함 필수 |
+
+`schema.json` 위임을 선택한 문서는 어느 파일이 계약 정본인지 문서 첫 섹션에 명시해야 한다.
+
+---
+
 ## 관련 문서
 
 - [proposal/AGENTS.md](../AGENTS.md)

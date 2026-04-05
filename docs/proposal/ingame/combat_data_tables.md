@@ -98,7 +98,8 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId
 
 > WeaponTable은 무기 전투 전용 메타(전투 수치 참조, 애니메이션, 역할 태그)를 저장하며, ItemTemplateTable(공통 아이템 메타)과 FK로 연결해 아이템 시스템과 전투 시스템을 분리할 수 있게 한다.
 
-- 담당 값: `WeaponCode`, `WeaponName`, `WeaponType`, `BaseWeaponStatTableId`, `MaxEnhanceLevel`, `SmartDropTag`, `OptionPoolId`, `BaseDurabilityMax`, `RepairCostRate`, `EquipLevelMin`, `TradeLimitCount`, `AnimationSetId`, `IconKey`, `ModelKey`, `DisplayOrder`, `HandType`, `CombatRoleTag`, `RangeProfile`, `BalanceVersion`
+- 담당 값: `WeaponCode`, `WeaponName`, `WeaponType`, `BaseWeaponStatTableId`, `MaxEnhanceLevel`, `SmartDropTag`, `BaseDurabilityMax`, `RepairCostRate`, `EquipLevelMin`, `AnimationSetId`, `ModelKey`, `DisplayOrder`, `HandType`, `CombatRoleTag`, `RangeProfile`, `BalanceVersion`
+- **교차 참조 (pending decision #6 미해결):** `OptionPoolId`, `TradeLimitCount`, `IconKey`는 `item_data_table.md`의 `ItemTemplateTable`과 소유권이 중복된다. pending decision #6(무기 authoring 단일 소스)이 확정되기 전까지는 `ItemTemplateTable`을 정본으로 간주하고, `WeaponTable`에서 이 컬럼들을 참조할 경우 `ItemId FK`를 경유한다.
 - 목적: 전투 수치와 무기 메타를 분리해 참조하기 위함
 - 기본 공격, 기본 지급 액티브, 아이덴티티, 이동기는 `WeaponType + BalanceVersion -> WeaponDefaultSkillTable` 경로로 연결한다.
 
@@ -145,6 +146,11 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId
 - 방어구/장신구는 v1에서 무기와 같은 복잡한 강화 테이블을 강제하지 않는다.
 - `WeaponStatTableId`는 안정적인 규칙으로 생성하고, 스크립트가 임의 재배치하지 않게 유지한다.
 - 강화 단계가 실제 장비 상태라면 구현 단계에서 별도 소유 테이블이 필요하다.
+
+## 서버 구현으로 넘기는 항목
+
+- **버프/디버프 런타임 계약**: main.md는 전투 스탯 조합에 "임시 버프"를 포함한다. `BuffTable`/`StatusEffectTable` 계열의 런타임 상태 계약(버프 종류, 스택 규칙, 만료 조건)은 서버 구현 문서에서 정의한다. v1 스탯 설명 가능성 요건을 충족하려면 최소한 버프 종류 목록과 스탯 영향 계수를 서버 구현 문서에 명시해야 한다.
+- **캐릭터 강화 상태**: 강화 단계가 실제 플레이어 장비 상태라면 `CharacterEquipTable` 계열의 인스턴스 테이블로 구현 단계에서 분리한다.
 
 ## 관련 문서
 

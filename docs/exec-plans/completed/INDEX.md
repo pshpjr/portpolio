@@ -4,6 +4,7 @@
 
 ## 완료된 계획
 
+- [20260405-harness-recursive-improvement-queue.md](./20260405-harness-recursive-improvement-queue.md) - 하네스가 작업 중 발견한 개선 항목을 `task` / `message` 큐로 남기고 다른 에이전트가 처리하게 연결
 - [20260403-harness-domain-agents.md](./20260403-harness-domain-agents.md) - Codex 위임 스킬 + 도메인 특화 에이전트 4종(server-implementer, codegen-specialist, design-author) 추가
 - [20260403-harness-single-source.md](./20260403-harness-single-source.md) - 에이전트 단일 소스 정리: .codex/agents/ 제거, agent-workflow.md 중복 정리, exec-plan 템플릿 문서화
 - [20260403-harness-investigation.md](./20260403-harness-investigation.md) - 기존 하네스 구성 조사, 단점 식별, 모노레포 적합성 및 서브에이전트 활용 방향 평가
