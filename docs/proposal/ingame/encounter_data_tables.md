@@ -50,7 +50,7 @@ DungeonGimmickTable.GimmickId
 | `EnrageTimeSec` | FLOAT | DATA | 광폭화 발동까지 남은 시간 (0 = 없음) |
 | `EnrageHpThreshold` | FLOAT | DATA | HP 비율 기반 광폭화 임계값 (0.0 = 사용 안 함) |
 | `DownProtectionSec` | FLOAT | DATA | 다운 후 재무력화 보호 시간 (초) |
-| `PhaseCount` | INT | DATA | 총 페이즈 수 (v1 = 1) |
+| `PhaseCount` | INT | DATA | 총 페이즈 수 (혼식 주술사 = 2) |
 | `BalanceVersion` | INT | META | 밸런스 버전 |
 
 - PK: `BossId`
@@ -210,9 +210,9 @@ DungeonGimmickTable.GimmickId
 ## 제약과 예외
 
 - 절대 좌표와 실제 맵 배치 값은 맵 authoring 데이터에서 최종 확정한다.
-- v1에서는 `PhaseTag = CORE` 패턴만 필수 구현 대상으로 둔다.
+- v1에서는 `PhaseTag = CORE`(1페이즈)와 `PhaseTag = EXTENSION`(2페이즈) 패턴 모두 구현 대상이다. 2페이즈 세부 패턴(소환 압박 강화 등)은 기본 구조 확정 후 보강한다.
 - `CameraPullBackMeters`, `DurationMs` 같은 연출 수치는 프로토타입 후 미세 조정한다.
-- 보스 페이즈 수(pending decision #1)에 따라 `BossStaggerRuleTable.ResetOnPhase` 활용 범위가 달라진다.
+- 보스 2페이즈 구조(pending decision #1 확정)에 따라 `BossStaggerRuleTable.ResetOnPhase = true`로 2페이즈 전환 시 게이지를 초기화한다.
 - `WarningTextKey`, `TextKey`, `RoleHintTextKey`, `MarkerKey`는 클라이언트 로컬라이제이션 리소스와 연결되는 계약 키다. 실제 문자열은 클라이언트 리소스 테이블에서 관리한다.
 
 ---

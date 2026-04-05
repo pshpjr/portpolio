@@ -14,7 +14,11 @@
       "Bash(python3 -c ':*)",
       "Bash(python \"D:\\\\Users\\\\pshpjr\\\\source\\\\repos\\\\portpolio\\\\tools\\\\extract_opencode_text.py\")",
       "Bash(python -c *)",
-      "Bash(python *)"
+      "Bash(python *)",
+      "Bash(node:*)",
+      "Bash(mv:*)",
+      "Bash(mv *)",
+      "Bash(xargs python:*)"
     ]
   },
   "sandbox": {

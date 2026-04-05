@@ -8,64 +8,35 @@
 
 ---
 
-## 1. v1 보스 범위
+## ~~1. v1 보스 범위~~ ✅ 확정
 
-작업 기본안:
-- A. v1은 1페이즈 중심으로 고정
+**확정: C — 처음부터 완전한 2페이즈 보스로 유지.**
 
-현재 초안:
-- `혼식 주술사`는 1페이즈 중심의 읽기 쉬운 보스전으로 정리한다.
-- 2페이즈 확장, 복잡한 강제 타게팅, 소환 압박 강화는 후속 확장으로 미룬다.
-
-검토할 선택지:
-- A. v1은 지금처럼 1페이즈 중심으로 고정
-- B. 짧은 1.5페이즈 전환 연출만 추가
-- C. 처음부터 완전한 2페이즈 보스로 유지
-
-영향:
-- A는 완성 가능성과 가독성이 가장 높다.
-- C는 기억점은 늘지만 구현/밸런싱 비용이 크게 오른다.
+- `혼식 주술사`는 완전한 2페이즈 구조로 설계한다.
+- 1페이즈: 읽기 쉬운 코어 패턴 + 무력화 딜 타임.
+- 2페이즈: 체력 임계치 도달 시 전환, 강화된 패턴 + 협동 기믹 세트.
+- 복잡한 소환 압박 강화, 추가 기믹 확장은 v1 이후로 미룰 수 있다.
 
 ---
 
-## 2. 무기 변경과 전리품 선호의 연결 방식
+## ~~2. 무기 변경과 전리품 선호의 연결 방식~~ ✅ 확정
 
-작업 기본안:
-- B. 입장 준비 구간에서 장착 무기와 전리품 선호를 별도로 선택
+**확정: A — 현재 장착 무기와 전리품 선호를 항상 동일하게 묶는다.**
 
-현재 초안:
-- 마을 또는 입장 준비 구간에서 무기를 바꿀 수 있다.
-- 던전 입장 시 현재 무기 프리셋과 `전리품 선호 무기`를 함께 잠근다.
-
-검토할 선택지:
-- A. 현재 장착 무기와 전리품 선호를 항상 동일하게 묶는다
-- B. 입장 준비 구간에서 장착 무기와 전리품 선호를 별도로 선택한다
-- C. 마을에서만 별도 전리품 선호를 설정하고 던전마다 유지한다
-
-영향:
-- A는 단순하지만 파밍 자유도가 낮다.
-- B는 가장 유연하지만 UI와 설명 부담이 늘어난다.
+- 던전 입장 시 현재 장착 무기가 전리품 선호 무기로 자동 결정된다.
+- 별도 선택 UI 없음. 단순하고 설명 부담이 없다.
 
 ---
 
-## 3. v1 경제 컷라인
+## ~~3. v1 경제 컷라인~~ ✅ 확정
 
-작업 기본안:
-- A. `수리 + 제한적 재련 + 보조적 유저 거래` 유지
+**확정: B + 커스텀 — 유저 거래 제거, 수리 + 제한적 재련 + 귀속 유지.**
 
-현재 초안:
-- `수리 + 제한적 재련 + 보조적 유저 거래`를 유지한다.
-- `정찰 원정` 보상은 연습/저가치 보상으로 제한한다.
-
-검토할 선택지:
-- A. 현재 초안 유지
-- B. v1에서는 유저 거래를 빼고 `개인 드롭 + 수리 + 재련`만 남긴다
-- C. 재련은 남기되 거래와 귀속 시스템은 후속 단계로 미룬다
-
-영향:
-- A는 시스템 설명은 풍부하지만 운영 규칙이 늘어난다.
-- B와 C는 포트폴리오 컷라인을 더 선명하게 만든다.
-- 이 결정은 `item_data_table.md`의 `TradeLimitCount`, `ReforgeCostTable`, `ItemUiStateTable` 유지 범위에도 직접 영향을 준다.
+- v1에서는 유저 간 거래를 제거한다.
+- 귀속 시스템은 유지하되 **창고 관련 제약**으로 범위를 한정한다.
+  - 예: 인던 드롭 아이템은 계정 귀속 → 캐릭터 간 공유 창고로 이동 가능, 외부 거래 불가.
+- 이후 거래 시스템이 추가될 때 귀속 규칙을 확장한다.
+- `item_data_table.md`의 `TradeLimitCount` 컬럼은 제거하거나 v2 예약 처리한다.
 
 ---
 
@@ -87,104 +58,57 @@
 
 ---
 
-## 6. 무기 authoring 단일 소스 구조
+## ~~6. 무기 authoring 단일 소스 구조~~ ✅ 확정
 
-작업 기본안:
-- B. `ItemTemplateTable`는 공통 아이템 메타, `WeaponTable`은 전투 전용 메타로 분리하고 FK로 연결
+**확정: 커스텀 — Item_Table 기본 틀 + Item_Weapon_Table 상속 구조.**
 
-현재 초안:
-- `ItemTemplateTable`와 `WeaponTable`가 모두 무기 메타를 일부 갖고 있다.
-- 거래/툴팁/아이콘 같은 공통 메타와 전투 참조 메타의 정본 위치가 아직 완전히 닫혀 있지 않다.
-
-검토할 선택지:
-- A. 무기 관련 authoring을 `WeaponTable` 하나로 최대한 모은다
-- B. `ItemTemplateTable`는 공통 메타, `WeaponTable`은 전투 전용 메타로 분리하고 FK로 연결한다
-- C. `ItemTemplateTable`를 정본으로 두고 `WeaponTable`는 최소 전투 참조 데이터만 남긴다
-
-영향:
-- A는 단순해 보이지만 소비형/방어구/장신구와의 공통 처리 경계가 흐려질 수 있다.
-- B는 역할 분리가 가장 명확하지만 FK와 문서 보강이 추가로 필요하다.
-- C는 인벤토리/경제 쪽은 단순해지지만 전투 전용 메타가 과도하게 축소될 수 있다.
+- `Item_Table`: 모든 아이템 공통 메타 (id, name, type, icon, grade, equip_slot, bind_policy 등).
+- `Item_Weapon_Table`: `Item_Table`의 앞부분(공통 컬럼)과 동일한 구조를 먼저 두고, 그 뒤에 무기 전용 데이터(weapon_type, base_atk, stagger_add 등)를 붙인다.
+- C++ 구조체 상속처럼 `ItemBase` → `ItemWeapon` 관계로 읽으면 된다.
+- 소비형/방어구/장신구는 `Item_Table`만 사용하거나 각자 동일 패턴으로 확장한다.
 
 ---
 
-## 7. 전리품 선호와 원정 모드의 authoring 결합 방식
+## ~~7. 전리품 선호와 원정 모드의 authoring 결합 방식~~ ✅ 확정
 
-작업 기본안:
-- B. 던전/원정 모드별 보상 프로필을 두고, 전리품 선호 bias는 그 프로필이 참조한다
+**확정: 커스텀 — Reward_Table(멀티맵) + DungeonTable FK 2컬럼.**
 
-현재 초안:
-- `DropTable.RewardMode`와 `LootPreferenceBiasTable`가 따로 존재하지만, 어느 던전/보상 흐름이 어떤 bias 규칙을 쓰는지 연결이 약하다.
-
-검토할 선택지:
-- A. 현재처럼 각 드롭 행에 `RewardMode`를 직접 둔다
-- B. `DungeonRewardProfileTable` 같은 보상 프로필을 두고 `RewardMode`와 bias를 거기서 묶는다
-
-영향:
-- A는 단순하지만 드롭 행이 늘수록 규칙 중복이 커진다.
-- B는 구조가 늘지만 서버/클라/기획이 같은 보상 규칙 단위를 공유하기 쉽다.
-- 이 선택은 `item_data_table.md`의 `PracticeLootFlag`, `DropTable.RewardMode`, `LootPreferenceBiasTable.Mode`와 직접 연결된다.
-- 단, `## 4. 원정 모드 이원화 유지 여부`에서 단일 모드로 정리되면 이 결정은 단일 보상 프로필 구조로 자동 축소된다.
+- `Reward_Table`: `reward_id`는 고유 PK가 아닌 그룹 키(멀티맵). 동일 `reward_id`에 여러 행이 존재하며, 각 행이 보상 그룹 내 개별 드롭 항목을 나타낸다.
+- `Dungeon_Table`: `purification_reward_id`, `scouting_reward_id` 두 컬럼으로 `Reward_Table.reward_id`를 참조한다.
+- 정화/정찰 각각 독립적인 보상 그룹을 가질 수 있으며, 공유도 가능하다.
 
 ---
 
-## 8. 보스 코어 스탯과 페이즈 규칙의 테이블 분리 방식
+## ~~8. 보스 코어 스탯과 페이즈 규칙의 테이블 분리 방식~~ ✅ 확정
 
-작업 기본안:
-- A. `BossPatternTable`와 별도로 `BossCombatProfileTable` 계열을 둔다
+**확정: A — BossCombatProfileTable + BossStaggerRuleTable 분리.**
 
-현재 초안:
-- `boss_pattern.md`에 `MaxHP`, `Defense`, `StaggerGauge`, `StatusResistance`, `EnrageTime`, 무력화 후처리 규칙이 직접 적혀 있다.
-- `encounter_data_tables.md`에는 패턴/전조/체크포인트는 있지만, 보스 코어 전투 프로필과 페이즈/저항 규칙 테이블은 없다.
-
-검토할 선택지:
-- A. `BossCombatProfileTable`과 `BossStaggerRuleTable`을 추가해 패턴 테이블과 분리한다
-- B. `BossPatternTable`에 보스 공통 수치를 억지로 포함한다
-- C. v1은 마크다운 문서에만 두고 테이블화는 후속으로 미룬다
-
-영향:
-- A는 서버 로딩과 밸런스 조정 경계가 가장 명확하다.
-- B는 패턴 데이터와 보스 공통 규칙이 섞여 변경 비용이 커진다.
-- C는 구현 초기에 하드코딩 유혹이 커지고 data-driven 설명력이 약해진다.
+- `BossCombatProfileTable`: 보스 고유 전투 수치 (MaxHP, Defense, EnrageTime 등).
+- `BossStaggerRuleTable`: 무력화 게이지, 상태 저항, 다운 후처리 규칙.
+- `BossPatternTable`은 패턴/전조/체크포인트 authoring 전용으로 유지한다.
+- 서버 로딩과 밸런스 조정 경계가 분리된다.
 
 ---
 
-## 9. 아이템 귀속/거래 상태 계약을 어디까지 authoring 테이블로 끌어올릴지
+## ~~9. 아이템 귀속/거래 상태 계약을 어디까지 authoring 테이블로 끌어올릴지~~ ✅ 확정
 
-작업 기본안:
-- B. authoring은 규칙만 두고, 현재 상태는 런타임 인스턴스 계약으로 분리한다
+**확정: 커스텀 — BindRule Enum을 기획 테이블에, 현재 귀속 상태는 T_ DB 테이블에.**
 
-현재 초안:
-- `item_data_table.md`에는 `TradeLimitCount`, `PracticeLootFlag`, `BindOnReforge`는 있지만 현재 귀속 상태, 귀속 사유, 거래 차단 사유 계약은 없다.
-- `item.md`, `economy.md`는 `계정 귀속`, `거래 가능 횟수 0`, `연습 보상` UI를 요구한다.
-
-검토할 선택지:
-- A. `ItemTemplateTable`에 귀속 상태까지 직접 넣는다
-- B. authoring은 `TransferPolicy`, `BindOnReforge` 같은 규칙만 두고, 현재 상태는 서버 인스턴스 계약으로 분리한다
-- C. 모든 귀속/거래 상태를 구현 문서로 넘기고 기획 테이블에서는 다룰지 않는다
-
-영향:
-- B가 static rule과 runtime state를 가장 깔끔하게 분리한다.
-- A는 템플릿과 인스턴스 상태가 섞일 위험이 있다.
-- C는 UI/기획 문서가 요구하는 상태 표현 근거가 약해진다.
+- 기획 테이블(`Item_Table`, `Item_Weapon_Table`)에는 `bind_rule` Enum만 둔다.
+  - `BindRule`: `NONE`, `BIND_ON_ACQUIRE`, `BIND_ON_EQUIP` (v1 드롭 아이템은 `BIND_ON_ACQUIRE`)
+- `PracticeLootFlag` 제거. 연습 보상 표시는 별도 UI 로직으로 처리하지 않는다.
+- 현재 귀속 상태(`bind_state`)와 거래 잔여 횟수(`trade_count`)는 DB 테이블 `T_Item`에 런타임 컬럼으로 둔다.
+- 기획 데이터 테이블 이름: `Item_Table` 형태 (접두사 없음).
+- DB 테이블 이름: `T_` 접두사 (예: `T_Item`, `T_Account`, `T_Character`).
+- 아이템 정보 UI에는 `귀속 상태 텍스트`와 `거래 횟수`를 표시한다. (v1은 거래 불가 = 0)
 
 ---
 
-## 10. 전투/입장 UI 표현 계약 분리 방식
+## ~~10. 전투/입장 UI 표현 계약 분리 방식~~ ✅ 확정
 
-작업 기본안:
-- B. 게임플레이 테이블은 판정/규칙 위주로 두고, UI 표현 키는 별도 표현 계약 테이블로 분리
+**확정: 커스텀 — 별도 UI 매핑 테이블 없음. 텍스트 테이블 + UI 하드코딩.**
 
-현재 초안:
-- `combat.md`, `combat_ui_wireframe.md`, `dungeon_entry.md`는 패링/인터럽트/무력화/차단 사유/잠금 상태 같은 UI를 약속한다.
-- 하지만 `skill_data_table.md`, `encounter_data_tables.md`, `item_data_table.md`에는 아이콘/문구/스타일/미리보기 키 계약이 충분하지 않다.
-
-검토할 선택지:
-- A. 기존 스킬/전투/아이템 테이블에 UI key 컬럼을 계속 직접 추가한다
-- B. `SkillUiPresentationTable`, `CombatFeedbackPresentationTable`, `EntryBlockReasonTable` 같은 별도 표현 계약 테이블로 분리한다
-- C. v1에서는 코드 상수로 처리하고 기획 문서에는 최소 키만 남긴다
-
-영향:
-- A는 빠르게 문서를 채울 수 있지만 게임플레이와 표현 책임이 섞인다.
-- B는 클라/서버/기획 경계가 가장 선명하지만 테이블 수가 늘어난다.
-- C는 구현은 빠를 수 있지만 문서 우선, 데이터 드리븐 방향이 약해진다.
+- 별도 UI 표현 계약 테이블(`SkillUiPresentationTable`, `EntryBlockReasonTable` 등)은 만들지 않는다.
+- 출력 텍스트는 `UI_Text_Table`(string_key → localized text)에서 관리한다.
+- UI 코드에서 game state → string_key 매핑을 하드코딩한다. 매핑은 수정될 일이 없으므로 테이블화 불필요.
+- `ItemUiStateTable`은 단순화하거나 제거하고, 텍스트 키만 `UI_Text_Table`로 참조한다.
