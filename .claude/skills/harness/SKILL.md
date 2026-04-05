@@ -265,6 +265,16 @@ Also check for trigger conflicts with existing skills at this stage.
 - Add a `## Test Scenarios` section to the orchestrator skill.
 - Document at least one normal flow and one error flow.
 
+#### 6-7. Recursive Improvement Loop
+
+If harness design or validation exposes reusable friction, do not leave that insight only in chat.
+
+- Record memorable patterns in the repository feedback log.
+- Record independent follow-up work in `docs/workflow/harness-improvement-queue.md`.
+- Queue items must include `task` and `message` so another agent can claim and execute them without replaying the full conversation.
+- If a script or new skill would likely reduce repeated context or token use, capture that in the queued item as part of the improvement signal.
+- For this repository, the default processor for queued harness work is `harness-improver`.
+
 ## Output Checklist
 
 Verify after generation is complete:
@@ -280,6 +290,7 @@ Verify after generation is complete:
 - [ ] SKILL.md body is under 500 lines; anything over that split into references/
 - [ ] Execution validated with 2–3 test prompts
 - [ ] Trigger validation (should-trigger + should-NOT-trigger) complete
+- [ ] Recursive improvement path wired (feedback log + task/message queue + owning agent)
 
 ## References
 

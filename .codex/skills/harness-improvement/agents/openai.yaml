@@ -1,0 +1,4 @@
+version: 1
+display_name: Harness Improvement
+short_description: Leave or process queued harness follow-up work and track context-saving script or skill opportunities.
+default_prompt: Use $harness-improvement to register a new improvement item, capture script/skill optimization potential, or process one through harness-improver.

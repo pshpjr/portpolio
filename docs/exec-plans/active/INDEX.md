@@ -4,6 +4,8 @@
 
 ## 현재 활성 계획
 
+- [20260405-harness-recursive-improvement-queue.md](./20260405-harness-recursive-improvement-queue.md) - 하네스가 작업 중 발견한 개선 항목을 `task` / `message` 큐로 남기고 다른 에이전트가 처리하게 연결
+
 - [20260404-office-hours-proposal-polish.md](./20260404-office-hours-proposal-polish.md) - Office Hours: 기획서 폴리싱 및 데이터 테이블 검토 라운드
 
 

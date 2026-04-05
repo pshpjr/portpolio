@@ -48,6 +48,12 @@ exec-plan 작성 기준과 템플릿: [exec-plan-template.md](./exec-plan-templa
 
 사용자가 명시적으로 멈추라고 하지 않았다면, 쓰기 작업을 끝낸 에이전트는 검증 통과 후 자기 브랜치 커밋/푸시와 `dev` 반영까지 이어서 수행한다.
 
+핵심 목적:
+
+- 완료된 AI 작업 상태를 대화 바깥의 git 이력으로 남긴다.
+- 이후 사용자가 수정을 요청해도, 직전 AI 산출물을 비교 기준으로 다시 확인할 수 있게 한다.
+- "일단 끝난 상태"와 "후속 수정 상태"를 서로 다른 커밋으로 분리한다.
+
 기본 순서:
 
 1. 관련 문서/빌드/테스트/검사 명령을 모두 통과시킨다.
@@ -57,6 +63,13 @@ exec-plan 작성 기준과 템플릿: [exec-plan-template.md](./exec-plan-templa
 5. 최신 `dev`를 자기 브랜치에 merge 해 최종 상태를 확인한다.
 6. 작업이 끝나면 자기 브랜치를 `dev`에 반영하고 `dev`도 푸시한다.
 
+추적성 규칙:
+
+- 사용자가 나중에 추가 수정이나 방향 전환을 요청할 가능성이 있더라도, 현재 작업이 완료됐으면 먼저 한 번 커밋한다.
+- 후속 수정은 이전 완료 커밋 위의 새 커밋으로 쌓는다.
+- 사용자가 "이번엔 커밋하지 말라"고 명시한 경우만 예외로 둔다.
+- 커밋 없이 여러 완료 상태를 한 워킹트리에 겹쳐 두지 않는다.
+
 안전 조건:
 
 - 현재 작업과 무관한 dirty change는 함께 커밋하지 않는다.
@@ -64,6 +77,7 @@ exec-plan 작성 기준과 템플릿: [exec-plan-template.md](./exec-plan-templa
 - `dev` merge 또는 `dev` 반영 과정에서 conflict가 나면 자동 해결을 가장하지 말고 충돌 지점을 명확히 보고한다.
 - 자동 푸시는 "내가 수정한 파일 집합을 명확히 분리할 수 있을 때"만 수행한다.
 - 커밋 전에 관련 exec-plan 진행 상황과 검증 기록을 먼저 갱신한다.
+- 커밋 전, 이번 작업에서 재발 가능한 하네스 결함이 드러났다면 `harness-feedback-log.md` 또는 `harness-improvement-queue.md` 갱신이 필요한지 확인한다.
 
 ## Skill / Agent 저장 위치
 
@@ -160,6 +174,71 @@ PR 설명 필수 포함:
 - 반복될 가능성이 높은 혼선이나 우회가 발생했을 때
 
 각 기록은 `kind`, `area`, `summary`, `impact`, `suggested-follow-up`를 포함한다.
+
+피드백 로그는 "기억할 사건"을 남기는 곳이다. 바로 집어가서 처리할 독립 후속 작업은 [harness-improvement-queue.md](./harness-improvement-queue.md)에 별도로 남긴다.
+
+---
+
+## 재귀 개선 큐
+
+작업 중 또는 작업 종료 시, 하네스의 빈틈이 드러났고 그 문제가 현재 메인 작업과 분리 가능한 후속 작업이라면 [harness-improvement-queue.md](./harness-improvement-queue.md)에 항목을 추가한다.
+
+큐 항목 최소 형식:
+
+```markdown
+- recommended-artifact: script | skill | prompt | doc | other
+- context-savings: low | medium | high | unknown
+- token-meter: `<estimated tokens / changed lines>` | pending
+- task: 다음 에이전트가 수행할 작업
+- message: 왜 필요한지와 어디서 드러났는지
+```
+
+운영 규칙:
+
+- 반복 설명이나 반복 생성 때문에 비효율이 생겼다면 `recommended-artifact`에 `script` 또는 `skill` 후보를 적어 둔다.
+- 스크립트/스킬화가 컨텍스트나 토큰 사용량을 줄일 것 같다면 `context-savings`도 함께 남긴다.
+- substantial task라면 `python tools/context_meter.py --git-base HEAD --files <읽은 주요 컨텍스트 파일들>`로 작업 분량 대비 컨텍스트 부하를 계측하고, 결과를 exec-plan 또는 큐 항목에 남긴다.
+- `task`는 명령형으로 짧게 쓴다.
+- `message`는 다음 에이전트가 전체 대화를 다시 읽지 않아도 될 정도의 맥락만 남긴다.
+- 현재 작업자가 바로 해결 가능한 항목은 큐에 미루지 말고 지금 처리한다.
+- 후속 작업이 독립적이면 `harness-improver`가 claim 해서 처리한다.
+- 회고 가치만 있고 즉시 작업으로 쪼개기 어려운 항목은 큐 대신 피드백 로그에 남긴다.
+
+---
+
+## LLM 응답 아티팩트
+
+외부 LLM 또는 OpenCode 호출 뒤에는 raw thinking 전체를 저장하지 않는다.
+대신 응답 직후의 구조화된 요약만 파일로 남긴다.
+
+기본 경로:
+
+- `_workspace/agent-notes/*.md`
+
+기본 도구:
+
+```bash
+python tools/record_agent_artifact.py --agent <agent> --summary "<short summary>" --source "<task or command>"
+```
+
+후속 작업을 큐에 자동 추가하려면:
+
+```bash
+python tools/record_agent_artifact.py \
+  --agent <agent> \
+  --summary "<short summary>" \
+  --source "<task or command>" \
+  --task "<follow-up task>" \
+  --message "<follow-up context>" \
+  --recommended-artifact script \
+  --context-savings medium
+```
+
+운영 규칙:
+
+- 저장 대상은 구조화된 요약, 결정, 후속 작업, 토큰 계측 결과다.
+- raw private thinking, 장문 내부 추론, 모델의 숨은 scratchpad는 파일에 남기지 않는다.
+- 자동 큐 추가는 현재 작업과 분리 가능한 후속 작업일 때만 사용한다.
 
 ---
 

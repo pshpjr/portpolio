@@ -7,6 +7,7 @@
 - 반복되는 사용자 피드백을 모은다.
 - 작업 중 자주 막히는 지점을 모은다.
 - 나중에 개선 에이전트가 문서, 규칙, 프롬프트, 프로세스 개선 후보를 추출할 수 있게 한다.
+- 즉시 처리 가능한 후속 작업은 `harness-improvement-queue.md`로 분리해 작업 큐로 남긴다.
 
 ## 기록 원칙
 
@@ -14,6 +15,7 @@
 - 실제로 개선으로 이어질 만한 사건만 남긴다.
 - 같은 문제의 장황한 재서술보다, 패턴과 원인을 짧게 적는다.
 - 민감한 비밀값, 토큰, 개인정보는 적지 않는다.
+- 바로 처리 가능한 독립 작업은 이 로그만 남기지 말고 `harness-improvement-queue.md`에도 함께 등록한다.
 
 ## 언제 기록할까
 
@@ -37,6 +39,48 @@
 ```
 
 ## Entries
+
+## 2026-04-05 - recursive-improvement-work-should-be-queued
+- kind: requested-change
+- area: workflow
+- summary: 사용자가 하네스가 작업 완료 후나 작업 중 발견한 문제를 채팅에 흘리지 말고, 다른 에이전트가 처리할 수 있는 `task` / `message` 형식 작업으로 남기길 요청했다.
+- impact: 개선 후보가 대화에만 남으면 후속 처리자가 집어갈 단위가 없어서 하네스가 자기 개선 루프를 안정적으로 돌리지 못한다.
+- suggested-follow-up: `harness-improvement-queue.md`를 추가하고 `harness-improver`가 open item을 claim/처리하도록 workflow에 연결한다.
+
+## 2026-04-05 - completed-work-needs-its-own-commit
+- kind: requested-change
+- area: workflow
+- summary: 사용자가 나중에 추가 수정이 오더라도 그 전 AI 작업 상태를 확인할 수 있어야 하므로, 완료된 작업은 먼저 자동 커밋되길 요청했다.
+- impact: 완료 상태가 커밋으로 남지 않으면 후속 수정이 이전 AI 산출물을 덮어써 비교 기준과 개선 근거가 사라진다.
+- suggested-follow-up: workflow에 "완료 상태 선커밋, 후속 수정은 새 커밋" 규칙을 명시하고 기본 동작으로 유지한다.
+
+## 2026-04-05 - script-or-skill-opportunities-must-be-trackable
+- kind: requested-change
+- area: workflow
+- summary: 사용자가 반복 설명이나 반복 생성이 많은 지점은 스크립트 작성 또는 새 스킬 생성으로 컨텍스트/토큰 사용량을 줄일 수 있는지 추적 가능해야 한다고 요청했다.
+- impact: 개선 큐가 단순 버그 메모만 담으면 어떤 항목이 실제 토큰 절감형 개선인지 구분되지 않아, 하네스 최적화 우선순위를 놓치기 쉽다.
+- suggested-follow-up: 개선 큐 항목에 `recommended-artifact`와 `context-savings`를 추가해 script/skill 후보와 절감 효과를 함께 남긴다.
+
+## 2026-04-05 - token-load-should-be-measured-against-work-size
+- kind: requested-change
+- area: tool
+- summary: 사용자가 하네스 개선 여부를 감으로 판단하지 않도록, 작업 분량 대비 컨텍스트/토큰 사용량을 항상 계측하길 요청했다.
+- impact: 측정값이 없으면 어떤 작업이 실제로 과도한 컨텍스트를 먹는지, 어떤 스크립트/스킬이 비용을 낮출지 판단하기 어렵다.
+- suggested-follow-up: `context_meter.py` 같은 공용 도구와 workflow 기록 규칙을 추가한다.
+
+## 2026-04-05 - response-artifacts-should-be-file-backed
+- kind: requested-change
+- area: workflow
+- summary: 사용자가 외부 LLM/OpenCode 응답 뒤의 핵심 내용을 바로 파일에 남기고, 필요 시 후속 작업을 큐에 자동 추가할 수 있길 요청했다.
+- impact: 응답 결과가 채팅에만 남으면 later pass나 다른 에이전트가 그대로 재사용하기 어렵고, 후속 작업 등록도 누락되기 쉽다.
+- suggested-follow-up: 구조화된 응답 아티팩트 스크립트를 추가하고 workflow에서 `_workspace/agent-notes/` 기록 경로를 정의한다.
+
+## 2026-04-05 - script-or-skill-opportunities-must-be-trackable
+- kind: requested-change
+- area: workflow
+- summary: 사용자가 반복 설명이나 반복 생성이 많은 지점은 스크립트 작성 또는 새 스킬 생성으로 컨텍스트/토큰 사용량을 줄일 수 있는지 추적 가능해야 한다고 요청했다.
+- impact: 개선 큐가 단순 버그 메모만 담으면 어떤 항목이 실제 토큰 절감형 개선인지 구분되지 않아, 하네스 최적화 우선순위를 놓치기 쉽다.
+- suggested-follow-up: 개선 큐 항목에 `recommended-artifact`와 `context-savings`를 추가해 script/skill 후보와 절감 효과를 함께 남긴다.
 
 ## 2026-04-04 - gstack-web-assumptions-must-be-trimmed
 - kind: requested-change

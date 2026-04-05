@@ -26,7 +26,9 @@ Python은 저장소에서 다음 용도로 사용한다.
 tools/
 ├── check_encoding.py
 ├── check_layers.py
+├── context_meter.py
 ├── doc_check.py
+├── record_agent_artifact.py
 └── setup_linux_env.sh
 
 server/tools/
@@ -73,6 +75,16 @@ Python 3.10+
 
 - 저장소 텍스트 파일이 UTF-8 without BOM인지 검사한다.
 - 깨진 문자나 전형적인 mojibake 패턴을 감지한다.
+
+### `context_meter.py`
+
+- 작업에 실제로 읽은 컨텍스트 파일들과 현재 diff를 기준으로 대략적인 토큰 부하를 계산한다.
+- 작업 분량 대비 컨텍스트/토큰 사용량을 비교해, 스크립트화·스킬화 후보를 찾는 데 사용한다.
+
+### `record_agent_artifact.py`
+
+- 외부 LLM/OpenCode 응답 직후 구조화된 응답 노트를 `_workspace/agent-notes/`에 남긴다.
+- 필요 시 `task` / `message` 후속 작업을 `harness-improvement-queue.md`에 자동 추가한다.
 
 ---
 
