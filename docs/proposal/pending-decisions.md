@@ -112,3 +112,99 @@
 - 출력 텍스트는 `UI_Text_Table`(string_key → localized text)에서 관리한다.
 - UI 코드에서 game state → string_key 매핑을 하드코딩한다. 매핑은 수정될 일이 없으므로 테이블화 불필요.
 - `ItemUiStateTable`은 단순화하거나 제거하고, 텍스트 키만 `UI_Text_Table`로 참조한다.
+
+---
+
+## 11. 원격 캐릭터 상태 전이와 FClientRemoteCharacterState 필드 확정
+
+> 출처: [20260406-network-subsystem-client-review.md](./reviews/20260406-network-subsystem-client-review.md)
+
+**작업 기본안: 미정 (결정 필요)**
+
+- `FClientRemoteCharacterState`에 Velocity, 상태 enum, 스킬 ID, 상태 이상 플래그 등을 포함할지 확정해야 한다.
+- 원격 캐릭터의 상태 전이(Alive/Dying/Dead/Reviving/Invulnerable)를 enum으로 정의하고, 각 전이를 트리거하는 서버 패킷을 지정해야 한다.
+- 보스 엔티티가 같은 `FClientRemoteCharacterState`를 쓸지, 별도 타입으로 분리할지 결정해야 한다.
+
+---
+
+## 12. 구역 전환 빈 화면 처리 정책
+
+> 출처: [20260406-network-subsystem-client-review.md](./reviews/20260406-network-subsystem-client-review.md)
+
+**작업 기본안: 미정 (결정 필요)**
+
+- 일괄 디스폰과 새 스폰 패킷 사이 빈 화면 구간의 UI 처리(페이드, 로딩 화면, 텍스트 등)를 정해야 한다.
+- 구역 전환 트리거 패킷을 protocol.md에 등록해야 한다.
+- 스폰 완료 판정 방법(완료 패킷 vs. 타이머)을 정해야 한다.
+
+---
+
+## 13. NetworkSubsystem Pop-dispatch Tick 소유권
+
+> 출처: [20260406-network-subsystem-client-review.md](./reviews/20260406-network-subsystem-client-review.md)
+
+**작업 기본안: 미정 (결정 필요)**
+
+- NetworkSubsystem Tick에서 Pop + Delegate fire 방식인지, WorldEntitySubsystem Tick에서 Pull 방식인지 하나를 확정해야 한다.
+- 두 GameInstanceSubsystem의 Tick 순서 보장 방법을 결정해야 한다.
+- 한 프레임당 패킷 처리 상한이 필요한지 결정해야 한다.
+
+---
+
+## 14. 엔티티 스폰 패킷의 유형 구분과 몬스터 전용 필드
+
+> 출처: [20260406-network-subsystem-server-review.md](./reviews/20260406-network-subsystem-server-review.md) 항목 1-1, 1-2, 1-3
+
+**작업 기본안: 미정 (결정 필요)**
+
+- `FClientRemoteCharacterState`에 `EntityType` 열거형(PLAYER/MONSTER/NPC)을 추가할지, TemplateId 대역 규칙으로 유형을 암시할지 결정해야 한다.
+- 몬스터 스폰 시 추가 필드(무력화 게이지, 속성, AI 상태)를 동일 패킷 내 optional로 넣을지, 별도 패킷 타입으로 분리할지 결정해야 한다.
+- 원격 플레이어 스폰 시 장비 외형 정보의 전달 범위를 결정해야 한다.
+
+---
+
+## 15. 구역 전환 서버-클라이언트 프로토콜
+
+> 출처: [20260406-network-subsystem-server-review.md](./reviews/20260406-network-subsystem-server-review.md) 항목 3-1, 3-2, 8-2
+
+**작업 기본안: 미정 (결정 필요)**
+
+- 구역 전환 시작/완료를 알리는 서버 패킷의 이름과 필드를 확정해야 한다.
+- 클라이언트가 "새 구역 준비 완료"를 서버에 응답해야 하는지 결정해야 한다.
+- 구역 전환 중 이전 구역 잔여 패킷의 폐기 규칙을 정해야 한다.
+- `protocol.md`의 `DungeonLifecycle` 이벤트와 구역 전환 트리거의 관계를 명확히 해야 한다.
+
+---
+
+## 16. 재연결 시 월드 복구 및 연결 끊김 캐릭터 처리
+
+> 출처: [20260406-network-subsystem-server-review.md](./reviews/20260406-network-subsystem-server-review.md) 항목 4-1, 4-2
+
+**작업 기본안: 미정 (결정 필요)**
+
+- 재연결 시 서버가 보내야 하는 월드 스냅샷 범위(풀 스냅샷 vs 델타)를 결정해야 한다.
+- 던전 내 연결 끊김 시 서버 측 캐릭터 유지 시간(grace period)과 그동안의 행동(무적/AI대리/즉시사망)을 결정해야 한다.
+- grace period 초과 시 파티원에게 보내는 디스폰 사유 필드를 정해야 한다.
+
+---
+
+## 17. EntityId 고유성 범위와 서버-클라이언트 시간 동기화
+
+> 출처: [20260406-network-subsystem-server-review.md](./reviews/20260406-network-subsystem-server-review.md) 항목 6-1, 6-2
+
+**작업 기본안: 미정 (결정 필요)**
+
+- EntityId의 고유성 범위(서버 프로세스 전역 vs 던전 인스턴스)와 재사용 가능 여부를 결정해야 한다.
+- `MoveTimestamp`의 시간 기준(서버 클록 vs 클라이언트 로컬)을 확정해야 한다.
+- 서버-클라이언트 시간 오프셋 동기화 메커니즘의 v1 포함 여부를 결정해야 한다.
+
+---
+
+## 18. 서버 거부 응답 공통 포맷
+
+> 출처: [20260406-network-subsystem-server-review.md](./reviews/20260406-network-subsystem-server-review.md) 항목 7-1
+
+**작업 기본안: 미정 (결정 필요)**
+
+- 서버 거부/에러 응답의 공통 패킷 포맷(requestType, errorCode, message)을 `protocol.md`에 추가해야 한다.
+- 주요 에러 코드 열거(INVALID_SESSION, ENTITY_NOT_FOUND, ZONE_MISMATCH 등)를 확정해야 한다.

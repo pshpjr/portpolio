@@ -4,6 +4,9 @@
 
 ## 현재 활성 계획
 
+- [20260406-client-network-subsystem-proposal.md](./20260406-client-network-subsystem-proposal.md) - UClientNetworkSubsystem + UClientWorldEntitySubsystem 기획 라운드
+
+
 - [20260405-item-data-table-and-factory.md](./20260405-item-data-table-and-factory.md) - 아이템 DataTable + 인스턴스 팩토리 (UClientItemSubsystem)
 
 - [20260405-inventory-completion.md](./20260405-inventory-completion.md) - 언리얼 인벤토리 C++ 완성 + 에디터 작업 가이드
