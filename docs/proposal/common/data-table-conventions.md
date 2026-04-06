@@ -164,6 +164,23 @@ Weapon.WeaponType + Weapon.EnhanceLevel
 
 ---
 
+## schema.json enum 값 네이밍 규칙
+
+스키마의 enum `values` 배열에 작성하는 값은 **CamelCase**를 사용한다.
+
+| 예시 (잘못됨) | 예시 (올바름) |
+|---|---|
+| `"NONE"` | `"None"` |
+| `"SWORD_SHIELD"` | `"SwordShield"` |
+| `"SKILL_BOOK"` | `"SkillBook"` |
+| `"RING_LEFT"` | `"RingLeft"` |
+
+- 생성기(`tools/generate_tables.py`)는 값을 변환하지 않고 그대로 사용한다.
+- 스키마가 단일 소스이므로 enum 표기 규칙도 스키마에서 결정한다.
+- 데이터 파일(`.data.json`)의 enum 문자열 값도 스키마와 동일한 CamelCase를 사용해야 한다 (파서가 문자열 비교로 파싱하기 때문).
+
+---
+
 ## schema.json 기반 문서 예외
 
 전투 스탯처럼 코드 생성 파이프라인(`schema.json` + `data.json` + `codegen`)을 통해 관리되는 테이블 문서는 아래 조건 하에 표준 컬럼 표를 schema.json으로 위임할 수 있다.

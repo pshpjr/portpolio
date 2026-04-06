@@ -12,37 +12,54 @@ void UClientEquipmentComponent::InitializeDefaultSlots()
 {
     EquippedItems.Empty();
 
-    static const TArray<EClientEquipSlot> DefaultSlots = {
-        EClientEquipSlot::Weapon,
-        EClientEquipSlot::Head,
-        EClientEquipSlot::Chest,
-        EClientEquipSlot::Hands,
-        EClientEquipSlot::Legs,
-        EClientEquipSlot::Feet,
-        EClientEquipSlot::Necklace,
-        EClientEquipSlot::RingLeft,
-        EClientEquipSlot::RingRight
+    static const TArray<EEquipSlot> DefaultSlots = {
+        EEquipSlot::Weapon,
+        EEquipSlot::Chest,
+        EEquipSlot::Legs,
+        EEquipSlot::Hands,
+        EEquipSlot::Necklace,
+        EEquipSlot::RingLeft,
+        EEquipSlot::RingRight
     };
 
-    for (EClientEquipSlot Slot : DefaultSlots)
+    for (EEquipSlot Slot : DefaultSlots)
     {
         EquippedItems.Add(Slot, nullptr);
     }
 }
 
-bool UClientEquipmentComponent::CanEquipItem(const UClientItemInstance* Item, EClientEquipSlot Slot) const
+bool UClientEquipmentComponent::CanEquipItem(const UClientItemInstance* Item, EEquipSlot Slot) const
 {
     return Item != nullptr
-        && Slot != EClientEquipSlot::None
-        && Item->CanEquipInSlot(Slot)
-        && (!EquippedItems.Contains(Slot) || EquippedItems.FindRef(Slot) == nullptr);
+        && Slot != EEquipSlot::None
+        && Item->CanEquipInSlot(Slot);
 }
 
-bool UClientEquipmentComponent::EquipItem(UClientItemInstance* Item, EClientEquipSlot Slot)
+bool UClientEquipmentComponent::EquipItem(UClientItemInstance* Item, EEquipSlot Slot)
 {
+    UClientItemInstance* Previous = nullptr;
+    return SwapEquipItem(Item, Slot, Previous);
+}
+
+bool UClientEquipmentComponent::SwapEquipItem(UClientItemInstance* Item, EEquipSlot Slot, UClientItemInstance*& OutPreviousItem)
+{
+    OutPreviousItem = nullptr;
+
     if (!CanEquipItem(Item, Slot))
     {
         return false;
+    }
+
+    OutPreviousItem = EquippedItems.FindRef(Slot);
+
+    if (OutPreviousItem != nullptr)
+    {
+        FClientItemLocation ClearedLocation = OutPreviousItem->GetRuntimeData().Location;
+        ClearedLocation.StorageKind = EClientItemStorageKind::None;
+        ClearedLocation.SlotIndex = INDEX_NONE;
+        ClearedLocation.SecondaryIndex = INDEX_NONE;
+        ClearedLocation.EquipSlot = EEquipSlot::None;
+        OutPreviousItem->SetLocation(ClearedLocation);
     }
 
     EquippedItems.FindOrAdd(Slot) = Item;
@@ -51,7 +68,7 @@ bool UClientEquipmentComponent::EquipItem(UClientItemInstance* Item, EClientEqui
     return true;
 }
 
-UClientItemInstance* UClientEquipmentComponent::UnequipItem(EClientEquipSlot Slot)
+UClientItemInstance* UClientEquipmentComponent::UnequipItem(EEquipSlot Slot)
 {
     if (!EquippedItems.Contains(Slot))
     {
@@ -67,7 +84,7 @@ UClientItemInstance* UClientEquipmentComponent::UnequipItem(EClientEquipSlot Slo
         NewLocation.StorageKind = EClientItemStorageKind::None;
         NewLocation.SlotIndex = INDEX_NONE;
         NewLocation.SecondaryIndex = INDEX_NONE;
-        NewLocation.EquipSlot = EClientEquipSlot::None;
+        NewLocation.EquipSlot = EEquipSlot::None;
         RemovedItem->SetLocation(NewLocation);
     }
 
@@ -75,27 +92,27 @@ UClientItemInstance* UClientEquipmentComponent::UnequipItem(EClientEquipSlot Slo
     return RemovedItem;
 }
 
-UClientItemInstance* UClientEquipmentComponent::GetEquippedItem(EClientEquipSlot Slot) const
+UClientItemInstance* UClientEquipmentComponent::GetEquippedItem(EEquipSlot Slot) const
 {
     return EquippedItems.FindRef(Slot);
 }
 
-EClientWeaponType UClientEquipmentComponent::GetEquippedWeaponType() const
+EWeaponType UClientEquipmentComponent::GetEquippedWeaponType() const
 {
-    if (const UClientItemInstance* WeaponItem = EquippedItems.FindRef(EClientEquipSlot::Weapon))
+    if (const UClientItemInstance* WeaponItem = EquippedItems.FindRef(EEquipSlot::Weapon))
     {
         return WeaponItem->GetStaticData().WeaponType;
     }
 
-    return EClientWeaponType::None;
+    return EWeaponType::None;
 }
 
-const TMap<EClientEquipSlot, TObjectPtr<UClientItemInstance>>& UClientEquipmentComponent::GetEquippedItems() const
+const TMap<EEquipSlot, TObjectPtr<UClientItemInstance>>& UClientEquipmentComponent::GetEquippedItems() const
 {
     return EquippedItems;
 }
 
-void UClientEquipmentComponent::UpdateItemLocation(UClientItemInstance* Item, EClientEquipSlot Slot) const
+void UClientEquipmentComponent::UpdateItemLocation(UClientItemInstance* Item, EEquipSlot Slot) const
 {
     if (Item == nullptr)
     {

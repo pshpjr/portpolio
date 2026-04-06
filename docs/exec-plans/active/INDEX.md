@@ -4,6 +4,11 @@
 
 ## 현재 활성 계획
 
+- [20260405-item-data-table-and-factory.md](./20260405-item-data-table-and-factory.md) - 아이템 DataTable + 인스턴스 팩토리 (UClientItemSubsystem)
+
+- [20260405-inventory-completion.md](./20260405-inventory-completion.md) - 언리얼 인벤토리 C++ 완성 + 에디터 작업 가이드
+
+
 - [20260404-server-client-proposal-critique.md](./20260404-server-client-proposal-critique.md) - 서버/클라이언트 구현 관점에서 기획서 비판 및 문서화
 
 - [20260403-client-inventory-build-fix.md](./20260403-client-inventory-build-fix.md) - 클라이언트 인벤토리 빌드 충돌(ItemDataAsset.h) 해소

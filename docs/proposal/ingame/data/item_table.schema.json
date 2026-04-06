@@ -1,0 +1,29 @@
+{
+  "table": "ItemTable",
+  "keys": [
+    { "field": "ItemId", "unique": true }
+  ],
+  "fields": [
+    { "name": "ItemId", "type": "int32" },
+    { "name": "ItemCode", "type": "string" },
+    { "name": "ItemName", "type": "string" },
+    { "name": "ItemCategory", "type": "enum", "enum_name": "EItemCategory" },
+    { "name": "Rarity", "type": "enum", "enum_name": "EItemRarity" },
+    { "name": "EquipSlot", "type": "enum", "enum_name": "EEquipSlot" },
+    { "name": "WeaponType", "type": "enum", "enum_name": "EWeaponType" },
+    { "name": "MaxStackCount", "type": "int32" },
+    { "name": "MaxDurability", "type": "int32" },
+    { "name": "MaxTradeCount", "type": "int32" },
+    { "name": "SellValue", "type": "int32" },
+    { "name": "bCanUseSharedStorage", "type": "bool" },
+    { "name": "bCanBindToConsumableQuickSlot", "type": "bool" },
+    { "name": "IconKey", "type": "string" },
+    { "name": "BalanceVersion", "type": "int32" }
+  ],
+  "enums": [
+    { "name": "EItemCategory", "values": ["None", "Weapon", "Armor", "Consumable", "SkillBook", "Material", "Quest", "Currency"] },
+    { "name": "EItemRarity", "values": ["Normal", "Uncommon", "Rare", "Epic"] },
+    { "name": "EEquipSlot", "values": ["None", "Weapon", "Chest", "Legs", "Hands", "Necklace", "RingLeft", "RingRight"] },
+    { "name": "EWeaponType", "values": ["None", "SwordShield", "Greatsword", "Staff"] }
+  ]
+}

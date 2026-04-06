@@ -1,3 +1,7 @@
+> **[DEPRECATED]** 아이템 테이블 스키마는 `docs/proposal/ingame/data/item_table.schema.json` 이 단일 소스입니다.
+> 이 문서의 `Item_Table` / `Item_Weapon_Table` 컬럼 정의는 스키마로 대체되었습니다.
+> 드롭(Reward_Table), 재련(ReforgeCostTable) 등 아이템 외 테이블 정의는 아직 유효합니다.
+
 # 아이템 / 드롭 데이터 테이블 구조
 
 ## 목적

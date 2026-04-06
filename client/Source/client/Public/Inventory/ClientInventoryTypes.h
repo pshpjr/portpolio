@@ -1,40 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Generated/ItemTableRow.h"
 #include "ClientInventoryTypes.generated.h"
 
 class UClientItemInstance;
 
-UENUM(BlueprintType)
-enum class EClientItemCategory : uint8
-{
-    None,
-    Weapon,
-    Armor,
-    Consumable,
-    SkillBook,
-    Material,
-    Quest,
-    Currency
-};
-
-UENUM(BlueprintType)
-enum class EClientWeaponType : uint8
-{
-    None,
-    SwordAndShield,
-    Greatsword,
-    Staff
-};
-
-UENUM(BlueprintType)
-enum class EClientItemRarity : uint8
-{
-    Normal,
-    Uncommon,
-    Rare,
-    Epic
-};
+// EItemCategory, EItemRarity, EEquipSlot, EWeaponType 은 Generated/ItemTableRow.h 에서 옵니다.
 
 UENUM(BlueprintType)
 enum class EClientItemStorageKind : uint8
@@ -49,21 +21,6 @@ enum class EClientItemStorageKind : uint8
 };
 
 UENUM(BlueprintType)
-enum class EClientEquipSlot : uint8
-{
-    None,
-    Weapon,
-    Head,
-    Chest,
-    Hands,
-    Legs,
-    Feet,
-    Necklace,
-    RingLeft,
-    RingRight
-};
-
-UENUM(BlueprintType)
 enum class EClientSkillType : uint8
 {
     None,
@@ -72,6 +29,17 @@ enum class EClientSkillType : uint8
     Mobility,
     Parry
 };
+
+UENUM(BlueprintType)
+enum class EClientConsumableSlot : uint8
+{
+    None,
+    Slot1,
+    Slot2
+};
+
+// 기획: 소모품 슬롯 최대 수량 (슬롯당 5개)
+inline constexpr int32 GClientConsumableSlotMaxStack = 5;
 
 UENUM(BlueprintType)
 enum class EClientSkillHotSlot : uint8
@@ -99,52 +67,10 @@ struct CLIENT_API FClientItemLocation
     int32 SecondaryIndex = INDEX_NONE;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    EClientEquipSlot EquipSlot = EClientEquipSlot::None;
+    EEquipSlot EquipSlot = EEquipSlot::None;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
     EClientSkillHotSlot SkillHotSlot = EClientSkillHotSlot::None;
-};
-
-USTRUCT(BlueprintType)
-struct CLIENT_API FClientItemStaticData
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    int32 ItemTid = 0;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    FText DisplayName;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    FText Description;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    EClientItemCategory Category = EClientItemCategory::None;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    EClientWeaponType WeaponType = EClientWeaponType::None;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    EClientItemRarity Rarity = EClientItemRarity::Normal;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    EClientEquipSlot EquipSlot = EClientEquipSlot::None;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    int32 MaxStackCount = 1;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    int32 MaxDurability = 0;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    int32 MaxTradeCount = 0;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    bool bCanUseSharedStorage = true;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    bool bCanBindToConsumableQuickSlot = false;
 };
 
 USTRUCT(BlueprintType)
@@ -169,15 +95,6 @@ struct CLIENT_API FClientItemRuntimeData
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
     FClientItemLocation Location;
-};
-
-USTRUCT(BlueprintType)
-struct CLIENT_API FClientInventorySlotState
-{
-    GENERATED_BODY()
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-    TObjectPtr<UClientItemInstance> Item = nullptr;
 };
 
 USTRUCT(BlueprintType)
@@ -225,7 +142,7 @@ struct CLIENT_API FClientSkillDefinition
     EClientSkillType SkillType = EClientSkillType::Active;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
-    EClientWeaponType RequiredWeaponType = EClientWeaponType::None;
+    EWeaponType RequiredWeaponType = EWeaponType::None;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
     FText DisplayName;

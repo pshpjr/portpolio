@@ -16,7 +16,7 @@ public:
     UClientSkillHotbarComponent();
 
     UFUNCTION(BlueprintCallable, Category = "Skill")
-    void SetEquippedWeaponType(EClientWeaponType InWeaponType);
+    void SetEquippedWeaponType(EWeaponType InWeaponType);
 
     UFUNCTION(BlueprintPure, Category = "Skill")
     bool CanRegisterSkillToSlot(const FClientSkillDefinition& SkillDefinition, EClientSkillHotSlot Slot) const;
@@ -43,7 +43,7 @@ private:
     void BroadcastHotbarUpdated();
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill", meta = (AllowPrivateAccess = "true"))
-    EClientWeaponType EquippedWeaponType = EClientWeaponType::None;
+    EWeaponType EquippedWeaponType = EWeaponType::None;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill", meta = (AllowPrivateAccess = "true"))
     TMap<EClientSkillHotSlot, FClientSkillDefinition> SlotBindings;

@@ -1,15 +1,10 @@
 #include "UI/ClientInventoryWidgetBase.h"
 
 #include "Inventory/ClientInventoryComponent.h"
+#include "Inventory/ClientItemInstance.h"
 
 void UClientInventoryWidgetBase::BindInventoryComponent(UClientInventoryComponent* InInventoryComponent)
 {
-    if (InventoryComponent == InInventoryComponent)
-    {
-        RefreshFromInventory();
-        return;
-    }
-
     if (InventoryComponent != nullptr)
     {
         InventoryComponent->OnInventoryUpdated.RemoveDynamic(this, &UClientInventoryWidgetBase::HandleInventoryUpdated);
@@ -17,12 +12,15 @@ void UClientInventoryWidgetBase::BindInventoryComponent(UClientInventoryComponen
 
     InventoryComponent = InInventoryComponent;
 
-    if (InventoryComponent != nullptr)
+    if (InventoryComponent == nullptr)
     {
-        InventoryComponent->OnInventoryUpdated.AddDynamic(this, &UClientInventoryWidgetBase::HandleInventoryUpdated);
+        return;
     }
 
-    RefreshFromInventory();
+    InventoryComponent->OnInventoryUpdated.AddDynamic(this, &UClientInventoryWidgetBase::HandleInventoryUpdated);
+
+    // 바인딩 직후 null을 전달해 전체 목록 초기화를 유도한다.
+    OnInventoryUpdated(nullptr);
 }
 
 UClientInventoryComponent* UClientInventoryWidgetBase::GetInventoryComponent() const
@@ -35,12 +33,13 @@ void UClientInventoryWidgetBase::NativeDestruct()
     if (InventoryComponent != nullptr)
     {
         InventoryComponent->OnInventoryUpdated.RemoveDynamic(this, &UClientInventoryWidgetBase::HandleInventoryUpdated);
+        InventoryComponent = nullptr;
     }
 
     Super::NativeDestruct();
 }
 
-void UClientInventoryWidgetBase::HandleInventoryUpdated()
+void UClientInventoryWidgetBase::HandleInventoryUpdated(UClientItemInstance* ChangedItem)
 {
-    RefreshFromInventory();
+    OnInventoryUpdated(ChangedItem);
 }
