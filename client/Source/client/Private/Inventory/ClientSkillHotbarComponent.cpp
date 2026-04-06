@@ -2,7 +2,6 @@
 
 UClientSkillHotbarComponent::UClientSkillHotbarComponent()
 {
-    PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UClientSkillHotbarComponent::SetEquippedWeaponType(EWeaponType InWeaponType)

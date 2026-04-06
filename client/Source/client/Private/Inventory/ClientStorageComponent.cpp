@@ -4,7 +4,6 @@
 
 UClientStorageComponent::UClientStorageComponent()
 {
-    PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UClientStorageComponent::InitializeStorage(const TArray<FClientStorageTabDescriptor>& TabDescriptors)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "UObject/Object.h"
 #include "Inventory/ClientInventoryTypes.h"
 #include "ClientStorageComponent.generated.h"
 
@@ -9,8 +9,8 @@ class UClientItemInstance;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FClientStorageUpdatedSignature);
 
-UCLASS(ClassGroup = (Custom), BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
-class CLIENT_API UClientStorageComponent : public UActorComponent
+UCLASS(BlueprintType)
+class CLIENT_API UClientStorageComponent : public UObject
 {
     GENERATED_BODY()
 

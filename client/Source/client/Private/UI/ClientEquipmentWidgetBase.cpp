@@ -1,6 +1,20 @@
 #include "UI/ClientEquipmentWidgetBase.h"
 
+#include "ClientCharacterSubsystem.h"
 #include "Inventory/ClientEquipmentComponent.h"
+
+void UClientEquipmentWidgetBase::NativeConstruct()
+{
+    Super::NativeConstruct();
+
+    if (UGameInstance* GI = GetOwningGameInstance())
+    {
+        if (UClientCharacterSubsystem* CharSub = GI->GetSubsystem<UClientCharacterSubsystem>())
+        {
+            BindEquipmentComponent(CharSub->GetEquipment());
+        }
+    }
+}
 
 void UClientEquipmentWidgetBase::BindEquipmentComponent(UClientEquipmentComponent* InEquipmentComponent)
 {

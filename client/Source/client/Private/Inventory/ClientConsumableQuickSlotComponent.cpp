@@ -4,8 +4,6 @@
 
 UClientConsumableQuickSlotComponent::UClientConsumableQuickSlotComponent()
 {
-    PrimaryComponentTick.bCanEverTick = false;
-
     SlotItems.Add(EClientConsumableSlot::Slot1, nullptr);
     SlotItems.Add(EClientConsumableSlot::Slot2, nullptr);
 }

@@ -1,6 +1,20 @@
 #include "UI/ClientConsumableQuickSlotWidgetBase.h"
 
+#include "ClientCharacterSubsystem.h"
 #include "Inventory/ClientConsumableQuickSlotComponent.h"
+
+void UClientConsumableQuickSlotWidgetBase::NativeConstruct()
+{
+    Super::NativeConstruct();
+
+    if (UGameInstance* GI = GetOwningGameInstance())
+    {
+        if (UClientCharacterSubsystem* CharSub = GI->GetSubsystem<UClientCharacterSubsystem>())
+        {
+            BindConsumableQuickSlotComponent(CharSub->GetConsumableQuickSlot());
+        }
+    }
+}
 
 void UClientConsumableQuickSlotWidgetBase::BindConsumableQuickSlotComponent(UClientConsumableQuickSlotComponent* InComponent)
 {

@@ -4,7 +4,6 @@
 
 UClientEquipmentComponent::UClientEquipmentComponent()
 {
-    PrimaryComponentTick.bCanEverTick = false;
     InitializeDefaultSlots();
 }
 

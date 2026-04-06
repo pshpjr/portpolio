@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "UObject/Object.h"
 #include "Inventory/ClientInventoryTypes.h"
 #include "ClientInventoryComponent.generated.h"
 
@@ -10,8 +10,8 @@ class UClientItemInstance;
 // ChangedItem: 추가/수량 변경된 아이템. null이면 전체 목록이 바뀐 것 (제거, 초기화 등).
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FClientInventoryUpdatedSignature, UClientItemInstance*, ChangedItem);
 
-UCLASS(ClassGroup = (Custom), BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
-class CLIENT_API UClientInventoryComponent : public UActorComponent
+UCLASS(BlueprintType)
+class CLIENT_API UClientInventoryComponent : public UObject
 {
     GENERATED_BODY()
 

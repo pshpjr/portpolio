@@ -1,14 +1,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "UObject/Object.h"
 #include "Inventory/ClientInventoryTypes.h"
 #include "ClientSkillHotbarComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FClientSkillHotbarUpdatedSignature);
 
-UCLASS(ClassGroup = (Custom), BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
-class CLIENT_API UClientSkillHotbarComponent : public UActorComponent
+UCLASS(BlueprintType)
+class CLIENT_API UClientSkillHotbarComponent : public UObject
 {
     GENERATED_BODY()
 

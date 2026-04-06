@@ -20,6 +20,7 @@ public:
     UClientInventoryComponent* GetInventoryComponent() const;
 
 protected:
+    virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;
 
     // 아이템이 추가·수량 변경되면 해당 아이템과 함께 호출된다.

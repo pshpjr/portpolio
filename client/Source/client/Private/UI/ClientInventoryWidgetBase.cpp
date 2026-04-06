@@ -1,7 +1,21 @@
 #include "UI/ClientInventoryWidgetBase.h"
 
+#include "ClientCharacterSubsystem.h"
 #include "Inventory/ClientInventoryComponent.h"
 #include "Inventory/ClientItemInstance.h"
+
+void UClientInventoryWidgetBase::NativeConstruct()
+{
+    Super::NativeConstruct();
+
+    if (UGameInstance* GI = GetOwningGameInstance())
+    {
+        if (UClientCharacterSubsystem* CharSub = GI->GetSubsystem<UClientCharacterSubsystem>())
+        {
+            BindInventoryComponent(CharSub->GetInventory());
+        }
+    }
+}
 
 void UClientInventoryWidgetBase::BindInventoryComponent(UClientInventoryComponent* InInventoryComponent)
 {

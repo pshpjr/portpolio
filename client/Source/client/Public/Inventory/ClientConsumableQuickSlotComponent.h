@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "UObject/Object.h"
 #include "Inventory/ClientInventoryTypes.h"
 #include "ClientConsumableQuickSlotComponent.generated.h"
 
@@ -13,8 +13,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FClientConsumableQuickSlotUpdatedSignature);
 // - 슬롯 2개 (Slot1, Slot2), 슬롯당 최대 5개 스택
 // - 쿨다운은 슬롯 단위 (아이템 단위 아님)
 // - 던전 내부에서는 슬롯 구성(아이템 종류) 변경 불가 — 이 컴포넌트는 상태만 보관, 제한 로직은 호출부 책임
-UCLASS(ClassGroup = (Custom), BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
-class CLIENT_API UClientConsumableQuickSlotComponent : public UActorComponent
+UCLASS(BlueprintType)
+class CLIENT_API UClientConsumableQuickSlotComponent : public UObject
 {
     GENERATED_BODY()
 

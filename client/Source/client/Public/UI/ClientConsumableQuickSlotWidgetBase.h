@@ -19,6 +19,7 @@ public:
     UClientConsumableQuickSlotComponent* GetConsumableQuickSlotComponent() const;
 
 protected:
+    virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;
 
     UFUNCTION(BlueprintImplementableEvent, Category = "UI")

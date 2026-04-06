@@ -4,7 +4,6 @@
 
 UClientInventoryComponent::UClientInventoryComponent()
 {
-    PrimaryComponentTick.bCanEverTick = false;
 }
 
 bool UClientInventoryComponent::AddItem(UClientItemInstance* Item)
