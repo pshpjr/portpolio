@@ -54,7 +54,7 @@ void AClientPlayerController::FocusUI()
 
 void AClientPlayerController::FocusGame()
 {
-    SetFocus();
+    //SetFocus();
 }
 
 void AClientPlayerController::RequestInteraction(AActor* Target)

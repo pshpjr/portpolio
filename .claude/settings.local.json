@@ -2,23 +2,23 @@
   "permissions": {
     "allow": [
       "Bash(cd:*)",
-      "Bash(cmd.exe /c \"dir \\\\\"C:\\\\\\\\Program Files\\\\\\\\Microsoft Visual Studio\\\\\" /b\")",
-      "Find *",
-      "Ls *",
+      "Bash(cmd.exe /c \"dir \\\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\\\\" /b\")",
       "Bash(git mv:*)",
-      "Read(//d/Users/pshpjr/AppData/Roaming/claude/**)",
-      "Read(//d/Users/pshpjr/AppData/Local/claude/**)",
-      "Read(//d/Users/pshpjr/**)",
-      "Bash(opencode run *)",
-      "Edit(//d/Users/pshpjr/source/repos/**)",
-      "Bash(python3 -c ':*)",
-      "Bash(python \"D:\\\\Users\\\\pshpjr\\\\source\\\\repos\\\\portpolio\\\\tools\\\\extract_opencode_text.py\")",
-      "Bash(python -c *)",
-      "Bash(python *)",
-      "Bash(node:*)",
       "Bash(mv:*)",
       "Bash(mv *)",
-      "Bash(xargs python:*)"
+      "Bash(node:*)",
+      "Bash(opencode run *)",
+      "Bash(python *)",
+      "Bash(python -c *)",
+      "Bash(python3 -c:*)",
+      "Bash(python \"D:\\\\Users\\\\pshpjr\\\\source\\\\repos\\\\portpolio\\\\tools\\\\extract_opencode_text.py\")",
+      "Bash(xargs python:*)",
+      "Edit(//d/Users/pshpjr/source/repos/**)",
+      "Find *",
+      "Ls *",
+      "Read(//d/Users/pshpjr/**)",
+      "Read(//d/Users/pshpjr/AppData/Local/claude/**)",
+      "Read(//d/Users/pshpjr/AppData/Roaming/claude/**)"
     ]
   },
   "sandbox": {

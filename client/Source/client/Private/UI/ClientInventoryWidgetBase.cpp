@@ -8,7 +8,7 @@ void UClientInventoryWidgetBase::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    if (UGameInstance* GI = GetOwningGameInstance())
+    if (UGameInstance* GI = GetGameInstance())
     {
         if (UClientCharacterSubsystem* CharSub = GI->GetSubsystem<UClientCharacterSubsystem>())
         {
