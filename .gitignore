@@ -1,6 +1,9 @@
 ## Local environment
 .env
 
+## Workspace auto-generated logs
+_workspace/*.jsonl
+
 ## Python
 __pycache__/
 *.pyc

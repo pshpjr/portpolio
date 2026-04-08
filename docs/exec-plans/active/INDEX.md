@@ -6,6 +6,8 @@
 
 - [20260408-harness-polish.md](./20260408-harness-polish.md) - 모노레포 에이전트 하네스 폴리싱 + 미사용 스킬 정리 + 재귀 개선 큐 보강
 
+- [20260408-network-library.md](./20260408-network-library.md) - 서버 TCP 네트워크 레이어 + 클라이언트 서브시스템 구현 계획 (미확정 결정 선행 필요)
+
 - [20260406-client-network-subsystem-proposal.md](./20260406-client-network-subsystem-proposal.md) - UClientNetworkSubsystem + UClientWorldEntitySubsystem 기획 라운드
 
 - [20260404-server-client-proposal-critique.md](./20260404-server-client-proposal-critique.md) - 서버/클라이언트 구현 관점에서 기획서 비판 및 문서화

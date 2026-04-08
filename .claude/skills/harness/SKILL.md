@@ -16,12 +16,26 @@ A meta-skill for configuring a harness suited to a domain or project, defining e
 
 ## Workflow
 
-### Phase 1: Domain Analysis
+### Phase 1: Domain Analysis & Task Routing
 1. Identify the domain or project from the user's request.
 2. Identify the core task types (creation, validation, editing, analysis, etc.).
 3. Check for existing agents and skills to avoid conflicts or duplication.
 4. Explore the project codebase — understand the tech stack, data models, and key modules.
 5. **Detect user proficiency** — read contextual cues in the conversation (terminology used, question depth) to gauge technical level, and adjust communication tone accordingly. Do not use terms like "assertion" or "JSON schema" without explanation when talking to users with limited coding experience.
+6. **Classify task complexity** before choosing execution mode:
+
+| Bucket | Signals | Action |
+|--------|---------|--------|
+| **Lightweight** | single factual question, one-file trivial edit, quick lookup | Implement directly — no agent team needed |
+| **Standard** | one feature/bug across a small number of files, clear goal, moderate context | Single agent or small team, plan optional |
+| **Deep** | unclear root cause, architecture tradeoffs, large diff review, mixed implement+validate+migrate | Full agent team with plan, read memory/instructions first |
+
+Decision rules:
+- Favor `lightweight` when the request is self-contained and reversible.
+- Favor `deep` when root cause, architecture, or evidence gathering dominates.
+- If the request mixes "explain", "implement", and "review" in one sentence, default to `deep`.
+- If the request mentions "today", "latest", or "current", verify externally before acting on stale state.
+- Check whether `_workspace/token-log.jsonl` exists; if so, review recent token costs to calibrate team size (high-cost sessions suggest tighter scoping).
 
 ### Phase 2: Team Architecture Design
 
@@ -92,7 +106,19 @@ skill-name/
     └── assets/     - files used in output (templates, images, etc.)
 ```
 
-#### 4-2. Writing the Description — Actively Encourage Triggering
+#### 4-2. Skill Improvement Workflow
+
+When improving an existing skill rather than creating one:
+1. Read the full skill file.
+2. Identify what failed or felt ambiguous in actual usage.
+3. Tighten the description if triggering was weak.
+4. Add missing commands or environment assumptions.
+5. Add decision rules where the old version left too much ambiguity.
+6. Add failure handling if the skill assumed a happy path.
+7. Remove stale instructions and dead commands.
+8. If `_workspace/skill-usage-log.jsonl` exists, check actual invocation counts — skills with zero invocations likely have a trigger problem.
+
+#### 4-3. Writing the Description — Actively Encourage Triggering
 
 The description is the skill's sole trigger mechanism. Because Claude tends to be conservative about triggering, write descriptions **aggressively ("pushy")**.
 
@@ -252,6 +278,23 @@ Verify that each skill's description triggers correctly:
 **Key to writing near-miss queries:** Queries like "write a Fibonacci function" are obviously unrelated and have no test value. Good test cases are **queries with ambiguous boundaries**, such as "extract the chart from this Excel file as PNG" (xlsx skill vs image conversion).
 
 Also check for trigger conflicts with existing skills at this stage.
+
+#### 6-5. Skill Audit Checklist
+
+When auditing existing skills (inventory or post-generation review), evaluate each skill on these dimensions:
+
+| Dimension | What to check |
+|-----------|--------------|
+| Trigger clarity | Does the description contain specific trigger situations, not just "a skill for X"? |
+| Instruction quality | Are steps actionable with exact commands, not vague guidance? |
+| Command accuracy | Do referenced CLI commands, file paths, and flags still exist? |
+| Decision rules | Does the skill tell the agent what to do at ambiguity points? |
+| Output contract | Is the expected output format defined? |
+| Verification steps | Does the skill say how to confirm success? |
+| Duplication | Does it overlap with another skill's trigger or body? If so, merge or differentiate. |
+| Staleness | Does the skill reference removed files, renamed APIs, or old conventions? |
+
+Use `_workspace/skill-usage-log.jsonl` (if available) to identify skills with zero invocations — these likely have trigger or relevance problems.
 
 #### 6-5. Dry-Run Test
 
