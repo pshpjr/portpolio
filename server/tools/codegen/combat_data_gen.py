@@ -15,8 +15,8 @@ from typing import Any
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[2]
 DEFAULT_SCHEMA_DIR = REPO_ROOT / "docs" / "proposal" / "ingame" / "data"
-DEFAULT_SERVER_OUT = REPO_ROOT / "shared" / "generated" / "server"
-DEFAULT_UNREAL_OUT = REPO_ROOT / "shared" / "generated" / "unreal"
+DEFAULT_SERVER_OUT = REPO_ROOT / "server" / "src" / "generated"
+DEFAULT_UNREAL_OUT = REPO_ROOT / "client" / "Source" / "client" / "Public" / "Generated"
 OUTPUT_SUBDIR = "combat"
 MANIFEST_NAME = "combat_data_tables.h"
 COMMON_NAME = "combat_data_common.h"

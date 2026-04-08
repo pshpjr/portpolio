@@ -12,8 +12,8 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[2]
 DEFAULT_SCHEMA_DIR = REPO_ROOT / "shared" / "protocol"
-DEFAULT_SERVER_OUT = REPO_ROOT / "shared" / "generated" / "server"
-DEFAULT_UNREAL_OUT = REPO_ROOT / "shared" / "generated" / "unreal"
+DEFAULT_SERVER_OUT = REPO_ROOT / "server" / "src" / "generated"
+DEFAULT_UNREAL_OUT = REPO_ROOT / "client" / "Source" / "client" / "Public" / "Generated"
 DEFAULT_BUILDER = DEFAULT_SCHEMA_DIR / "build-proto.py"
 
 
