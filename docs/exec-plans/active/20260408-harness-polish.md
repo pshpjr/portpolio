@@ -38,3 +38,4 @@
 - 추가 사용자 피드백 반영: startup-doc-discovery-delegation 큐 등록 (작업 시작 문서 탐색을 경량 Codex 에이전트에 위임)
 - 추가 사용자 피드백 반영: context-meter-encoding-tolerance 큐 등록 (`context_meter.py` UTF-8 디코딩 실패를 후속 개선으로 추적)
 - 추가 사용자 피드백 반영: command-script-usage-purpose-log 큐 등록 (명령/스크립트 실행 목적과 사용 빈도 로깅)
+- 추가 사용자 피드백 반영: `tools/find_doc_refs.py`를 표준 라이브러리 기반으로 정비하고 `doc-value-audit` 절차를 새 스크립트 호출 기준으로 갱신
