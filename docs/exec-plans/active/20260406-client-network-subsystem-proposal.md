@@ -4,6 +4,17 @@
 - **범위**: office-hours — 클라이언트 네트워크 서브시스템 기획 문서 작성 및 리뷰
 - **출력 대상**: `docs/proposal/client/network_subsystem.md`
 
+## 목표
+
+UClientNetworkSubsystem 및 UClientWorldEntitySubsystem 기획서를 작성하고 서버/클라 계약, 스레드 모델, 상태 전이를 문서화한다.
+
+## 완료 기준
+
+- [x] `docs/proposal/client/network_subsystem.md` 기획서 작성 완료
+- [x] 서버/클라 계약, 상태 전이, 스레드 모델 결정 문서화
+- [x] pending-decisions 갱신 완료
+- [ ] performance-analysis 큐 처리량 검토 (선택적 — 이후 라운드 가능)
+
 ## 배경
 
 사용자 요구:

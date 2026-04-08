@@ -15,7 +15,7 @@
 - 루트는 모노레포 조정과 공용 문서, 공용 skill/agent 관리가 우선이다.
 - 앱 구현 세부 규칙은 각 앱 디렉터리 문서가 단일 소스다.
 - exec-plan은 사용자 승인 대기용이 아니라 작업 맥락 유지와 범위 관리용으로 먼저 작성한다.
-- 반복될 만한 사용자 피드백, 요청된 수정, 프로세스 이슈는 `docs/workflow/harness-feedback-log.md`에 짧게 남긴다.
+- 개선이 필요한 지점은 `docs/workflow/harness-improvement-queue.md`에 독립 작업으로 등록한다.
 - 저장소 공용 skill/agent 원본은 `.claude/skills/`, `.claude/agents/`에 둔다 (단일 소스).
 - `.codex/skills/`, `.codex/agents/`는 참조 래퍼만 두며, 원본 내용을 복제하지 않는다.
 

@@ -10,7 +10,6 @@
   → 진행 중인 플랜이 있으면: 해당 파일을 읽고 컨텍스트 복원
   → 없으면: 새 플랜 파일 작성 후 시작
 □ 관련 도메인 문서 읽기
-□ ARCHITECTURE.md 레이어 규칙 재확인 (서버 작업 시)
 □ 문서 작업이면 문서 검증 스크립트 존재 여부 확인
 ```
 
@@ -23,7 +22,7 @@
 
 ## 브랜치 운영 (기본 순서)
 
-1. 작업 시작 시 자기 브랜치를 만들거나 전환한다.
+1. 작업 시작 시 자기 도메인의 브랜치로 이동한다.
 2. 의미 있는 단위가 나오면 자기 브랜치에 커밋·푸시한다.
 3. 주기적으로 최신 `dev`를 merge 해 드리프트를 줄인다.
 4. 완료 후 자기 브랜치를 `dev`에 반영하고 `dev`도 푸시한다.
@@ -40,13 +39,9 @@
 ```bash
 # 전체 검사 한 번에 (권장)
 python tools/check_all.py
-
-# 개별 실행이 필요할 때만
-python tools/doc_check.py
-python tools/check_encoding.py
-python tools/check_layers.py --root server/src --layer-order types,config,core,service,network,runtime
-python tools/check_layers.py --root Lib --layer-order include,src,tests
 ```
+
+상세 체크리스트 → [pr-checklist.md](./pr-checklist.md)
 
 ## 금지 행동
 
@@ -75,7 +70,17 @@ python tools/new_exec_plan.py --name <slug> --area docs|proposal|server|lib --go
 
 ## 피드백 / 개선 큐 / LLM 아티팩트
 
-- 사용자 피드백 → [harness-feedback-log.md](./harness-feedback-log.md)
 - 독립 후속 작업 → [harness-improvement-queue.md](./harness-improvement-queue.md)
 - 외부 LLM 응답 요약 → `_workspace/agent-notes/*.md` (`record_agent_artifact.py` 사용)
 - substantial task → `python tools/context_meter.py --git-base HEAD --files <파일>` 로 계측 후 exec-plan에 기록
+
+## harness-improvement 사용 트리거
+
+작업 중 아래 상황이 발생하면 **반드시** `harness-improvement` 스킬을 호출한다:
+
+- 규칙·문서·프롬프트 빈틈 때문에 우회가 필요했을 때
+- 같은 설명이나 생성을 반복해야 했을 때 (스크립트/스킬 후보)
+- 작업 완료 후 분리 가능한 후속 정리가 남았을 때
+- 다음 세션에서 동일 문제가 반복될 가능성이 보일 때
+
+큐에 항목 등록 시 `task`, `message`, `recommended-artifact`, `context-savings`를 반드시 포함한다.

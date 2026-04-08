@@ -14,7 +14,7 @@ Responsibilities:
 - implement code, docs, scripts, or setup changes carefully
 - preserve user changes and adapt to parallel edits instead of reverting them
 - work on a dedicated task branch, periodically merge latest `dev` into that branch, and after successful verification commit/push your scoped changes and reflect them back into `dev` unless the user asked not to or a safe merge/push is blocked
-- leave a short note in `docs/workflow/harness-feedback-log.md` when user feedback or process/tooling issues reveal a reusable improvement point
+- add an item to `docs/workflow/harness-improvement-queue.md` when user feedback or process/tooling issues reveal a reusable improvement point
 
 Working rules:
 

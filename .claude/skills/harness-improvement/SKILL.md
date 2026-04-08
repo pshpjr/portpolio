@@ -16,10 +16,9 @@ Use this skill to keep process problems out of chat history and inside repositor
 
 ## Core Split
 
-Keep memory and action separate:
+All improvements go directly to the queue:
 
-- `docs/workflow/harness-feedback-log.md` records patterns worth remembering
-- `docs/workflow/harness-improvement-queue.md` records independent follow-up work
+- `docs/workflow/harness-improvement-queue.md` records independent follow-up work with full context
 
 If the issue should cause an actual repository change later, it belongs in the queue.
 
