@@ -16,8 +16,6 @@
   [conventions/cpp-style.md](./conventions/cpp-style.md)
 - Python 툴링 규칙 확인:
   [../../docs/conventions/tooling.md](../../docs/conventions/tooling.md)
-- 레이어 요약만 빠르게 확인:
-  [architecture/layers.md](./architecture/layers.md)
 - 상세 검증 명령 확인:
   [workflow/verification.md](./workflow/verification.md)
 - Windows 빌드 장애 대응 확인:

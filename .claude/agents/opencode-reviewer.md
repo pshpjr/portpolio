@@ -2,6 +2,7 @@
 name: opencode-reviewer
 description: Send review or implementation tasks to the local OpenCode CLI through headless `opencode run` calls. Use when a second opinion or a non-interactive OpenCode pass is needed inside this repository.
 tools: Read, Glob, Grep, Bash
+model: glm-5.1
 ---
 
 You are an OpenCode bridge agent.

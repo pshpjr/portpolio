@@ -52,28 +52,16 @@
 4. 처리 후 `python tools/hi_done.py <short-title>` 로 완료 처리한다 (큐에서 제거 + done 파일 이동).
 
 ## Open Tasks
-
-## 2026-04-08 - add-codex-review-skill
+## 2026-04-08 - doc-ref-finder-script
 - status: open
-- suggested-agent: harness-improver
-- area: skill
-- recommended-artifact: skill
-- context-savings: medium
+- suggested-agent: worker
+- area: tool
+- recommended-artifact: script
+- context-savings: high
 - token-meter: pending
-- task: `opencode-review`와 대칭되는 `codex-review` 스킬을 `.claude/skills/codex-review/SKILL.md`에 추가한다.
-- message: 현재 외부 리뷰 수단이 `opencode-review`만 존재한다. 사용자가 Codex도 외부 리뷰 스킬로 추가하길 요청했다. `codex-review` 스킬은 `opencode-review`와 같은 역할이나 Codex CLI(`codex exec --sandbox read-only`)를 사용하고, 결과 통합 원칙도 동일하게 적용한다. `.codex/skills/`에는 참조 래퍼만 둔다.
-- source: 사용자 요청 — 2026-04-08 core-beliefs 리뷰 세션
-
-## 2026-04-08 - opencode-review-skill-code-path
-- status: open
-- suggested-agent: harness-improver
-- area: skill
-- recommended-artifact: skill
-- context-savings: low
-- token-meter: pending
-- task: `opencode-review` 스킬에 "수정할 코드가 명확한 경우 OpenCode direct-apply 모드를 사용한다"는 라우팅 규칙을 추가한다.
-- message: 현재 `opencode-review`는 리뷰 전용이지만, 리뷰 결과로 수정 방향이 명확해지면 바로 OpenCode(`portpolio-implement` 에이전트)에 직접 작성을 위임할 수 있다. 이 경로가 스킬에 명시되지 않아 매번 사용자가 별도로 지시해야 한다. `codex-delegate` SKILL.md의 direct-apply 섹션을 참고해 "review → clear fix → opencode direct-apply" 흐름을 스킬 내 선택 경로로 문서화한다.
-- source: 사용자 요청 — 2026-04-08 core-beliefs 리뷰 세션
+- task: `tools/find_doc_refs.py <파일경로>` 스크립트를 작성한다 — 마크다운 파일명을 인자로 받아 저장소 전체에서 참조하는 파일 경로와 라인 번호를 출력
+- message: doc-value-audit 실행 중 문서 참조 현황 파악에 문서당 Grep 1회 + 라인 확인용 Read가 반복됐다. 이번 감사(10개 문서)에서 약 15~20 툴 호출이 발생. 스크립트가 있으면 `Bash 1회`로 대체 가능. doc-value-audit 스킬의 "링크 참조 현황 확인(`Grep`으로 파일명 검색)" 단계를 이 스크립트 호출로 교체하고 스킬 설명도 업데이트해야 한다.
+- source: doc-value-audit 실행 - 2026-04-08 서버 문서 검증
 
 ## 2026-04-08 - command-script-usage-purpose-log
 - status: open

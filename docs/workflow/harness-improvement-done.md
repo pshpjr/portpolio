@@ -67,3 +67,31 @@
 - message: `20260404-office-hours-proposal-polish.md`는 completed/로 이동 후 삭제. `20260406-client-network-subsystem-proposal.md`에 동일 문제 발견 → `## 목표`, `## 완료 기준` 섹션 추가로 해결.
 - source: `python tools/doc_check.py` during harness workflow updates
 - resolution: `20260406-client-network-subsystem-proposal.md`에 `## 목표`, `## 완료 기준` 추가. 2026-04-08 처리 완료.
+
+---
+
+## 2026-04-08 - add-codex-review-skill
+- status: done
+- suggested-agent: harness-improver
+- area: skill
+- recommended-artifact: skill
+- context-savings: medium
+- token-meter: pending
+- task: `opencode-review`와 대칭되는 `codex-review` 스킬을 `.claude/skills/codex-review/SKILL.md`에 추가한다.
+- message: 현재 외부 리뷰 수단이 `opencode-review`만 존재한다. 사용자가 Codex도 외부 리뷰 스킬로 추가하길 요청했다. `codex-review` 스킬은 `opencode-review`와 같은 역할이나 Codex CLI(`codex exec --sandbox read-only`)를 사용하고, 결과 통합 원칙도 동일하게 적용한다. `.codex/skills/`에는 참조 래퍼만 둔다.
+- source: 사용자 요청 — 2026-04-08 core-beliefs 리뷰 세션
+- resolution: 처리 2026-04-08 처리 완료.
+
+---
+
+## 2026-04-08 - opencode-review-skill-code-path
+- status: done
+- suggested-agent: harness-improver
+- area: skill
+- recommended-artifact: skill
+- context-savings: low
+- token-meter: pending
+- task: `opencode-review` 스킬에 "수정할 코드가 명확한 경우 OpenCode direct-apply 모드를 사용한다"는 라우팅 규칙을 추가한다.
+- message: 현재 `opencode-review`는 리뷰 전용이지만, 리뷰 결과로 수정 방향이 명확해지면 바로 OpenCode(`portpolio-implement` 에이전트)에 직접 작성을 위임할 수 있다. 이 경로가 스킬에 명시되지 않아 매번 사용자가 별도로 지시해야 한다. `codex-delegate` SKILL.md의 direct-apply 섹션을 참고해 "review → clear fix → opencode direct-apply" 흐름을 스킬 내 선택 경로로 문서화한다.
+- source: 사용자 요청 — 2026-04-08 core-beliefs 리뷰 세션
+- resolution: 처리 2026-04-08 처리 완료.

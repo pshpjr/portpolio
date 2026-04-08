@@ -1,6 +1,6 @@
 ---
 name: docs-reviewer
-description: Review documentation changes in this repository for structure, ownership, stale links, routing gaps, and context-efficiency regressions. Use proactively after doc edits or before doc PRs.
+description: Entry-point reviewer for documentation changes. Use for broad reviews that span multiple axes (structure, ownership, links, context budget) at once. For single-axis focused reviews, use docs-structure-reviewer, docs-consistency-reviewer, or docs-context-reviewer instead.
 tools: Read, Glob, Grep, Bash
 model: sonnet
 skills: doc-governance
