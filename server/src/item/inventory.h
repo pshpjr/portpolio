@@ -1,8 +1,8 @@
 #pragma once
 
-#include "01_types/content_id.h"
-#include "01_types/entity_id.h"
-#include "01_types/type_def.h"
+#include "common/content_id.h"
+#include "common/entity_id.h"
+#include "common/type_def.h"
 #include "types/not_null.h"
 
 #include <memory>

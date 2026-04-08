@@ -4,7 +4,7 @@
 
 #ifndef PORTPOLIO_USER_H
 #define PORTPOLIO_USER_H
-#include "01_types/type_def.h"
+#include "common/type_def.h"
 
 class User
 {

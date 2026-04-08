@@ -1,5 +1,5 @@
-#include "03_core/item/inventory.h"
-#include "03_core/item/item.h"
+#include "item/inventory.h"
+#include "item/item.h"
 
 #include <cassert>
 

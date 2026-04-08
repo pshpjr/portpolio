@@ -4,8 +4,8 @@
 
 #ifndef PORTPOLIO_CONNECTION_H
 #define PORTPOLIO_CONNECTION_H
-#include "01_types/type_def.h"
-#include "05_network/packet_handler/packet_handler.h"
+#include "common/type_def.h"
+#include "network/packet_handler/packet_handler.h"
 enum class EnumConnectionState
 {
     eNone,

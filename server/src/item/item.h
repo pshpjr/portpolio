@@ -4,8 +4,8 @@
 
 #ifndef PORTPOLIO_ITEM_H
 #define PORTPOLIO_ITEM_H
-#include "01_types/content_id.h"
-#include "01_types/entity_id.h"
+#include "common/content_id.h"
+#include "common/entity_id.h"
 
 namespace psh::core
 {

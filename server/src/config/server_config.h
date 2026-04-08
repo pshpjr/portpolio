@@ -1,6 +1,6 @@
 #pragma once
 
-#include "01_types/entity_id.h"
+#include "common/entity_id.h"
 
 #include <string>
 

@@ -4,13 +4,12 @@
 Equivalent to running manually:
     python tools/doc_check.py
     python tools/check_encoding.py
-    python tools/check_layers.py --root server/src --layer-order types,config,core,service,network,runtime
-    python tools/check_layers.py --root Lib --layer-order include,src,tests
+    python tools/check_deps.py --root server/src --layer-order common,config,item,user,network
 
 Usage:
     python tools/check_all.py            # all checks
     python tools/check_all.py --only docs encoding   # subset
-    python tools/check_all.py --skip layers          # skip layer checks
+    python tools/check_all.py --skip deps            # skip dependency checks
 """
 
 from __future__ import annotations
@@ -34,26 +33,14 @@ CHECKS: list[dict] = [
         "cmd": [sys.executable, "tools/check_encoding.py"],
     },
     {
-        "id": "layers-server",
-        "label": "check_layers server/src",
+        "id": "deps",
+        "label": "check_deps server/src",
         "cmd": [
             sys.executable,
-            "tools/check_layers.py",
+            "tools/check_deps.py",
             "--root", "server/src",
-            "--layer-order", "types,config,core,service,network,runtime",
         ],
         "optional": True,  # skip silently if directory does not exist
-    },
-    {
-        "id": "layers-lib",
-        "label": "check_layers Lib",
-        "cmd": [
-            sys.executable,
-            "tools/check_layers.py",
-            "--root", "Lib",
-            "--layer-order", "include,src,tests",
-        ],
-        "optional": True,
     },
 ]
 
