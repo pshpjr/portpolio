@@ -5,18 +5,21 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from env_utils import REPO_ROOT, load_dotenv
+
+load_dotenv(REPO_ROOT / ".env")
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parents[2]
 DEFAULT_SCHEMA_DIR = REPO_ROOT / "docs" / "proposal" / "ingame" / "data"
-DEFAULT_SERVER_OUT = REPO_ROOT / "server" / "src" / "generated"
-DEFAULT_UNREAL_OUT = REPO_ROOT / "client" / "Source" / "client" / "Public" / "Generated"
+DEFAULT_SERVER_OUT = Path(os.environ.get("PORTPOLIO_SERVER_OUT", str(REPO_ROOT / "server" / "src" / "generated")))
+DEFAULT_UNREAL_OUT = Path(os.environ.get("PORTPOLIO_UNREAL_OUT", str(REPO_ROOT / "client" / "Source" / "client" / "Public" / "Generated")))
 OUTPUT_SUBDIR = "combat"
 MANIFEST_NAME = "combat_data_tables.h"
 COMMON_NAME = "combat_data_common.h"

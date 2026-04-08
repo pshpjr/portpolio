@@ -1,0 +1,5 @@
+{
+    "server_name": "portpolio",
+    "shard_id": 1,
+    "log_level": "info"
+}
