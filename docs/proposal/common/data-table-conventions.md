@@ -175,7 +175,7 @@ Weapon.WeaponType + Weapon.EnhanceLevel
 | `"SKILL_BOOK"` | `"SkillBook"` |
 | `"RING_LEFT"` | `"RingLeft"` |
 
-- 생성기(`tools/generate_tables.py`)는 값을 변환하지 않고 그대로 사용한다.
+- 코드 생성 파이프라인은 값을 변환하지 않고 그대로 사용한다.
 - 스키마가 단일 소스이므로 enum 표기 규칙도 스키마에서 결정한다.
 - 데이터 파일(`.data.json`)의 enum 문자열 값도 스키마와 동일한 CamelCase를 사용해야 한다 (파서가 문자열 비교로 파싱하기 때문).
 

@@ -6,7 +6,7 @@
 
 - [../AGENTS.md](../AGENTS.md): `Lib/` 영역 진입점
 - [../../docs/design/core-beliefs.md](../../docs/design/core-beliefs.md): 공용 설계 철학
-- [../../docs/conventions/cpp-style.md](../../docs/conventions/cpp-style.md): 공용 C++ 규칙
+- [../../server/docs/conventions/cpp-style.md](../../server/docs/conventions/cpp-style.md): 공용 C++ 규칙
 
 ## 작업 유형별 문서
 

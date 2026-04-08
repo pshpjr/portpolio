@@ -4,7 +4,6 @@
 
 ## 현재 활성 계획
 
-
 - [20260408-harness-polish.md](./20260408-harness-polish.md) - 모노레포 에이전트 하네스 폴리싱 + 미사용 스킬 정리 + 재귀 개선 큐 보강
 
 - [20260406-client-network-subsystem-proposal.md](./20260406-client-network-subsystem-proposal.md) - UClientNetworkSubsystem + UClientWorldEntitySubsystem 기획 라운드

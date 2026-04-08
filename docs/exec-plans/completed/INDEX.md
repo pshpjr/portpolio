@@ -4,5 +4,6 @@
 
 ## 완료된 계획
 
+- [20260408-repo-cleanup-doc-tools-hud.md](./20260408-repo-cleanup-doc-tools-hud.md) - 중복 C++ 스타일 문서 제거, 미사용 tools 삭제, client HUD 가이드라인 이동 (2026-04-08 완료)
 - [20260408-skill-agent-usage-counter.md](./20260408-skill-agent-usage-counter.md) - Skill/Agent 호출 횟수 자동 추적 (2026-04-08 완료)
 - [20260408-workflow-detail-refactor.md](./20260408-workflow-detail-refactor.md) - agent-workflow-detail.md 핫패스 슬림화 + 운영 정책 분리 (2026-04-08 완료)

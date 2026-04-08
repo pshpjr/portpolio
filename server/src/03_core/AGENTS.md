@@ -5,7 +5,7 @@
 
 1. `../../AGENTS.md`
 2. `../../ARCHITECTURE.md`
-3. `../../../docs/conventions/cpp-style.md`
+3. `../../docs/conventions/cpp-style.md`
 
 ## Core 불변식
 

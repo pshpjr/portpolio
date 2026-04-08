@@ -16,7 +16,7 @@
 - 설계 철학과 의사결정 기준 확인:
   [../../docs/design/core-beliefs.md](../../docs/design/core-beliefs.md)
 - C++ 구현 규칙 확인:
-  [../../docs/conventions/cpp-style.md](../../docs/conventions/cpp-style.md)
+  [conventions/cpp-style.md](./conventions/cpp-style.md)
 - Python 툴링 규칙 확인:
   [../../docs/conventions/tooling.md](../../docs/conventions/tooling.md)
 - 레이어 요약만 빠르게 확인:

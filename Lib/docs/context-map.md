@@ -5,16 +5,16 @@
 
 - 모든 작업은 `../AGENTS.md`를 시작점으로 한다.
 - 공용 설계 철학은 `../../docs/design/core-beliefs.md`를 따른다.
-- C++ 규칙은 `../../docs/conventions/cpp-style.md`를 따른다.
+- C++ 규칙은 `../../server/docs/conventions/cpp-style.md`를 따른다.
 - 공용 검사 도구 규칙은 `../../docs/conventions/tooling.md`를 따른다.
 
 ## 경로별 필독 문서
 
 | 수정 경로 | 필독 문서 | 비고 |
 |---|---|---|
-| `include/**` | `../../docs/conventions/cpp-style.md`, `../include/README.md` | 공개 헤더와 재사용성 우선 |
-| `src/**` | `../../docs/conventions/cpp-style.md`, `../src/README.md` | 구현이 공개 API를 새지 않게 유지 |
-| `tests/**` | `../../docs/conventions/cpp-style.md`, `../tests/README.md` | 공용 계약 검증 |
+| `include/**` | `../../server/docs/conventions/cpp-style.md`, `../include/README.md` | 공개 헤더와 재사용성 우선 |
+| `src/**` | `../../server/docs/conventions/cpp-style.md`, `../src/README.md` | 구현이 공개 API를 새지 않게 유지 |
+| `tests/**` | `../../server/docs/conventions/cpp-style.md`, `../tests/README.md` | 공용 계약 검증 |
 | `docs/**` | `../../docs/design/core-beliefs.md`, `../../docs/conventions/tooling.md` | 문서 역할과 공용 도구 경로 확인 |
 
 ## exec-plan 로드 규칙

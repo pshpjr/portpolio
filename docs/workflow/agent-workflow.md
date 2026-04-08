@@ -62,7 +62,12 @@ python tools/new_exec_plan.py --name <slug> --area docs|proposal|server|lib --go
 
 ## Codex / OpenCode 위임 기준
 
-다음 조건 중 하나 이상이면 직접 구현 전에 `codex-delegate` 또는 `opencode-review` 스킬 검토:
+**OpenCode 위임** (`opencode-review` 스킬): 무엇을 해야 할지 명확히 지시할 수 있을 때
+- 특정 파일을 수정/생성/삭제하는 코드 작성
+- 범위가 정해진 문서 편집 또는 폴리싱
+- 명확한 체크리스트가 있는 검토 작업
+
+**Codex 위임** (`codex-delegate` 스킬): 탐색·판단이 필요하거나 컨텍스트 보호가 목적일 때
 - 반복 구현 패턴이 이미 존재하거나, 동일 작업을 이전 세션에서 한 번 이상 수행
 - 검증 없이 재시도가 2회 이상 예상되는 작업 (첫 시도 실패 가능성 높음)
 - 300줄 이상 순수 코드 생성 (문서/주석 제외)

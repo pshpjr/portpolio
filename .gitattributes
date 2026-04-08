@@ -1,0 +1,66 @@
+# Default: 레포 내부는 LF로 정규화, 체크아웃 시 OS 줄바꿈 유지
+* text=auto eol=lf
+
+# 문서
+*.md   text eol=lf
+*.txt  text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
+*.toml text eol=lf
+
+# 스크립트 / 빌드
+*.py   text eol=lf
+*.sh   text eol=lf
+*.bat  text eol=crlf
+
+# C / C++
+*.c    text eol=lf
+*.cpp  text eol=lf
+*.h    text eol=lf
+*.hpp  text eol=lf
+*.inl  text eol=lf
+
+# C# (Unreal Build Tool)
+*.cs   text eol=lf
+
+# Protobuf
+*.proto text eol=lf
+
+# Unreal Engine 텍스트 파일
+*.uproject  text eol=lf
+*.uplugin   text eol=lf
+*.Build.cs  text eol=lf
+*.Target.cs text eol=lf
+*.ini       text eol=lf
+*.cfg       text eol=lf
+
+# 바이너리 (BOM/줄바꿈 변환 금지)
+*.pyc    binary
+*.pyo    binary
+*.uasset binary
+*.umap   binary
+*.ubulk  binary
+*.upk    binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.bmp    binary
+*.tga    binary
+*.pdf    binary
+*.zip    binary
+*.tar    binary
+*.gz     binary
+*.7z     binary
+*.rar    binary
+*.exe    binary
+*.dll    binary
+*.lib    binary
+*.a      binary
+*.so     binary
+*.pdb    binary
+*.obj    binary
+*.pak    binary
