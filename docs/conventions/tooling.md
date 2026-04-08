@@ -28,6 +28,7 @@ tools/
 ├── check_layers.py
 ├── context_meter.py
 ├── doc_check.py
+├── git_commit.py
 ├── record_agent_artifact.py
 └── setup_linux_env.sh
 
@@ -80,6 +81,30 @@ Python 3.10+
 
 - 작업에 실제로 읽은 컨텍스트 파일들과 현재 diff를 기준으로 대략적인 토큰 부하를 계산한다.
 - 작업 분량 대비 컨텍스트/토큰 사용량을 비교해, 스크립트화·스킬화 후보를 찾는 데 사용한다.
+
+### `git_commit.py`
+
+- Bash 툴이 Windows 환경에서 `/mnt/` 경로를 인식하지 못하는 문제를 우회하는 git 래퍼.
+- 저장소 루트를 자동 감지하므로 어느 경로에서 실행해도 동작한다.
+- `Co-Authored-By` 서명을 자동으로 삽입한다.
+- **에이전트는 git commit/add/status/diff가 필요할 때 이 스크립트를 사용한다.**
+
+```bash
+# 상태 확인
+python tools/git_commit.py --status
+
+# 특정 파일 스테이징 + 커밋
+python tools/git_commit.py --add path/to/file.md -m "커밋 메시지"
+
+# 변경된 추적 파일 전체 스테이징 + 커밋
+python tools/git_commit.py --add-all -m "커밋 메시지"
+
+# staged diff 확인
+python tools/git_commit.py --diff
+
+# 최근 커밋 5개 확인
+python tools/git_commit.py --log
+```
 
 ### `record_agent_artifact.py`
 

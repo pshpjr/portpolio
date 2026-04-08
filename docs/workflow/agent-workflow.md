@@ -34,6 +34,10 @@
 3. 비대화형 커밋 메시지로 커밋한다.
 4. 현재 작업 브랜치에 푸시하고 최종적으로 `dev`에 반영한다.
 
+> **git 명령 실행 시 주의:** Bash 툴은 Windows 환경에서 `/mnt/` 경로를 인식하지 못한다.
+> `git add`, `git commit` 대신 `python tools/git_commit.py`를 사용한다.
+> 사용법 → [docs/conventions/tooling.md](../conventions/tooling.md#git_commitpy)
+
 ## PR 전 필수 검사
 
 ```bash
