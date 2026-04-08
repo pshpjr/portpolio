@@ -37,7 +37,6 @@
 
 - 기획서 전체 개요: [proposal/main.md](./proposal/main.md)
 - 기획서 작업 진입점: [proposal/AGENTS.md](./proposal/AGENTS.md)
-- 공용 설계 철학: [design/core-beliefs.md](./design/core-beliefs.md)
 - 공용 C++ 규칙: [../server/docs/conventions/cpp-style.md](../server/docs/conventions/cpp-style.md)
 - 공용 Python 도구 규칙: [conventions/tooling.md](./conventions/tooling.md)
 - 공용 작업 절차: [workflow/agent-workflow.md](./workflow/agent-workflow.md)

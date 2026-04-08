@@ -7,7 +7,6 @@
 - 모든 작업은 `../AGENTS.md`를 시작점으로 한다.
 - 아키텍처 판단이 필요한 코드 변경은 `../ARCHITECTURE.md`를 읽는다.
 - 작업 절차와 검증은 `workflow/agent-workflow.md`를 단일 소스로 본다.
-- 공용 설계 철학은 `../../docs/design/core-beliefs.md`를 따른다.
 - 공용 C++ 규칙은 `conventions/cpp-style.md`, 공용 Python 규칙은 `../../docs/conventions/tooling.md`를 따른다.
 - 아래 경로 규칙에 없는 경우, 가장 가까운 디렉터리의 `AGENTS.md` 또는 `README.md`를 우선 읽는다.
 
@@ -24,7 +23,7 @@
 | `data/skills/**` | `../data/skills/README.md` | 런타임 핫리로드 대상 |
 | `data/items/**` | `../data/items/README.md` | 아이템 정의 데이터 |
 | `data/monsters/**` | `../data/monsters/README.md` | 몬스터 정의 데이터 |
-| `docs/**` | `../../docs/design/core-beliefs.md`, `workflow/agent-workflow.md` | 서버 문서와 공용 문서의 경계 확인 |
+| `docs/**` | `workflow/agent-workflow.md` | 서버 문서와 공용 문서의 경계 확인 |
 
 ## exec-plan 로드 규칙
 

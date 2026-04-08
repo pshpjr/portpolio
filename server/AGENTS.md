@@ -54,7 +54,6 @@ Types -> Config -> Core -> Service -> Network -> Runtime
 - 레이어/도메인 판단: [ARCHITECTURE.md](./ARCHITECTURE.md)
 - 작업 절차, exec-plan, 검증: [docs/workflow/agent-workflow.md](./docs/workflow/agent-workflow.md)
 - 제품 목표, 범위: [docs/design/overview.md](./docs/design/overview.md)
-- 설계 원칙: [../docs/design/core-beliefs.md](../docs/design/core-beliefs.md)
 
 ---
 

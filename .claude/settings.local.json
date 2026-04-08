@@ -19,7 +19,8 @@
       "Read(//d/Users/pshpjr/**)",
       "Read(//d/Users/pshpjr/AppData/Local/claude/**)",
       "Read(//d/Users/pshpjr/AppData/Roaming/claude/**)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Skill(codex:rescue)"
     ]
   },
   "sandbox": {

@@ -38,11 +38,13 @@ Implementation, refactoring, documentation, tests, scripts, build/config changes
       2. Create `docs/exec-plans/queued/YYYYMMDD-작업명.md`
       3. Update `docs/exec-plans/queued/INDEX.md`
 
-9. Keep the active plan current while implementing.
+9. If implementation reveals execution errors, repeated manual fixes, or work better extracted into a reusable script or module, queue it unless it must be resolved immediately to complete the current task.
+
+10. Keep the active plan current while implementing.
 
 ## Finish
 
-10. When the task is complete:
+11. When the task is complete:
 - update the final status
 - move the plan to `docs/exec-plans/completed/`
 - update indexes accordingly

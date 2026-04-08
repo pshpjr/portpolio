@@ -6,15 +6,12 @@
 
 - [../AGENTS.md](../AGENTS.md): 서버 앱 진입점
 - [../ARCHITECTURE.md](../ARCHITECTURE.md): 레이어 불변식
-- [../../docs/design/core-beliefs.md](../../docs/design/core-beliefs.md): 공용 설계 철학
 - [workflow/agent-workflow.md](./workflow/agent-workflow.md): 작업 절차와 검증
 
 ## 작업 유형별 문서
 
 - 제품 목표와 범위 확인:
   [design/overview.md](./design/overview.md)
-- 설계 철학과 의사결정 기준 확인:
-  [../../docs/design/core-beliefs.md](../../docs/design/core-beliefs.md)
 - C++ 구현 규칙 확인:
   [conventions/cpp-style.md](./conventions/cpp-style.md)
 - Python 툴링 규칙 확인:
