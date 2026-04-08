@@ -35,7 +35,7 @@ Implementation, refactoring, documentation, tests, scripts, build/config changes
 8. If you discover useful follow-up work that is outside the current agreed scope and not required to finish the current task, ask whether to queue it or handle it now.
    - If queued:
       1. Read `docs/workflow/queue-item-template.md`
-      2. Create `docs/exec-plans/queued/YYYYMMDD-작업명.md`
+      2. Create `docs/exec-plans/queued/YYYYMMDD-task-name.md`
       3. Update `docs/exec-plans/queued/INDEX.md`
 
 9. If implementation reveals execution errors, repeated manual fixes, or work better extracted into a reusable script or module, queue it unless it must be resolved immediately to complete the current task.

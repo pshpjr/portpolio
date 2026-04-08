@@ -98,7 +98,7 @@ After both complete, evaluate on these criteria:
 ## Step 4: Validate
 
 After applying the selected output:
-- Server work: run `check_layers.py`
+- Server work: run `check_deps.py`
 - Documentation work: run `doc_check.py`
 - Update the exec-plan progress
 - Report any remaining issues

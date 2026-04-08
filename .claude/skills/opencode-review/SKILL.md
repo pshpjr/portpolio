@@ -48,22 +48,22 @@ Evaluation criteria:
 
 ## After Review: Clear Fix Path
 
-리뷰 결과로 수정 방향이 명확해진 경우, OpenCode direct-apply 모드로 즉시 위임할 수 있다.
+When the review produces a clear fix direction, delegate immediately to OpenCode direct-apply mode.
 
-| 상황 | 경로 |
-|------|------|
-| 수정 범위가 모호하거나 설계 판단이 필요한 경우 | Claude가 직접 수정 |
-| 수정할 파일과 내용이 명확하고 OpenCode가 단독 쓰기 소유권을 갖는 경우 | OpenCode direct-apply |
+| Situation | Path |
+|-----------|------|
+| Fix scope is ambiguous or requires design judgment | Claude fixes directly |
+| Target files and changes are clear, and OpenCode has sole write ownership | OpenCode direct-apply |
 
-### OpenCode Direct-Apply 위임 방법
+### OpenCode Direct-Apply Delegation
 
 ```bash
-opencode run --agent portpolio-implement --format json "[수정 작업 프롬프트]"
+opencode run --agent portpolio-implement --format json "[fix task prompt]"
 ```
 
-- 프롬프트에는 수정 대상 파일 경로, 수정 내용, 검증 방법을 명시한다.
-- 수정 완료 후 Claude가 결과를 확인하고 exec-plan을 갱신한다.
-- write 소유권이 분리되지 않는 경우에는 proposal 모드(`portpolio-propose`)를 사용한다.
+- The prompt must specify target file paths, fix details, and verification method.
+- After completion, Claude reviews the result and updates the exec-plan.
+- When write ownership is not isolated, use proposal mode (`portpolio-propose`) instead.
 
 ## Notes
 
