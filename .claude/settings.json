@@ -39,6 +39,16 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "TaskUpdate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python tools/hi_done_hook.py 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
       }
     ]
   }
