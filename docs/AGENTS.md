@@ -42,7 +42,7 @@
 - 공용 작업 절차: [workflow/agent-workflow.md](./workflow/agent-workflow.md)
 - 루트 활성 exec-plan: [exec-plans/active/INDEX.md](./exec-plans/active/INDEX.md)
 - 서버 구현 문서로 이동: [../server/AGENTS.md](../server/AGENTS.md)
-- 공용 라이브러리 문서로 이동: [../Lib/AGENTS.md](../Lib/AGENTS.md)
+- 공용 라이브러리 문서로 이동: [../server/lib/AGENTS.md](../server/lib/AGENTS.md)
 
 ## Skill / Agent 위치 규칙
 

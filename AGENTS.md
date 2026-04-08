@@ -30,10 +30,10 @@
 ## 현재 기준
 
 - 서버 작업: [server/AGENTS.md](./server/AGENTS.md)
-- 공용 라이브러리 작업: [Lib/AGENTS.md](./Lib/AGENTS.md)
+- 공용 라이브러리 작업: [server/lib/AGENTS.md](./server/lib/AGENTS.md)
 - 상위 문서 작업: [docs/AGENTS.md](./docs/AGENTS.md)
 - 서버 아키텍처/설계/컨벤션 문서는 `server/` 하위에 있음
-- 서버/클라이언트 공용 코드는 `Lib/` 하위에 있음
+- 공용 라이브러리 코드는 `server/lib/` 하위에 있음 (서버 전용)
 - 기획서와 루트 워크플로 문서는 `docs/` 하위에 있음
 - 저장소 공용 skill/agent는 루트 `.codex/`, `.claude/` 하위에서 관리
 - 루트는 모노레포 조정용이며, 영역별 상세 규칙은 각 진입 문서에서 관리

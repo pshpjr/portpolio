@@ -66,8 +66,8 @@ add_custom_target(generate_combat_data DEPENDS "${PORTPOLIO_COMBAT_CODEGEN_STAMP
 add_dependencies(generate_combat_data generate_packets)
 
 add_subdirectory(
-    "${CMAKE_CURRENT_SOURCE_DIR}/../Lib"
-    "${CMAKE_CURRENT_BINARY_DIR}/Lib"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib"
+    "${CMAKE_CURRENT_BINARY_DIR}/lib"
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
