@@ -95,3 +95,31 @@
 - message: 현재 `opencode-review`는 리뷰 전용이지만, 리뷰 결과로 수정 방향이 명확해지면 바로 OpenCode(`portpolio-implement` 에이전트)에 직접 작성을 위임할 수 있다. 이 경로가 스킬에 명시되지 않아 매번 사용자가 별도로 지시해야 한다. `codex-delegate` SKILL.md의 direct-apply 섹션을 참고해 "review → clear fix → opencode direct-apply" 흐름을 스킬 내 선택 경로로 문서화한다.
 - source: 사용자 요청 — 2026-04-08 core-beliefs 리뷰 세션
 - resolution: 처리 2026-04-08 처리 완료.
+
+---
+
+## 2026-04-08 - doc-ref-finder-script
+- status: done
+- suggested-agent: worker
+- area: tool
+- recommended-artifact: script
+- context-savings: high
+- token-meter: pending
+- task: `tools/find_doc_refs.py <파일경로>` 스크립트를 작성한다 — 마크다운 파일명을 인자로 받아 저장소 전체에서 참조하는 파일 경로와 라인 번호를 출력
+- message: doc-value-audit 실행 중 문서 참조 현황 파악에 문서당 Grep 1회 + 라인 확인용 Read가 반복됐다. 이번 감사(10개 문서)에서 약 15~20 툴 호출이 발생. 스크립트가 있으면 `Bash 1회`로 대체 가능. doc-value-audit 스킬의 "링크 참조 현황 확인(`Grep`으로 파일명 검색)" 단계를 이 스크립트 호출로 교체하고 스킬 설명도 업데이트해야 한다.
+- source: doc-value-audit 실행 - 2026-04-08 서버 문서 검증
+- resolution: 처리 2026-04-08 처리 완료.
+
+---
+
+## 2026-04-08 - command-script-usage-purpose-log
+- status: done
+- suggested-agent: harness-improver
+- area: tool
+- recommended-artifact: script
+- context-savings: medium
+- token-meter: pending
+- task: bash, PowerShell, Python 등 명령 실행 시 목적과 사용 스크립트를 구조화해 로깅하는 도구 또는 훅을 추가한다.
+- message: 사용자가 에이전트가 `bash`, `python`, PowerShell 등으로 명령을 실행할 때 어떤 목적으로 어떤 스크립트나 커맨드를 사용했는지 기록하길 요청했다. 이 로그는 자주 쓰이는 스크립트와 반복 커맨드를 식별해 자동화, 스킬화, 문서 개선 피드백으로 연결하는 데 쓰인다. claim 시에는 기존 `_workspace/token-log.jsonl`, `_workspace/skill-usage-log.jsonl`, `tools/skill_usage_logger.py`, Claude Code hook 설정과 중복되지 않게 설계하고, command, purpose, script_path, cwd, result 정도의 최소 필드를 검토한다.
+- source: 사용자 피드백 - 2026-04-08 명령/스크립트 사용 목적 로깅 요청
+- resolution: 처리 2026-04-08 처리 완료.

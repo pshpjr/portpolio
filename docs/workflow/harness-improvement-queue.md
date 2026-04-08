@@ -52,37 +52,9 @@
 4. 처리 후 `python tools/hi_done.py <short-title>` 로 완료 처리한다 (큐에서 제거 + done 파일 이동).
 
 ## Open Tasks
-## 2026-04-08 - doc-ref-finder-script
-- status: open
-- suggested-agent: worker
-- area: tool
-- recommended-artifact: script
-- context-savings: high
-- token-meter: pending
-- task: `tools/find_doc_refs.py <파일경로>` 스크립트를 작성한다 — 마크다운 파일명을 인자로 받아 저장소 전체에서 참조하는 파일 경로와 라인 번호를 출력
-- message: doc-value-audit 실행 중 문서 참조 현황 파악에 문서당 Grep 1회 + 라인 확인용 Read가 반복됐다. 이번 감사(10개 문서)에서 약 15~20 툴 호출이 발생. 스크립트가 있으면 `Bash 1회`로 대체 가능. doc-value-audit 스킬의 "링크 참조 현황 확인(`Grep`으로 파일명 검색)" 단계를 이 스크립트 호출로 교체하고 스킬 설명도 업데이트해야 한다.
-- source: doc-value-audit 실행 - 2026-04-08 서버 문서 검증
-
-## 2026-04-08 - command-script-usage-purpose-log
-- status: open
-- suggested-agent: harness-improver
-- area: tool
-- recommended-artifact: script
-- context-savings: medium
-- token-meter: pending
-- task: bash, PowerShell, Python 등 명령 실행 시 목적과 사용 스크립트를 구조화해 로깅하는 도구 또는 훅을 추가한다.
-- message: 사용자가 에이전트가 `bash`, `python`, PowerShell 등으로 명령을 실행할 때 어떤 목적으로 어떤 스크립트나 커맨드를 사용했는지 기록하길 요청했다. 이 로그는 자주 쓰이는 스크립트와 반복 커맨드를 식별해 자동화, 스킬화, 문서 개선 피드백으로 연결하는 데 쓰인다. claim 시에는 기존 `_workspace/token-log.jsonl`, `_workspace/skill-usage-log.jsonl`, `tools/skill_usage_logger.py`, Claude Code hook 설정과 중복되지 않게 설계하고, command, purpose, script_path, cwd, result 정도의 최소 필드를 검토한다.
-- source: 사용자 피드백 - 2026-04-08 명령/스크립트 사용 목적 로깅 요청
-
 ## 2026-04-05 - decide-whether-response-artifacts-should-also-capture-explic
-- status: open
-- suggested-agent: harness-improver
-- area: workflow
-- recommended-artifact: prompt
-- context-savings: low
-- token-meter: pending
-- task: Decide whether response artifacts should also capture explicit command outputs for review-only runs.
-- message: `_workspace/agent-notes/`는 존재함. 정책 미결: review-only 실행의 command output snippet을 agent-notes에도 저장할지, summary-only로 유지할지. 사용자 의사결정이 필요한 사항.
+- status: dropped
+- decision: summary-only — review-only 실행의 command output은 agent-notes에 저장하지 않는다.
 - source: recursive harness improvement rollout
 
 ## Claimed
