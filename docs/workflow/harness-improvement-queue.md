@@ -65,7 +65,7 @@
 - source: 사용자 피드백 - 2026-04-08 명령/스크립트 사용 목적 로깅 요청
 
 ## 2026-04-08 - context-meter-encoding-tolerance
-- status: open
+- status: done
 - suggested-agent: harness-improver
 - area: tool
 - recommended-artifact: script
@@ -74,9 +74,10 @@
 - task: `context_meter.py`가 UTF-8 디코딩 오류를 만나도 원인 파일을 보고하고 계측을 계속할 수 있게 개선한다.
 - message: 작업 중 `python tools/context_meter.py --git-base HEAD --files ...`가 `'utf-8' codec can't decode byte 0x91 in position 8` 오류로 실패해, 큐 항목의 token-meter를 `pending`으로 남겨야 했다. 다음 처리자는 파일별 예외 메시지에 경로를 포함하고, 필요하면 `errors=replace` 또는 명시적 fallback 정책을 적용해 계측이 완전히 중단되지 않도록 한다. 인코딩 문제를 숨기지 않도록 경고와 결과를 함께 출력하는 방식이 적합하다.
 - source: 2026-04-08 startup-doc-discovery-delegation 큐 등록 중 `context_meter.py` 실패
+- resolution: `read_file()`은 UTF-8 실패 시 경고 출력 후 latin-1 fallback. untracked 파일 루프는 인코딩 오류 시 경고 출력 후 해당 파일 line count 0으로 처리, 계측 계속. 2026-04-08 처리 완료.
 
 ## 2026-04-08 - startup-doc-discovery-delegation
-- status: open
+- status: done
 - suggested-agent: harness-improver
 - area: workflow
 - recommended-artifact: skill

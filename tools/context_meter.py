@@ -22,7 +22,11 @@ def read_file(path_str: str) -> tuple[str, int, int, int]:
     path = (REPO_ROOT / path_str).resolve()
     if not path.exists():
         raise FileNotFoundError(f"missing file: {path_str}")
-    text = path.read_text(encoding="utf-8")
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        print(f"WARNING: encoding error in {path_str} ({exc}), falling back to latin-1", file=sys.stderr)
+        text = path.read_text(encoding="latin-1")
     return path_str, len(text.splitlines()), len(text), estimate_tokens(text)
 
 
@@ -70,7 +74,11 @@ def git_diff_stats(git_base: str) -> tuple[int, int, int]:
         if not abs_path.is_file():
             continue
         changed_files += 1
-        added += len(abs_path.read_text(encoding="utf-8").splitlines())
+        try:
+            added += len(abs_path.read_text(encoding="utf-8").splitlines())
+        except UnicodeDecodeError as exc:
+            print(f"WARNING: encoding error in {rel_path} ({exc}), skipping line count", file=sys.stderr)
+            added += 0
 
     return changed_files, added, deleted
 
