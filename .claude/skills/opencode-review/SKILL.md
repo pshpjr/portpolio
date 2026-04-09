@@ -19,24 +19,39 @@ Use this skill to obtain a second perspective and reduce blind spots.
 
 1. **Claude goes first** — complete a primary analysis using its own review or a relevant agent (reviewer, docs-reviewer, etc.).
 2. **Compile the list of files to review and the relevant context.**
-3. **Delegate to the `opencode-reviewer` sub-agent.**
-   - Specify the review type: code / documentation / planning
-   - Provide the list of target file paths
-   - Provide the key evaluation criteria (layer rules, role-separation principles, etc.)
-   - The sub-agent will call `opencode run --agent portpolio-review`
+3. **Invoke via `review_delegate.sh` wrapper** (foreground, blocking).
+
+```bash
+bash tools/review_delegate.sh opencode "[review prompt]"
+```
+
+The wrapper uses `opencode run --format json --agent portpolio-review` internally and extracts only the final text response — no intermediate tool calls, no ANSI noise.
+
 4. **Combine the OpenCode result with Claude's result** to reach a final conclusion.
 
-## Example Delegation Prompt
+### Parallel execution
+
+Multiple Bash tool calls in a single message will run in parallel, each blocking independently:
 
 ```
-Content to pass to opencode-reviewer:
+Bash 1: bash tools/review_delegate.sh codex "서버 관점 리뷰..."
+Bash 2: bash tools/review_delegate.sh opencode "클라이언트 관점 리뷰..."
+```
 
+Both return clean results directly in the tool response — no polling, no extra reads.
+
+## Example Invocation
+
+```bash
+bash tools/review_delegate.sh opencode "
 Review type: Code review
 Target file: server/src/03_core/combat/CombatSystem.cpp
 Evaluation criteria:
   - Layer rule: 03_core must not depend on 04_service or 05_network
   - Single responsibility: check whether any class carries too many roles
   - Potential bugs: null checks, bounds checks, race conditions
+Report issues as a numbered list with file:line references.
+"
 ```
 
 ## Result Integration Principles

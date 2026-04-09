@@ -52,6 +52,18 @@
 4. 처리 후 `python tools/hi_done.py <short-title>` 로 완료 처리한다 (큐에서 제거 + done 파일 이동).
 
 ## Open Tasks
+
+## 2026-04-08 - review-delegate-opencode-text-extraction-robustness
+- status: open
+- suggested-agent: harness-improver
+- area: tool
+- recommended-artifact: script
+- context-savings: high
+- token-meter: pending
+- task: `tools/review_delegate.sh`의 opencode JSON 후처리를 실제 다양한 출력으로 검증하고 edge case 보강
+- message: opencode `--format json` 출력에서 마지막 `type:text` 이벤트의 `.part.text`를 추출하는 로직이 단일 테스트(짧은 프롬프트)만 거쳤다. 긴 리뷰, 멀티 턴, 에러 시 빈 출력 등 edge case 검증 필요. jq 없는 환경의 python fallback도 테스트 필요.
+- source: tools/review_delegate.sh
+
 ## 2026-04-05 - decide-whether-response-artifacts-should-also-capture-explic
 - status: dropped
 - decision: summary-only — review-only 실행의 command output은 agent-notes에 저장하지 않는다.
