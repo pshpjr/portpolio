@@ -10,7 +10,7 @@
 
 ## 언어 버전
 
-C++20
+C++23
 
 ---
 
@@ -79,13 +79,17 @@ CombatSystem* sys = new CombatSystem(); // 금지
 ## 오류 처리
 
 ```cpp
-// 실패 가능한 연산
-std::optional<DamageResult> CalculateHit(EntityId attacker, EntityId target);
+// 실패 가능한 연산 — std::expected를 기본으로 사용
+std::expected<DamageResult, ErrorCode> CalculateHit(EntityId attacker, EntityId target);
+
+// 오류 정보가 필요 없으면 std::optional도 허용
+std::optional<EntityId> FindTarget(Position pos);
 ```
 
-- 설정/초기화 오류처럼 시작 단계에서 복구 불가능한 문제는 예외를 허용한다.
-- 런타임 게임 로직과 공용 라이브러리 로직은 예외 대신 `optional`, `expected` 계열, 에러 코드 같은 명시적 실패 표현을 우선한다.
-- 프레임 루프나 빈번한 런타임 경로에서 예외 제어 흐름을 쓰지 않는다.
+- **예외(exception)는 사용하지 않는다.** 외부 라이브러리(Boost, spdlog 등)가 던지는 예외를 받아야 하는 경계에서만 `try/catch`를 허용한다.
+- 실패 가능한 연산은 `std::expected<T, E>`를 기본 반환 타입으로 사용한다.
+- 오류 종류 구분이 필요 없는 단순 실패는 `std::optional<T>`을 허용한다.
+- 복구 불가능한 프로그래밍 오류(불변식 위반)는 `assert` 또는 즉시 종료로 처리한다.
 
 ---
 

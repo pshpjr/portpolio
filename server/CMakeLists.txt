@@ -74,7 +74,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -92,7 +92,7 @@ target_include_directories(portpolio_server
         "${PORTPOLIO_GENERATED_SERVER_DIR}"
 )
 
-target_compile_features(portpolio_server PUBLIC cxx_std_20)
+target_compile_features(portpolio_server PUBLIC cxx_std_23)
 
 target_link_libraries(portpolio_server
     PUBLIC
