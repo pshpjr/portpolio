@@ -73,6 +73,7 @@ add_subdirectory(
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(unofficial-perfetto CONFIG REQUIRED)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -100,6 +101,7 @@ target_link_libraries(portpolio_server
         psh::lib
         nlohmann_json::nlohmann_json
         spdlog::spdlog
+        unofficial::perfetto::perfetto
 )
 
 if(BUILD_TESTING)
