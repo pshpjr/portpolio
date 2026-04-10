@@ -25,6 +25,7 @@ if(BUILD_TESTING)
     find_package(GTest CONFIG REQUIRED)
 
     add_executable(portpolio_lib_unit_tests
+        tests/clock/clock_test.cpp
         tests/types/not_null_test.cpp
         tests/types/strong_id_test.cpp
         tests/utils/container_utils_test.cpp

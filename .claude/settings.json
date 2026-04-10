@@ -59,6 +59,17 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python tools/clang_tidy_hook.py 2>/dev/null || true",
+            "timeout": 30,
+            "statusMessage": "Running clang-format + clang-tidy..."
+          }
+        ]
       }
     ]
   }
