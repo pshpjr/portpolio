@@ -3,7 +3,7 @@
 #include "executor.h"
 #include "job.h"
 #include "job_queue.h"
-#include "timer_entry.h"
+#include "entry.h"
 
 #include <atomic>
 #include <chrono>
@@ -196,7 +196,7 @@ class Timer : public std::enable_shared_from_this<Timer>
 
     [[nodiscard]] TimePoint Now() const { return nowProvider_(); }
 
-    TimerEntry::DispatchFn MakeExecutorDispatch()
+    Entry::DispatchFn MakeExecutorDispatch()
     {
         std::weak_ptr<IExecutor> weakExec = executor_;
         return [weakExec](IExecutor::Callback cb,
@@ -207,7 +207,7 @@ class Timer : public std::enable_shared_from_this<Timer>
         };
     }
 
-    TimerEntry::DispatchFn
+    Entry::DispatchFn
     MakeQueueDispatch(const std::shared_ptr<JobQueue>& target)
     {
         std::weak_ptr<JobQueue> weakQ = target;
@@ -230,12 +230,12 @@ class Timer : public std::enable_shared_from_this<Timer>
     JobHandle ScheduleAtImpl(TimePoint at,
                              Callback fn,
                              std::string_view label,
-                             TimerEntry::DispatchFn dispatch)
+                             Entry::DispatchFn dispatch)
     {
         if (!fn)
             return JobHandle{};
 
-        auto entry = std::make_shared<TimerEntry>(
+        auto entry = std::make_shared<Entry>(
             NextId(), label, std::move(fn), at, BucketOf(at),
             std::move(dispatch));
 
@@ -249,7 +249,7 @@ class Timer : public std::enable_shared_from_this<Timer>
         if (wasNewMin)
             cv_.notify_one();
 
-        return JobHandle{std::weak_ptr<TimerEntry>(entry), label};
+        return JobHandle{std::weak_ptr<Entry>(entry), label};
     }
 
     RepeatHandle ScheduleRepeatImpl(Duration period,
@@ -257,13 +257,13 @@ class Timer : public std::enable_shared_from_this<Timer>
                                     EnumRepeatMode mode,
                                     bool executeNow,
                                     std::string_view label,
-                                    TimerEntry::DispatchFn dispatch)
+                                    Entry::DispatchFn dispatch)
     {
         if (!fn || period <= Duration::zero())
             return RepeatHandle{};
 
         const TimePoint at = executeNow ? Now() : Now() + period;
-        auto entry = std::make_shared<TimerEntry>(
+        auto entry = std::make_shared<Entry>(
             NextId(), label, std::move(fn), at, BucketOf(at),
             std::move(dispatch));
 
@@ -281,11 +281,11 @@ class Timer : public std::enable_shared_from_this<Timer>
         if (wasNewMin)
             cv_.notify_one();
 
-        return RepeatHandle{std::weak_ptr<TimerEntry>(entry), period, mode, label};
+        return RepeatHandle{std::weak_ptr<Entry>(entry), period, mode, label};
     }
 
     // mtx_ 보유 상태로 호출. 새 엔트리가 최소 bucket 을 앞당겼는지 반환.
-    bool Insert(const std::shared_ptr<TimerEntry>& entry)
+    bool Insert(const std::shared_ptr<Entry>& entry)
     {
         const BucketKey bucket = entry->Bucket;
         buckets_[bucket].push_back(entry);
@@ -323,7 +323,7 @@ class Timer : public std::enable_shared_from_this<Timer>
                 continue;
             }
 
-            std::list<std::shared_ptr<TimerEntry>> fired;
+            std::list<std::shared_ptr<Entry>> fired;
             {
                 std::lock_guard lock(mtx_);
                 if (auto it = buckets_.find(nextBucket); it != buckets_.end())
@@ -406,7 +406,7 @@ class Timer : public std::enable_shared_from_this<Timer>
 
     mutable std::mutex mtx_;
     std::condition_variable cv_;
-    std::unordered_map<BucketKey, std::list<std::shared_ptr<TimerEntry>>> buckets_;
+    std::unordered_map<BucketKey, std::list<std::shared_ptr<Entry>>> buckets_;
     std::set<BucketKey> occupied_;
 
     std::atomic<EntryId> nextId_{0};

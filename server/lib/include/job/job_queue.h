@@ -2,7 +2,7 @@
 
 #include "executor.h"
 #include "job.h"
-#include "job_entry.h"
+#include "entry.h"
 
 #include <atomic>
 #include <chrono>
@@ -64,8 +64,9 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
         if (!fn)
             return JobHandle{};
 
-        auto entry = std::make_shared<JobEntry>(
-            NextId(), debugLabel, std::chrono::steady_clock::now(), std::move(fn));
+        auto entry = std::make_shared<Entry>(
+            NextId(), debugLabel, std::move(fn),
+            std::chrono::steady_clock::now());
 
         bool needSchedule = false;
         {
@@ -97,7 +98,7 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
             }
         }
 
-        return JobHandle{std::weak_ptr<JobEntry>(entry), debugLabel};
+        return JobHandle{std::weak_ptr<Entry>(entry), debugLabel};
     }
 
     template <typename Fn>
@@ -209,7 +210,7 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
     {
         for (size_t i = 0; i < maxJobs; ++i)
         {
-            std::shared_ptr<JobEntry> entry;
+            std::shared_ptr<Entry> entry;
             {
                 std::lock_guard lock(mtx_);
                 if (queue_.empty())
@@ -225,7 +226,7 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
     {
         while (true)
         {
-            std::shared_ptr<JobEntry> entry;
+            std::shared_ptr<Entry> entry;
             {
                 std::lock_guard lock(mtx_);
                 if (queue_.empty())
@@ -251,7 +252,7 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
         stopCv_.notify_all();
     }
 
-    void ExecuteEntry(const std::shared_ptr<JobEntry>& entry)
+    void ExecuteEntry(const std::shared_ptr<Entry>& entry)
     {
         if (entry->Canceled.load(std::memory_order_acquire))
         {
@@ -283,7 +284,7 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
         // 진입 시 running_ == true 불변.
         for (uint32_t i = 0; i < options_.BatchLimit; ++i)
         {
-            std::shared_ptr<JobEntry> entry;
+            std::shared_ptr<Entry> entry;
             {
                 std::lock_guard lock(mtx_);
                 if (queue_.empty())
@@ -317,7 +318,7 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
 
     mutable std::mutex mtx_;
     std::condition_variable stopCv_;
-    std::deque<std::shared_ptr<JobEntry>> queue_;
+    std::deque<std::shared_ptr<Entry>> queue_;
 
     std::atomic<EntryId> nextId_{0};
     bool running_ = false;

@@ -6,6 +6,12 @@
 
 이 문서는 **인터페이스와 내부 데이터·동작의 계약**을 기술한다. 구현 시 이 문서가 단일 소스이며, 여기에 기술되지 않은 동작은 구현 전 본 문서를 먼저 갱신한다.
 
+### 최근 변경 (실코드 기준)
+
+- **Entry 통합**: `JobEntry` / `TimerEntry` 를 단일 `Entry` (`server/lib/include/job/entry.h`) 로 합쳤다. 경로 구분은 클래스 내부 private `EnumKind { Plain, Timer }` 로만 남기고 외부 API 에는 노출하지 않는다. Timer 전용 필드(`Bucket` / `Dispatch` / `Period` / `Mode` / `Paused`) 는 Plain 경로에서 미사용. 이하 본문의 `JobEntry` / `TimerEntry` 표기는 historical — 현재 코드는 모두 `Entry` 이다.
+- **Handle 단일화**: `JobHandle` 은 `weak_ptr<Entry>` 하나만 보유. 기존 `std::variant<monostate, weak<JobEntry>, weak<TimerEntry>>` 제거.
+- **Telemetry 분리**: `HistogramSnapshot` / `RateStats` / `LatencySummary` 는 `psh::lib::telemetry` 로 이동 (`server/lib/include/telemetry/`). `job_queue_types.h` 에는 using 별칭만 남는다.
+
 ---
 
 ## 용어
@@ -13,7 +19,7 @@
 - **Executor**: 함수 실행 엔진. 스레드풀의 추상.
 - **JobQueue**: 직렬 실행 큐. 자체 저장소·백프레셔·통계를 가지며 drain 클로저를 Executor 에 Post 해서 실행 슬롯을 확보. (ASIO strand 처럼 저장소 없는 경량 뷰가 아니다.)
 - **Timer**: 시각 기반 Job 관리. 생성 시 Executor 바인딩. 만료 시 Executor 또는 JobQueue 로 재위임.
-- **Entry**: `JobEntry` / `TimerEntry`. 컨테이너가 `shared_ptr` 로 소유하며, Handle 은 `weak_ptr` 로 참조.
+- **Entry**: `Entry` (`EnumEntryKind::Plain` 또는 `Timer`). 컨테이너가 `shared_ptr` 로 소유하며, Handle 은 `weak_ptr<Entry>` 로 참조.
 - **Handle**: `JobHandle` / `RepeatHandle`. Entry 의 atomic 필드를 통해 취소·일시정지·설정 변경을 수행.
 
 ---

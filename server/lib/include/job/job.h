@@ -1,22 +1,20 @@
 #pragma once
 
-#include "job_entry.h"
-#include "timer_entry.h"
+#include "entry.h"
 
 #include <memory>
 #include <string>
 #include <string_view>
-#include <type_traits>
 #include <utility>
-#include <variant>
 
 namespace psh::lib::job
 {
 // ============================================================
 // JobHandle
-//   - JobQueue::Post 또는 Timer::ScheduleAt/After 로 반환된다.
-//   - weak_ptr<JobEntry | TimerEntry> 로 참조. 실패 시 invalid(monostate).
+//   - JobQueue::Post / Timer::ScheduleAt / ScheduleAfter 에서 반환.
+//   - weak_ptr<Entry> 로만 참조. 기본 생성은 invalid.
 //   - Cancel / TryGetState 는 Entry 의 atomic 필드를 직접 조작/관측.
+//   - Entry.Kind 로 Timer/Plain 구분이 필요하면 참조 가능.
 // ============================================================
 
 class JobHandle
@@ -24,87 +22,17 @@ class JobHandle
   public:
     JobHandle() = default;
 
-    JobHandle(std::weak_ptr<JobEntry> entry, std::string_view debugLabel)
+    JobHandle(std::weak_ptr<Entry> entry, std::string_view debugLabel)
         : ref_(std::move(entry)), debugLabel_(debugLabel)
     {
     }
 
-    JobHandle(std::weak_ptr<TimerEntry> entry, std::string_view debugLabel)
-        : ref_(std::move(entry)), debugLabel_(debugLabel)
-    {
-    }
-
-    [[nodiscard]] bool IsValid() const noexcept
-    {
-        return std::visit(
-            [](const auto& r) -> bool {
-                using T = std::decay_t<decltype(r)>;
-                if constexpr (std::is_same_v<T, std::monostate>)
-                    return false;
-                else
-                    return !r.expired();
-            },
-            ref_);
-    }
-
-    [[nodiscard]] bool Expired() const noexcept
-    {
-        return std::visit(
-            [](const auto& r) -> bool {
-                using T = std::decay_t<decltype(r)>;
-                if constexpr (std::is_same_v<T, std::monostate>)
-                    return false;
-                else
-                    return r.expired();
-            },
-            ref_);
-    }
+    [[nodiscard]] bool IsValid() const noexcept { return !ref_.expired(); }
+    [[nodiscard]] bool Expired() const noexcept { return ref_.expired(); }
 
     EnumCancelResult Cancel()
     {
-        return std::visit(
-            [](auto& r) -> EnumCancelResult {
-                using T = std::decay_t<decltype(r)>;
-                if constexpr (std::is_same_v<T, std::monostate>)
-                {
-                    return EnumCancelResult::Expired;
-                }
-                else
-                {
-                    auto entry = r.lock();
-                    return CancelEntry(entry);
-                }
-            },
-            ref_);
-    }
-
-    [[nodiscard]] EnumJobState TryGetState() const
-    {
-        return std::visit(
-            [](const auto& r) -> EnumJobState {
-                using T = std::decay_t<decltype(r)>;
-                if constexpr (std::is_same_v<T, std::monostate>)
-                    return EnumJobState::Done;
-                else
-                {
-                    auto entry = r.lock();
-                    if (!entry)
-                        return EnumJobState::Done;
-                    return entry->State.load(std::memory_order_acquire);
-                }
-            },
-            ref_);
-    }
-
-    [[nodiscard]] std::string_view GetDebugLabel() const noexcept
-    {
-        return debugLabel_;
-    }
-
-  private:
-    template <class EntryPtr>
-    static EnumCancelResult CancelEntry(const EntryPtr& entry)
-    {
+        auto entry = ref_.lock();
         if (!entry)
             return EnumCancelResult::Expired;
 
@@ -126,19 +54,30 @@ class JobHandle
         return EnumCancelResult::Canceled;
     }
 
+    [[nodiscard]] EnumJobState TryGetState() const
+    {
+        auto entry = ref_.lock();
+        if (!entry)
+            return EnumJobState::Done;
+        return entry->State.load(std::memory_order_acquire);
+    }
+
+    [[nodiscard]] std::string_view GetDebugLabel() const noexcept
+    {
+        return debugLabel_;
+    }
+
   private:
-    std::variant<std::monostate,
-                 std::weak_ptr<JobEntry>,
-                 std::weak_ptr<TimerEntry>> ref_;
+    std::weak_ptr<Entry> ref_;
     std::string debugLabel_;
 };
 
 // ============================================================
 // RepeatHandle
-//   - Timer::ScheduleRepeat 에서 반환.
+//   - Timer::ScheduleRepeat 전용. 대상 Entry 는 Kind == Timer 이고 Period 를 가진다.
 //   - period / mode / debugLabel 은 핸들 로컬 캐시. Change* 성공 시 로컬 갱신.
-//   - Pause/Resume 은 Entry 의 Paused atomic 조작. 다음 회차부터 반영.
-//     (Paused 인 채로 만료된 회차는 dispatch 를 skip 하고 재등록만 한다.)
+//   - Pause/Resume 은 Entry.Paused atomic. 다음 회차부터 반영.
+//     (Paused 인 채로 만료된 회차는 dispatch 를 skip 하고 재등록만 수행)
 // ============================================================
 
 class RepeatHandle
@@ -146,7 +85,7 @@ class RepeatHandle
   public:
     RepeatHandle() = default;
 
-    RepeatHandle(std::weak_ptr<TimerEntry> entry,
+    RepeatHandle(std::weak_ptr<Entry> entry,
                  Duration period,
                  EnumRepeatMode mode,
                  std::string_view debugLabel)
@@ -228,7 +167,7 @@ class RepeatHandle
     }
 
   private:
-    std::weak_ptr<TimerEntry> entry_;
+    std::weak_ptr<Entry> entry_;
     Duration period_{};
     EnumRepeatMode mode_{EnumRepeatMode::FixedDelay};
     std::string debugLabel_;
