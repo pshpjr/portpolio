@@ -195,20 +195,24 @@ class ThreadPoolExecutor final : public IExecutor,
   private:
     CreateOptions options_;
 
+    // 큐 영역
     mutable std::mutex mtx_;
     std::condition_variable cv_;
-    std::deque<Callback> ready_;
+    std::deque<Callback> ready_; // 워커가 꺼내 실행할 ready job 큐.
 
+    // 상태 영역
     EnumJobQueueState state_ = EnumJobQueueState::Running;
-    bool drainOnStop_ = false;
+    bool drainOnStop_ = false; // Stop(true) 시 set. cv 깨움 후 워커가 관측.
 
+    // 워커 영역
     std::vector<std::thread> workers_;
 
+    // 통계 영역
     std::atomic<uint64_t> submittedCount_{0};
     std::atomic<uint64_t> executedCount_{0};
     std::atomic<uint64_t> failedCount_{0};
     std::atomic<uint64_t> rejectedCount_{0};
-    std::atomic<uint64_t> droppedOnStopCount_{0};
+    std::atomic<uint64_t> droppedOnStopCount_{0}; // Stop(false) 또는 timeout 폐기 누계.
 };
 
 } // namespace psh::lib::job

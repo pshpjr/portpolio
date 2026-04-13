@@ -399,18 +399,21 @@ class Timer : public std::enable_shared_from_this<Timer>
     }
 
   private:
+    // 설정 영역
     std::shared_ptr<IExecutor> executor_;
     CreateOptions options_;
     Duration tickResolution_;
     std::function<TimePoint()> nowProvider_;
 
+    // 버킷 영역
     mutable std::mutex mtx_;
     std::condition_variable cv_;
     std::unordered_map<BucketKey, std::list<std::shared_ptr<Entry>>> buckets_;
-    std::set<BucketKey> occupied_;
+    std::set<BucketKey> occupied_; // 비어있지 않은 버킷 키들. begin() 이 곧 다음 만료.
 
+    // 상태 영역
     std::atomic<EntryId> nextId_{0};
-    std::atomic<bool> stopping_{true};   // Start 호출 전에는 정지 상태
+    std::atomic<bool> stopping_{true};  // Start 호출 전에는 정지 상태.
     std::atomic<bool> started_{false};
     std::thread watcher_;
 };

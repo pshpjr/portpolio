@@ -316,21 +316,24 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
     std::shared_ptr<IExecutor> executor_;
     CreateOptions options_;
 
+    // 큐 영역
     mutable std::mutex mtx_;
-    std::condition_variable stopCv_;
+    std::condition_variable stopCv_; // Stop(drain) 대기에 사용.
     std::deque<std::shared_ptr<Entry>> queue_;
 
+    // 상태 영역
     std::atomic<EntryId> nextId_{0};
-    bool running_ = false;
+    bool running_ = false; // mtx_ 보호. drain 클로저가 큐에 떠있거나 실행 중이면 true.
     EnumJobQueueState state_ = EnumJobQueueState::Running;
 
+    // 통계 영역
     std::atomic<uint64_t> submittedCount_{0};
     std::atomic<uint64_t> executedCount_{0};
     std::atomic<uint64_t> failedCount_{0};
     std::atomic<uint64_t> rejectedCount_{0};
     std::atomic<uint64_t> canceledCount_{0};
-    std::atomic<uint64_t> batchLimitHitCount_{0};
-    std::atomic<uint64_t> drainRescheduleCount_{0};
+    std::atomic<uint64_t> batchLimitHitCount_{0};    // BatchLimit 소진해 self-requeue 한 횟수.
+    std::atomic<uint64_t> drainRescheduleCount_{0};  // self-requeue 가 executor 에 수락된 횟수.
 };
 
 } // namespace psh::lib::job
