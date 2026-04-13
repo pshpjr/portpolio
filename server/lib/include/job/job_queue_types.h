@@ -12,6 +12,8 @@ using ClockDuration = std::chrono::nanoseconds;
 using TimePoint = std::chrono::steady_clock::time_point;
 using Duration = std::chrono::nanoseconds;
 
+using EntryId = uint64_t;   // 컴포넌트(JobQueue / Timer) 별 단조 증가 id. 디버그/로그 용도.
+
 // ------------------------------------------------------------
 // Enums
 // ------------------------------------------------------------
@@ -22,6 +24,7 @@ enum class EnumJobState : uint8_t
     Queued,
     Executing,
     Done,
+    Failed,
     Canceled,
     Rejected
 };
@@ -39,22 +42,20 @@ enum class EnumRepeatMode : uint8_t
     FixedDelay
 };
 
-// 주석 메모:
-// 현재 단계에서는 외부 계약상 job cancel은 적극 지원하지 않는 방향으로 단순화.
-// 필요 시 추후 확장.
 enum class EnumCancelResult : uint8_t
 {
     Canceled,
+    AlreadyCanceled,
     AlreadyExecuting,
     AlreadyFinished,
-    NotFound,
-    Rejected
+    Expired
 };
 
 // ------------------------------------------------------------
-// Common Option Types
+// Common Option / Observation Types
 // ------------------------------------------------------------
 
+// 느릴 때 로그 찍는 기준
 struct SlowJobOptions
 {
     Duration WarningThreshold = std::chrono::milliseconds(0);
@@ -91,25 +92,25 @@ struct LatencySummary
     Duration P99{};
 };
 
+// 관측 API 단일 진입점: 모든 지표는 Get*StatsSnapshot() 하나로 노출.
 struct JobQueueStatsSnapshot
 {
     EnumJobQueueState State = EnumJobQueueState::Stopped;
 
     uint64_t PendingCount = 0;
-    uint64_t TimedWaitingCount = 0;
-    bool IsExecuting = false;
-
     uint64_t SubmittedCount = 0;
     uint64_t ExecutedCount = 0;
-    uint64_t CompletedCount = 0;
     uint64_t FailedCount = 0;
     uint64_t RejectedCount = 0;
-
+    uint64_t CanceledCount = 0;
     uint64_t BatchLimitHitCount = 0;
     uint64_t DrainRescheduleCount = 0;
 
+    RateStats Rates{};
     LatencySummary WaitTime{};
     LatencySummary ExecutionTime{};
+    HistogramSnapshot WaitHistogram{};
+    HistogramSnapshot ExecutionHistogram{};
 };
 
 struct WorkerStateSnapshot
@@ -122,16 +123,20 @@ struct WorkerStateSnapshot
 
 struct WorkerPoolStatsSnapshot
 {
-    uint32_t WorkerCount = 0;
+    EnumJobQueueState State = EnumJobQueueState::Stopped;
 
+    uint32_t WorkerCount = 0;
+    uint64_t PendingCount = 0;
     uint64_t SubmittedCount = 0;
     uint64_t ExecutedCount = 0;
-    uint64_t CompletedCount = 0;
     uint64_t FailedCount = 0;
     uint64_t RejectedCount = 0;
 
+    RateStats Rates{};
     LatencySummary QueueWaitTime{};
     LatencySummary ExecutionTime{};
+    HistogramSnapshot QueueWaitHistogram{};
+    HistogramSnapshot ExecutionHistogram{};
 
     std::vector<WorkerStateSnapshot> Threads;
 };

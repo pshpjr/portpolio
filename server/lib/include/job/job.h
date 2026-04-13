@@ -1,65 +1,99 @@
 #pragma once
 
-#include "job_queue_types.h"
+#include "job_entry.h"
+#include "timer_entry.h"
 
-#include <functional>
 #include <memory>
+#include <string>
 #include <string_view>
+#include <type_traits>
+#include <utility>
+#include <variant>
 
 namespace psh::lib::job
 {
-// ------------------------------------------------------------
-// Job / Handles
-// ------------------------------------------------------------
+// ============================================================
+// JobHandle
+//   - JobQueue::Post 또는 Timer::ScheduleAt/After 로 반환된다.
+//   - weak_ptr<JobEntry | TimerEntry> 로 참조. 실패 시 invalid(monostate).
+//   - Cancel / TryGetState 는 Entry 의 atomic 필드를 직접 조작/관측.
+// ============================================================
 
-class Job
+class JobHandle
 {
   public:
-    using Callback = std::function<void()>;
+    JobHandle() = default;
 
-  public:
-    Job() = default;
-
-    // Job의 경우 외부에서 모르는 타입이므로, 암시적으로 생성 가능하게 한다.
-    // 호출 가능 객체로부터 직접 생성.
-    Job(Callback callback, std::string_view debugLabel = {})
-        : callback_(std::move(callback)), debugLabel_(debugLabel)
+    JobHandle(std::weak_ptr<JobEntry> entry, std::string_view debugLabel)
+        : ref_(std::move(entry)), debugLabel_(debugLabel)
     {
     }
 
-    template <typename Fn>
-        requires std::invocable<Fn> && (!std::same_as<std::decay_t<Fn>, Job>)
-    Job(Fn&& func, std::string_view debugLabel = {})
-        : callback_(std::forward<Fn>(func)), debugLabel_(debugLabel)
+    JobHandle(std::weak_ptr<TimerEntry> entry, std::string_view debugLabel)
+        : ref_(std::move(entry)), debugLabel_(debugLabel)
     {
     }
 
-    // TODO: 멤버 strong bind / weak bind는 고민 중
-    // owner를 weak 캡쳐 후 없으면 사라지게 할지...
-    template <typename T, typename Ret, typename... Args>
-    Job(std::shared_ptr<T> owner, Ret (T::*memFunc)(Args...), Args&&... args)
-        : callback_(
-              [o = std::move(owner), memFunc, ... a = std::forward<Args>(args)]() mutable
-              {
-                  (o.get()->*memFunc)(std::forward<Args>(a)...);
-              })
-    {
-    }
-
-    template <typename T, typename Ret, typename... Args>
-    Job(std::shared_ptr<T> owner, Ret (T::*memFunc)(Args...) const, Args&&... args)
-        : callback_(
-              [o = std::move(owner), memFunc, ... a = std::forward<Args>(args)]() mutable
-              {
-                  (o.get()->*memFunc)(std::forward<Args>(a)...);
-              })
-    {
-    }
-
-  public:
     [[nodiscard]] bool IsValid() const noexcept
     {
-        return static_cast<bool>(callback_);
+        return std::visit(
+            [](const auto& r) -> bool {
+                using T = std::decay_t<decltype(r)>;
+                if constexpr (std::is_same_v<T, std::monostate>)
+                    return false;
+                else
+                    return !r.expired();
+            },
+            ref_);
+    }
+
+    [[nodiscard]] bool Expired() const noexcept
+    {
+        return std::visit(
+            [](const auto& r) -> bool {
+                using T = std::decay_t<decltype(r)>;
+                if constexpr (std::is_same_v<T, std::monostate>)
+                    return false;
+                else
+                    return r.expired();
+            },
+            ref_);
+    }
+
+    EnumCancelResult Cancel()
+    {
+        return std::visit(
+            [](auto& r) -> EnumCancelResult {
+                using T = std::decay_t<decltype(r)>;
+                if constexpr (std::is_same_v<T, std::monostate>)
+                {
+                    return EnumCancelResult::Expired;
+                }
+                else
+                {
+                    auto entry = r.lock();
+                    return CancelEntry(entry);
+                }
+            },
+            ref_);
+    }
+
+    [[nodiscard]] EnumJobState TryGetState() const
+    {
+        return std::visit(
+            [](const auto& r) -> EnumJobState {
+                using T = std::decay_t<decltype(r)>;
+                if constexpr (std::is_same_v<T, std::monostate>)
+                    return EnumJobState::Done;
+                else
+                {
+                    auto entry = r.lock();
+                    if (!entry)
+                        return EnumJobState::Done;
+                    return entry->State.load(std::memory_order_acquire);
+                }
+            },
+            ref_);
     }
 
     [[nodiscard]] std::string_view GetDebugLabel() const noexcept
@@ -67,63 +101,137 @@ class Job
         return debugLabel_;
     }
 
-    void operator()() const
+  private:
+    template <class EntryPtr>
+    static EnumCancelResult CancelEntry(const EntryPtr& entry)
     {
-        if (callback_)
-            callback_();
+        if (!entry)
+            return EnumCancelResult::Expired;
+
+        const bool wasCanceled =
+            entry->Canceled.exchange(true, std::memory_order_acq_rel);
+        const auto state = entry->State.load(std::memory_order_acquire);
+
+        if (wasCanceled)
+        {
+            if (state == EnumJobState::Done || state == EnumJobState::Failed)
+                return EnumCancelResult::AlreadyFinished;
+            return EnumCancelResult::AlreadyCanceled;
+        }
+
+        if (state == EnumJobState::Executing)
+            return EnumCancelResult::AlreadyExecuting;
+        if (state == EnumJobState::Done || state == EnumJobState::Failed)
+            return EnumCancelResult::AlreadyFinished;
+        return EnumCancelResult::Canceled;
     }
 
   private:
-    Callback callback_;
+    std::variant<std::monostate,
+                 std::weak_ptr<JobEntry>,
+                 std::weak_ptr<TimerEntry>> ref_;
     std::string debugLabel_;
 };
 
-class JobHandle
-{
-  public:
-    JobHandle() = default;
-
-    bool IsValid() const noexcept;
-    bool Expired() const noexcept;
-
-    // 주석 메모:
-    // 현재 단계에서는 외부 계약상 job cancel을 단순화.
-    // 필요 시 추후 활성화 가능.
-    EnumCancelResult Cancel();
-
-    EnumJobState TryGetState() const;
-    std::string GetDebugLabel() const;
-};
-
-// ------------------------------------------------------------
-// RepeatHandle — 반복 실행 제어 핸들
-// ------------------------------------------------------------
-// 계약:
-//   FixedRate  — 실행이 period보다 오래 걸리면 즉시 다음 1회 실행 (catch-up 없음).
-//   FixedDelay — 실행 완료 시점 + period 후 다음 실행.
-//   Pause      — 현재 예약된 회차를 취소하고 대기 상태로 전환.
-//   Resume     — period를 리셋하여 resume 시점 + period 후 다음 실행.
-//   Cancel     — 미래 회차 생성 중단 + 이미 예약된 회차도 취소.
-//                콜백 실행 중 자기 자신의 핸들로 Cancel 호출 가능.
+// ============================================================
+// RepeatHandle
+//   - Timer::ScheduleRepeat 에서 반환.
+//   - period / mode / debugLabel 은 핸들 로컬 캐시. Change* 성공 시 로컬 갱신.
+//   - Pause/Resume 은 Entry 의 Paused atomic 조작. 다음 회차부터 반영.
+//     (Paused 인 채로 만료된 회차는 dispatch 를 skip 하고 재등록만 한다.)
+// ============================================================
 
 class RepeatHandle
 {
   public:
     RepeatHandle() = default;
 
-    bool IsValid() const noexcept;
-    bool Expired() const noexcept;
+    RepeatHandle(std::weak_ptr<TimerEntry> entry,
+                 Duration period,
+                 EnumRepeatMode mode,
+                 std::string_view debugLabel)
+        : entry_(std::move(entry))
+        , period_(period)
+        , mode_(mode)
+        , debugLabel_(debugLabel)
+    {
+    }
 
-    bool Cancel();
-    bool Pause();
-    bool Resume();
+    [[nodiscard]] bool IsValid() const noexcept { return !entry_.expired(); }
+    [[nodiscard]] bool Expired() const noexcept { return entry_.expired(); }
 
-    bool ChangePeriod(Duration newPeriod);
-    bool ChangeMode(EnumRepeatMode newMode);
+    bool Cancel()
+    {
+        if (auto e = entry_.lock())
+        {
+            e->Canceled.store(true, std::memory_order_release);
+            return true;
+        }
+        return false;
+    }
 
-    std::optional<EnumRepeatMode> TryGetMode() const;
-    std::optional<Duration> TryGetPeriod() const;
-    std::string GetDebugLabel() const;
+    bool Pause()
+    {
+        if (auto e = entry_.lock())
+        {
+            if (e->Canceled.load(std::memory_order_acquire))
+                return false;
+            e->Paused.store(true, std::memory_order_release);
+            return true;
+        }
+        return false;
+    }
+
+    bool Resume()
+    {
+        if (auto e = entry_.lock())
+        {
+            if (e->Canceled.load(std::memory_order_acquire))
+                return false;
+            e->Paused.store(false, std::memory_order_release);
+            return true;
+        }
+        return false;
+    }
+
+    bool ChangePeriod(Duration newPeriod)
+    {
+        if (auto e = entry_.lock())
+        {
+            if (e->Canceled.load(std::memory_order_acquire))
+                return false;
+            e->PeriodNs.store(newPeriod.count(), std::memory_order_release);
+            period_ = newPeriod;
+            return true;
+        }
+        return false;
+    }
+
+    bool ChangeMode(EnumRepeatMode newMode)
+    {
+        if (auto e = entry_.lock())
+        {
+            if (e->Canceled.load(std::memory_order_acquire))
+                return false;
+            e->Mode.store(newMode, std::memory_order_release);
+            mode_ = newMode;
+            return true;
+        }
+        return false;
+    }
+
+    [[nodiscard]] Duration GetPeriod() const noexcept { return period_; }
+    [[nodiscard]] EnumRepeatMode GetMode() const noexcept { return mode_; }
+    [[nodiscard]] std::string_view GetDebugLabel() const noexcept
+    {
+        return debugLabel_;
+    }
+
+  private:
+    std::weak_ptr<TimerEntry> entry_;
+    Duration period_{};
+    EnumRepeatMode mode_{EnumRepeatMode::FixedDelay};
+    std::string debugLabel_;
 };
 
 } // namespace psh::lib::job
