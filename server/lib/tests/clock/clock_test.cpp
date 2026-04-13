@@ -6,6 +6,7 @@
 #include <thread>
 
 namespace psh::lib {
+using namespace std::chrono_literals;
 
 // --- ManualClock ---
 
@@ -78,7 +79,7 @@ TEST(SteadyTickClock, DeltaReflectsTickInterval) {
 // --- SteadyClock ---
 
 TEST(SteadyClock, StartsAndStops) {
-    SteadyClock clock(1.0);
+    SteadyClock clock(1ms);
     clock.Start();
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     clock.Stop();
@@ -88,7 +89,7 @@ TEST(SteadyClock, StartsAndStops) {
 }
 
 TEST(SteadyClock, DoubleStartIsNoop) {
-    SteadyClock clock(1.0);
+    SteadyClock clock(1ms);
     clock.Start();
     clock.Start();  // 두 번째 호출은 무시
     clock.Stop();
@@ -97,7 +98,7 @@ TEST(SteadyClock, DoubleStartIsNoop) {
 TEST(SteadyClock, PolymorphicAccess) {
     ManualClock manual;
     SteadyTickClock tick;
-    SteadyClock steady(1.0);
+    SteadyClock steady(1ms);
 
     IClock* clocks[] = {&manual, &tick, &steady};
 

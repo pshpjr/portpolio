@@ -8,40 +8,40 @@ namespace psh::lib
 class ManualClock final : public IClock
 {
   public:
-    double GetCurrentTime() const override
+    uint64_t GetCurrentTime() const override
     {
         return currentTime_;
     }
-    double GetDeltaTime() const override
+    uint64_t GetDeltaTime() const override
     {
         return deltaTime_;
     }
-    double GetIdleTime() const override
+    uint64_t GetIdleTime() const override
     {
         return idleTime_;
     }
 
-    void SetCurrentTime(double time)
+    void SetCurrentTime(uint64_t time)
     {
         deltaTime_ = time - currentTime_;
         currentTime_ = time;
     }
 
-    void Advance(double seconds)
+    void Advance(uint64_t seconds)
     {
         currentTime_ += seconds;
         deltaTime_ = seconds;
     }
 
-    void SetIdleTime(double idle)
+    void SetIdleTime(uint64_t idle)
     {
         idleTime_ = idle;
     }
 
   private:
-    double currentTime_ = 0.0;
-    double deltaTime_ = 0.0;
-    double idleTime_ = 0.0;
+    uint64_t currentTime_ = 0.0;
+    uint64_t deltaTime_ = 0.0;
+    uint64_t idleTime_ = 0.0;
 };
 
 } // namespace psh::lib

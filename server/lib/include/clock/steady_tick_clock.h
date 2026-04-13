@@ -3,6 +3,7 @@
 #include "clock/clock.h"
 
 #include <chrono>
+#include <cstdint>
 
 namespace psh::lib {
 
@@ -12,14 +13,16 @@ public:
         : start_(std::chrono::steady_clock::now()),
           lastTick_(start_) {}
 
-    double GetCurrentTime() const override { return currentTime_; }
-    double GetDeltaTime() const override   { return deltaTime_; }
-    double GetIdleTime() const override    { return 0.0; }
+    uint64_t GetCurrentTime() const override { return currentTime_; }
+    uint64_t GetDeltaTime() const override   { return deltaTime_; }
+    uint64_t GetIdleTime() const override    { return 0; }
 
     void Tick() {
         auto now     = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration<double>(now - start_).count();
-        auto delta   = std::chrono::duration<double>(now - lastTick_).count();
+        auto elapsed = static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(now - start_).count());
+        auto delta   = static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastTick_).count());
 
         currentTime_ = elapsed;
         deltaTime_   = delta;
@@ -29,8 +32,8 @@ public:
 private:
     std::chrono::steady_clock::time_point start_;
     std::chrono::steady_clock::time_point lastTick_;
-    double currentTime_ = 0.0;
-    double deltaTime_   = 0.0;
+    uint64_t currentTime_ = 0;
+    uint64_t deltaTime_   = 0;
 };
 
 }  // namespace psh::lib

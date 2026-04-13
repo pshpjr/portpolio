@@ -10,8 +10,8 @@ namespace psh::lib {
 
 class SteadyClock final : public IClock {
 public:
-    explicit SteadyClock(double tick_interval_ms = 1.0)
-        : tick_interval_(std::chrono::duration<double, std::milli>(tick_interval_ms)),
+    explicit SteadyClock(std::chrono::nanoseconds tick_interval = std::chrono::milliseconds(1))
+        : tick_interval_(tick_interval),
           start_(std::chrono::steady_clock::now()) {}
 
     ~SteadyClock() override { Stop(); }
@@ -21,15 +21,15 @@ public:
     SteadyClock(SteadyClock&&)                 = delete;
     SteadyClock& operator=(SteadyClock&&)      = delete;
 
-    double GetCurrentTime() const override {
+    uint64_t GetCurrentTime() const override {
         return current_time_.load(std::memory_order_acquire);
     }
 
-    double GetDeltaTime() const override {
+    uint64_t GetDeltaTime() const override {
         return delta_time_.load(std::memory_order_acquire);
     }
 
-    double GetIdleTime() const override {
+    uint64_t GetIdleTime() const override {
         return idle_time_.load(std::memory_order_acquire);
     }
 
@@ -51,29 +51,32 @@ public:
 private:
     void Run() {
         auto last_tick = start_;
+        const uint64_t idle_ns = static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(tick_interval_).count());
 
         while (running_.load(std::memory_order_acquire)) {
             std::this_thread::sleep_for(tick_interval_);
 
             auto now     = std::chrono::steady_clock::now();
-            auto elapsed = std::chrono::duration<double>(now - start_).count();
-            auto delta   = std::chrono::duration<double>(now - last_tick).count();
-            auto idle    = std::chrono::duration<double>(tick_interval_).count();
+            auto elapsed = static_cast<uint64_t>(
+                std::chrono::duration_cast<std::chrono::nanoseconds>(now - start_).count());
+            auto delta   = static_cast<uint64_t>(
+                std::chrono::duration_cast<std::chrono::nanoseconds>(now - last_tick).count());
 
             current_time_.store(elapsed, std::memory_order_release);
             delta_time_.store(delta, std::memory_order_release);
-            idle_time_.store(idle, std::memory_order_release);
+            idle_time_.store(idle_ns, std::memory_order_release);
 
             last_tick = now;
         }
     }
 
-    std::chrono::duration<double, std::milli> tick_interval_;
+    std::chrono::nanoseconds tick_interval_;
     std::chrono::steady_clock::time_point start_;
 
-    std::atomic<double> current_time_{0.0};
-    std::atomic<double> delta_time_{0.0};
-    std::atomic<double> idle_time_{0.0};
+    std::atomic<uint64_t> current_time_{};
+    std::atomic<uint64_t> delta_time_{};
+    std::atomic<uint64_t> idle_time_{};
     std::atomic<bool>   running_{false};
     std::thread         thread_;
 };

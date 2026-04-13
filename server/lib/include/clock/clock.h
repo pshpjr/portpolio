@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace psh;::lib
+namespace psh::lib
 {
 
 class IClock
