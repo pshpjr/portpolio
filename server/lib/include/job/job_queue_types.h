@@ -1,5 +1,9 @@
 #pragma once
 
+#include "telemetry/histogram.h"
+#include "telemetry/latency_summary.h"
+#include "telemetry/rate_stats.h"
+
 #include <chrono>
 #include <cstdint>
 #include <optional>
@@ -8,6 +12,11 @@
 
 namespace psh::lib::job
 {
+using HistogramBucket = telemetry::HistogramBucket;
+using HistogramSnapshot = telemetry::HistogramSnapshot;
+using RateStats = telemetry::RateStats;
+using LatencySummary = telemetry::LatencySummary;
+
 using ClockDuration = std::chrono::nanoseconds;
 using TimePoint = std::chrono::steady_clock::time_point;
 using Duration = std::chrono::nanoseconds;
@@ -60,36 +69,6 @@ struct SlowJobOptions
 {
     Duration WarningThreshold = std::chrono::milliseconds(0);
     bool EnableWarningLog = false;
-};
-
-struct HistogramBucket
-{
-    Duration LowerBound{};
-    Duration UpperBound{};
-    uint64_t Count = 0;
-};
-
-struct HistogramSnapshot
-{
-    std::vector<HistogramBucket> Buckets;
-    bool IsApproximate = true;
-};
-
-struct RateStats
-{
-    double SubmittedPerSecond = 0.0;
-    double ExecutedPerSecond = 0.0;
-    double CompletedPerSecond = 0.0;
-    double FailedPerSecond = 0.0;
-};
-
-struct LatencySummary
-{
-    Duration Average{};
-    Duration Maximum{};
-    Duration P50{};
-    Duration P95{};
-    Duration P99{};
 };
 
 // 관측 API 단일 진입점: 모든 지표는 Get*StatsSnapshot() 하나로 노출.

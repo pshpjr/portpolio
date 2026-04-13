@@ -34,10 +34,12 @@ enum class EnumRepeatMode     { FixedRate, FixedDelay };
 enum class EnumCancelResult   { Canceled, AlreadyCanceled, AlreadyExecuting, AlreadyFinished, Expired };
 
 struct SlowJobOptions    { Duration WarningThreshold{0}; bool EnableWarningLog = false; };
-struct HistogramBucket   { Duration LowerBound, UpperBound; uint64_t Count = 0; };
-struct HistogramSnapshot { std::vector<HistogramBucket> Buckets; bool IsApproximate = true; };
-struct RateStats         { double SubmittedPerSecond, ExecutedPerSecond, CompletedPerSecond, FailedPerSecond; };
-struct LatencySummary    { Duration Average, Maximum, P50, P95, P99; };
+
+// 계측 공용 타입은 psh::lib::telemetry 로 이동 (범용 재사용 목적).
+//   telemetry/histogram.h       — HistogramBucket / HistogramSnapshot
+//   telemetry/rate_stats.h      — RateStats
+//   telemetry/latency_summary.h — LatencySummary
+// job 네임스페이스에는 using 별칭만 노출하여 기존 코드 호환성을 유지한다.
 
 // 모든 관측 지표를 단일 스냅샷에 통합. 외부는 GetStatsSnapshot() 만 사용.
 struct JobQueueStatsSnapshot
