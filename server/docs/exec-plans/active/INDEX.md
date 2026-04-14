@@ -4,8 +4,7 @@
 
 ## 현재 활성 계획
 
-- [20260413-job-system-redesign.md](./20260413-job-system-redesign.md) - Job 시스템(Executor/Strand/Timer) 인터페이스 재설계 및 `JobQueueHelper` 제거
-- [20260413-job-system-interface-spec.md](./20260413-job-system-interface-spec.md) - 위 plan의 인터페이스·데이터·내부 동작 명세 (단일 소스)
+- [20260414-boost-mysql-user-db-executor.md](./20260414-boost-mysql-user-db-executor.md) — boost-mysql 종속성 추가, User DB strand, IQuery, DbExecutor 도입.
 
 ## 운영 규칙
 
