@@ -14,13 +14,12 @@ class IQuery
 public:
     virtual ~IQuery() = default;
 
-    IQuery(const IQuery&)            = delete;
+    IQuery(const IQuery&) = delete;
     IQuery& operator=(const IQuery&) = delete;
-    IQuery(IQuery&&)                 = delete;
-    IQuery& operator=(IQuery&&)      = delete;
+    IQuery(IQuery&&) = delete;
+    IQuery& operator=(IQuery&&) = delete;
 
-    virtual boost::asio::awaitable<std::error_code>
-        Execute(boost::mysql::any_connection& conn) = 0;
+    virtual boost::asio::awaitable<std::error_code> Execute(boost::mysql::any_connection& conn) = 0;
 
 protected:
     IQuery() = default;

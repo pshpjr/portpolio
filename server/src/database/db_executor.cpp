@@ -16,12 +16,9 @@
 namespace psh::database
 {
 
-DbExecutor::DbExecutor(boost::mysql::pool_params params,
-                       std::size_t               workerCount)
-    : m_io{}
-    , m_workGuard{m_io.get_executor()}
-    , m_pool{m_io, std::move(params)}
-    , m_workerCount{workerCount == 0 ? std::thread::hardware_concurrency() : workerCount}
+DbExecutor::DbExecutor(boost::mysql::pool_params params, std::size_t workerCount)
+    : m_io{}, m_workGuard{m_io.get_executor()}, m_pool{m_io, std::move(params)},
+      m_workerCount{workerCount == 0 ? std::thread::hardware_concurrency() : workerCount}
 {
 }
 
@@ -32,18 +29,19 @@ DbExecutor::~DbExecutor()
 
 void DbExecutor::Start()
 {
-    if (m_started)
-    {
+    if (std::exchange(m_started, true))
         return;
-    }
-    m_started = true;
 
     m_pool.async_run(boost::asio::detached);
 
     m_workers.reserve(m_workerCount);
     for (std::size_t i = 0; i < m_workerCount; ++i)
     {
-        m_workers.emplace_back([this] { m_io.run(); });
+        m_workers.emplace_back(
+            [this]
+            {
+                m_io.run();
+            });
     }
 }
 
@@ -62,15 +60,16 @@ DbStrand DbExecutor::MakeDbStrand()
     return boost::asio::make_strand(m_io.get_executor());
 }
 
-void DbExecutor::Post(const DbStrand&         userDbStrand,
-                      std::shared_ptr<IQuery> query,
-                      DbCallback              onComplete)
+void DbExecutor::Post(const DbStrand& userDbStrand, std::shared_ptr<IQuery> query,
+                      DbCallback onComplete)
 {
-    boost::asio::co_spawn(userDbStrand,
+    boost::asio::co_spawn(
+        userDbStrand,
         // 성공
-        [this, queryP = std::move(query), cb = std::move(onComplete)]() mutable  -> boost::asio::awaitable<void>
+        [this, queryP = std::move(query), cb = std::move(onComplete)]() mutable -> boost::asio::awaitable<void>
         {
-            auto [ec, conn] = co_await m_pool.async_get_connection(boost::asio::as_tuple(boost::asio::use_awaitable));
+            auto [ec, conn] = co_await m_pool.async_get_connection(
+                boost::asio::as_tuple(boost::asio::use_awaitable));
             if (!ec)
             {
                 std::error_code ecExec = co_await queryP->Execute(conn.get());

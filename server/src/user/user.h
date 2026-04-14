@@ -13,12 +13,18 @@ class User
 public:
     User(UserID uid, psh::database::DbExecutor& dbExecutor);
 
-    UserID                                Uid() const noexcept { return m_uid; }
-    const psh::database::DbStrand&        DbStrand() const noexcept { return m_dbStrand; }
+    UserID Uid() const noexcept
+    {
+        return m_uid;
+    }
+    const psh::database::DbStrand& DbStrand() const noexcept
+    {
+        return m_dbStrand;
+    }
 
 private:
-    UserID                  m_uid;
+    UserID m_uid;
     psh::database::DbStrand m_dbStrand;
 };
 
-#endif //PORTPOLIO_USER_H
+#endif // PORTPOLIO_USER_H

@@ -6,54 +6,72 @@
 #include <chrono>
 #include <thread>
 
-namespace psh::lib {
+namespace psh::lib
+{
 
-class SteadyClock final : public IClock {
+class SteadyClock final : public IClock
+{
 public:
     explicit SteadyClock(std::chrono::nanoseconds tick_interval = std::chrono::milliseconds(1))
         : tick_interval_(tick_interval), start_(std::chrono::steady_clock::now()) {}
 
-    ~SteadyClock() override { Stop(); }
+    ~SteadyClock() override
+    {
+        Stop();
+    }
 
-    SteadyClock(const SteadyClock&)            = delete;
+    SteadyClock(const SteadyClock&) = delete;
     SteadyClock& operator=(const SteadyClock&) = delete;
-    SteadyClock(SteadyClock&&)                 = delete;
-    SteadyClock& operator=(SteadyClock&&)      = delete;
+    SteadyClock(SteadyClock&&) = delete;
+    SteadyClock& operator=(SteadyClock&&) = delete;
 
-    uint64_t GetCurrentTime() const override {
+    uint64_t GetCurrentTime() const override
+    {
         return current_time_.load(std::memory_order_acquire);
     }
 
-    uint64_t GetDeltaTime() const override {
+    uint64_t GetDeltaTime() const override
+    {
         return delta_time_.load(std::memory_order_acquire);
     }
 
-    uint64_t GetIdleTime() const override {
+    uint64_t GetIdleTime() const override
+    {
         return idle_time_.load(std::memory_order_acquire);
     }
 
-    void Start() {
+    void Start()
+    {
         bool expected = false;
-        if (!running_.compare_exchange_strong(expected, true)) {
+        if (!running_.compare_exchange_strong(expected, true))
+        {
             return;
         }
-        thread_ = std::thread([this] { Run(); });
+        thread_ = std::thread(
+            [this]
+            {
+                Run();
+            });
     }
 
-    void Stop() {
+    void Stop()
+    {
         running_.store(false, std::memory_order_release);
-        if (thread_.joinable()) {
+        if (thread_.joinable())
+        {
             thread_.join();
         }
     }
 
 private:
-    void Run() {
+    void Run()
+    {
         auto last_tick = start_;
         const uint64_t idle_ns = static_cast<uint64_t>(
             std::chrono::duration_cast<std::chrono::nanoseconds>(tick_interval_).count());
 
-        while (running_.load(std::memory_order_acquire)) {
+        while (running_.load(std::memory_order_acquire))
+        {
             std::this_thread::sleep_for(tick_interval_);
 
             auto now     = std::chrono::steady_clock::now();

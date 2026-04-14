@@ -5,13 +5,13 @@
 #include <chrono>
 #include <cstdint>
 
-namespace psh::lib {
+namespace psh::lib
+{
 
-class SteadyTickClock final : public IClock {
+class SteadyTickClock final : public IClock
+{
 public:
-    SteadyTickClock()
-        : start_(std::chrono::steady_clock::now()),
-          lastTick_(start_) {}
+    SteadyTickClock() : start_(std::chrono::steady_clock::now()), lastTick_(start_) {}
 
     uint64_t GetCurrentTime() const override { return currentTime_; }
     uint64_t GetDeltaTime() const override   { return deltaTime_; }
@@ -25,8 +25,8 @@ public:
             std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastTick_).count());
 
         currentTime_ = elapsed;
-        deltaTime_   = delta;
-        lastTick_    = now;
+        deltaTime_ = delta;
+        lastTick_ = now;
     }
 
 private:
@@ -36,4 +36,4 @@ private:
     uint64_t deltaTime_   = 0;
 };
 
-}  // namespace psh::lib
+} // namespace psh::lib
