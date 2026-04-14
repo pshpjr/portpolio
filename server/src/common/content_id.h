@@ -18,10 +18,19 @@ public:
     constexpr ContentId() = default;
     constexpr ContentId(UInt64 contentId) : contentId_(contentId) {}
 
-    explicit operator UInt64() const { return contentId_; }
+    explicit operator UInt64() const
+    {
+        return contentId_;
+    }
 
-    [[nodiscard]] auto GetContentId() const -> UInt64 { return contentId_; }
-    void SetContentId(const UInt64& contentId) { contentId_ = contentId;}
+    [[nodiscard]] auto GetContentId() const -> UInt64
+    {
+        return contentId_;
+    }
+    void SetContentId(const UInt64& contentId)
+    {
+        contentId_ = contentId;
+    }
 
     constexpr ContentId(const ContentId&) = default;
     constexpr ContentId(ContentId&&) = default;
@@ -30,18 +39,20 @@ public:
     ContentId& operator=(ContentId&&) = default;
 
     constexpr bool operator==(const ContentId& other) const = default;
+
 private:
     UInt64 contentId_{0};
 };
 
-}
+} // namespace psh
 
 template <>
-struct std::hash<psh::ContentId> {
-    std::size_t operator()(const psh::ContentId& contentId) const {
+struct std::hash<psh::ContentId>
+{
+    std::size_t operator()(const psh::ContentId& contentId) const
+    {
         return static_cast<std::size_t>(contentId);
     }
 };
 
-
-#endif //PORTPOLIO_CONTENT_ID_H
+#endif // PORTPOLIO_CONTENT_ID_H

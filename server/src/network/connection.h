@@ -18,12 +18,11 @@ enum class EnumConnectionState
 class Connection
 {
     void Send();
+
 private:
     AccountID accountId_;
     psh::network::HandlerMap packetHandlers_;
     EnumConnectionState state_{};
 };
 
-
-
-#endif //PORTPOLIO_CONNECTION_H
+#endif // PORTPOLIO_CONNECTION_H

@@ -7,7 +7,7 @@ namespace psh::lib
 
 class ManualClock final : public IClock
 {
-  public:
+public:
     uint64_t GetCurrentTime() const override
     {
         return currentTime_;
@@ -38,7 +38,7 @@ class ManualClock final : public IClock
         idleTime_ = idle;
     }
 
-  private:
+private:
     uint64_t currentTime_ = 0.0;
     uint64_t deltaTime_ = 0.0;
     uint64_t idleTime_ = 0.0;

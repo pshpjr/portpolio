@@ -8,14 +8,12 @@
 
 namespace psh::core
 {
-class inventory_helper {
+class inventory_helper
+{
 
     bool CanAdd(const Item& item, size_t count);
     bool CanRemove(const Item& item, size_t count);
 };
-}
+} // namespace psh::core
 
-
-
-
-#endif //PORTPOLIO_INVENTORY_HELPER_H
+#endif // PORTPOLIO_INVENTORY_HELPER_H

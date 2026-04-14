@@ -64,32 +64,24 @@ PERFETTO_DEFINE_CATEGORIES(
     //   .SetDescription("설명") — UI에서 카테고리 위에 마우스를 올리면 표시됨
     //   .SetTags("slow")       — "slow" 태그가 붙은 카테고리는 기본적으로 비활성화됨
 
-    perfetto::Category("network")
-        .SetDescription("네트워크 I/O: 패킷 송수신, 연결/해제, 세션 관리"),
+    perfetto::Category("network").SetDescription("네트워크 I/O: 패킷 송수신, 연결/해제, 세션 관리"),
 
-    perfetto::Category("game")
-        .SetDescription("게임 로직: 틱 업데이트, 전투, 상태 전이"),
+    perfetto::Category("game").SetDescription("게임 로직: 틱 업데이트, 전투, 상태 전이"),
 
-    perfetto::Category("db")
-        .SetDescription("데이터베이스: 쿼리 실행, 커넥션 풀"),
+    perfetto::Category("db").SetDescription("데이터베이스: 쿼리 실행, 커넥션 풀"),
 
-    perfetto::Category("config")
-        .SetDescription("설정: JSON 로딩, 환경변수 오버라이드"),
+    perfetto::Category("config").SetDescription("설정: JSON 로딩, 환경변수 오버라이드"),
 
-    perfetto::Category("item")
-        .SetDescription("아이템: 인벤토리 조작, 장비 장착/해제"),
+    perfetto::Category("item").SetDescription("아이템: 인벤토리 조작, 장비 장착/해제"),
 
-    perfetto::Category("user")
-        .SetDescription("유저: 로그인/로그아웃, 세션 라이프사이클"),
+    perfetto::Category("user").SetDescription("유저: 로그인/로그아웃, 세션 라이프사이클"),
 
     // debug 카테고리는 기본 비활성화.
     // StartSession에서 명시적으로 켜야만 기록된다.
-    perfetto::Category("debug")
-        .SetDescription("디버깅 전용 상세 트레이스")
-        .SetTags("debug")
-);
+    perfetto::Category("debug").SetDescription("디버깅 전용 상세 트레이스").SetTags("debug"));
 
-namespace psh::tracing {
+namespace psh::tracing
+{
 
 // =============================================================================
 // 초기화 / 세션 관리
@@ -109,7 +101,8 @@ void Init();
 // StartSession()은 기본 설정을 사용하고,
 // StartSessionWithConfig()는 사용자 지정 설정을 받는다.
 
-struct SessionConfig {
+struct SessionConfig
+{
     // 트레이스 데이터를 저장할 링 버퍼 크기 (바이트 단위).
     // 버퍼가 가득 차면 가장 오래된 데이터부터 덮어쓴다.
     // 기본값 64MB — 수분~수십분 분량의 트레이스를 저장할 수 있다.
@@ -169,24 +162,20 @@ bool IsSessionActive();
 
 // 스코프 기반 트레이스 이벤트 (가장 자주 사용)
 // 블록이 끝나면 자동으로 duration이 기록된다.
-#define PSH_TRACE_EVENT(category, name, ...) \
-    TRACE_EVENT(category, name, ##__VA_ARGS__)
+#define PSH_TRACE_EVENT(category, name, ...) TRACE_EVENT(category, name, ##__VA_ARGS__)
 
 // 즉시(instant) 이벤트 — 시점만 기록, duration 없음
 #define PSH_TRACE_EVENT_INSTANT(category, name, ...) \
     TRACE_EVENT_INSTANT(category, name, ##__VA_ARGS__)
 
 // 비동기 시작/끝 — 서로 다른 스코프에서 짝을 맞춰 사용
-#define PSH_TRACE_EVENT_BEGIN(category, name, ...) \
-    TRACE_EVENT_BEGIN(category, name, ##__VA_ARGS__)
+#define PSH_TRACE_EVENT_BEGIN(category, name, ...) TRACE_EVENT_BEGIN(category, name, ##__VA_ARGS__)
 
-#define PSH_TRACE_EVENT_END(category, ...) \
-    TRACE_EVENT_END(category, ##__VA_ARGS__)
+#define PSH_TRACE_EVENT_END(category, ...) TRACE_EVENT_END(category, ##__VA_ARGS__)
 
 // 카운터 트레이스 — 시간에 따른 숫자 값 변화를 그래프로 표시
 // 예: PSH_TRACE_COUNTER("network", "ActiveConnections", connectionCount);
 //     → UI에서 시간축 위에 선 그래프로 표시됨
-#define PSH_TRACE_COUNTER(category, name, value) \
-    TRACE_COUNTER(category, name, value)
+#define PSH_TRACE_COUNTER(category, name, value) TRACE_COUNTER(category, name, value)
 
-}  // namespace psh::tracing
+} // namespace psh::tracing

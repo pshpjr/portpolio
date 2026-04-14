@@ -8,13 +8,9 @@
 
 //  처리 방식이 달라지면 분리
 
-
-
-
 namespace psh::type_utils
 {
 
 }
 
-
-#endif //PORTPOLIO_CONTENT_ID_HELPER_H
+#endif // PORTPOLIO_CONTENT_ID_HELPER_H

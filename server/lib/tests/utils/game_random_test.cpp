@@ -5,14 +5,18 @@
 
 #include <gtest/gtest.h>
 
-namespace psh::lib::utils {
-namespace {
+namespace psh::lib::utils
+{
+namespace
+{
 
-TEST(GameRandomTest, BagDrawConsumesConfiguredWeightsWithinCycle) {
+TEST(GameRandomTest, BagDrawConsumesConfiguredWeightsWithinCycle)
+{
     BagDraw<int> draw({{1, 3}, {2, 1}, {3, 1}});
     std::vector<int> picks;
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 5; ++i)
+    {
         picks.push_back(draw.draw());
     }
 
@@ -22,7 +26,8 @@ TEST(GameRandomTest, BagDrawConsumesConfiguredWeightsWithinCycle) {
     EXPECT_EQ(static_cast<int>(std::count(picks.begin(), picks.end(), 3)), 1);
 }
 
-TEST(GameRandomTest, BagDrawCanResumeFromSavedState) {
+TEST(GameRandomTest, BagDrawCanResumeFromSavedState)
+{
     BagDraw<int> original({{10, 2}, {20, 1}});
 
     const int firstDraw = original.draw();
@@ -35,7 +40,8 @@ TEST(GameRandomTest, BagDrawCanResumeFromSavedState) {
     EXPECT_EQ(restored.draw(), original.draw());
 }
 
-TEST(GameRandomTest, BagDrawStartsNewCycleAfterBagIsExhausted) {
+TEST(GameRandomTest, BagDrawStartsNewCycleAfterBagIsExhausted)
+{
     BagDraw<int> draw({{7, 1}});
 
     EXPECT_EQ(draw.draw(), 7);
@@ -44,5 +50,5 @@ TEST(GameRandomTest, BagDrawStartsNewCycleAfterBagIsExhausted) {
     EXPECT_EQ(draw.remaining(), 0);
 }
 
-}  // namespace
-}  // namespace psh::lib::utils
+} // namespace
+} // namespace psh::lib::utils

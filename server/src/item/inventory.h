@@ -8,7 +8,8 @@
 #include <memory>
 #include <utility>
 
-namespace psh::core {
+namespace psh::core
+{
 
 class Item;
 
@@ -19,7 +20,9 @@ class Inventory
     struct Datum
     {
         explicit Datum(NotNull<Item> item, ContentId contentId, size_t slotIndex)
-            : item(std::move(item)), contentId(contentId), slotIndex(slotIndex){}
+            : item(std::move(item)), contentId(contentId), slotIndex(slotIndex)
+        {
+        }
 
         NotNull<Item> item;
         ContentId contentId{};
@@ -27,8 +30,14 @@ class Inventory
     };
 
 public:
-    auto begin() { return repo1_.begin(); } // NOLINT(*-identifier-naming)
-    auto end() { return repo1_.end(); } // NOLINT(*-identifier-naming)
+    auto begin()
+    {
+        return repo1_.begin();
+    } // NOLINT(*-identifier-naming)
+    auto end()
+    {
+        return repo1_.end();
+    } // NOLINT(*-identifier-naming)
 
 public:
     bool Insert(EntityId entityId, const NotNull<Item>& item);
@@ -46,9 +55,8 @@ private:
 
     //  멀티 키 인덱스
     //  주소 변경 이슈 고려 unique로 설정
-    HashMap<EntityId, std::unique_ptr<Datum>> repo1_;  //  아이템 원본
-    HashMap<ContentId, Vector<Datum*>> repo2_; //  해당 타입 아이템 인덱스
+    HashMap<EntityId, std::unique_ptr<Datum>> repo1_; //  아이템 원본
+    HashMap<ContentId, Vector<Datum*>> repo2_;        //  해당 타입 아이템 인덱스
 };
 
-
-}  // namespace psh::core
+} // namespace psh::core
