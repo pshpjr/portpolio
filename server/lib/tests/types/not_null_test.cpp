@@ -15,7 +15,8 @@ namespace
 struct TestValue
 {
     explicit TestValue(int initialValue, std::string initialName = {})
-        : value(initialValue), name(std::move(initialName))
+        : value(initialValue),
+          name(std::move(initialName))
     {
     }
 

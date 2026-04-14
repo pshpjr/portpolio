@@ -74,7 +74,10 @@ public:
     }
 
 private:
-    explicit NotNull(std::shared_ptr<T>&& ptr) noexcept : ptr_(std::move(ptr)) {}
+    explicit NotNull(std::shared_ptr<T>&& ptr) noexcept
+        : ptr_(std::move(ptr))
+    {
+    }
 
     std::shared_ptr<T> ptr_;
 };

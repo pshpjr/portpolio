@@ -17,8 +17,7 @@ template <std::ranges::input_range Range, typename T>
 }
 
 template <std::ranges::input_range Range, typename Predicate, typename DefaultValue>
-[[nodiscard]] constexpr auto find_if_or(Range&& range, Predicate predicate,
-                                        DefaultValue&& defaultValue)
+[[nodiscard]] constexpr auto find_if_or(Range&& range, Predicate predicate, DefaultValue&& defaultValue)
     -> std::ranges::range_value_t<Range>
 {
     auto it = std::ranges::find_if(range, std::move(predicate));

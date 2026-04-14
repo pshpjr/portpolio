@@ -72,8 +72,7 @@ inline void trim_in_place(std::string& value)
 {
     std::string result(value);
 
-    std::transform(result.begin(), result.end(), result.begin(),
-                   [](const unsigned char ch)
+    std::transform(result.begin(), result.end(), result.begin(), [](const unsigned char ch)
                    {
                        return static_cast<char>(std::tolower(ch));
                    });
@@ -85,8 +84,7 @@ inline void trim_in_place(std::string& value)
 {
     std::string result(value);
 
-    std::transform(result.begin(), result.end(), result.begin(),
-                   [](const unsigned char ch)
+    std::transform(result.begin(), result.end(), result.begin(), [](const unsigned char ch)
                    {
                        return static_cast<char>(std::toupper(ch));
                    });

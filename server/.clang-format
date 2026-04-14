@@ -14,5 +14,10 @@ AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AllowShortLambdasOnASingleLine: Empty
 
+# 사용자가 줄 바꾼 건 유지 (생성자 초기화 리스트, 함수 인자/파라미터 bin-pack 금지)
+PackConstructorInitializers: Never
+BinPackArguments: false
+BinPackParameters: false
+
 PointerAlignment: Left
 SortIncludes: true

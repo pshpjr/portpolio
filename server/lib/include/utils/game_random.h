@@ -23,14 +23,18 @@ class BagDraw
 {
 public:
     explicit BagDraw(std::initializer_list<std::pair<T, int>> weightedItems)
-        : m_weightedItems(weightedItems), m_seed(detail::MakeSeed()), m_engine(m_seed)
+        : m_weightedItems(weightedItems),
+          m_seed(detail::MakeSeed()),
+          m_engine(m_seed)
     {
         refill_bag();
         m_engine.shuffle(m_bag);
     }
 
     BagDraw(std::initializer_list<std::pair<T, int>> weightedItems, const BagDrawState& savedState)
-        : m_weightedItems(weightedItems), m_seed(savedState.seed), m_index(savedState.index),
+        : m_weightedItems(weightedItems),
+          m_seed(savedState.seed),
+          m_index(savedState.index),
           m_engine(m_seed)
     {
         refill_bag();

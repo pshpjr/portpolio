@@ -34,8 +34,7 @@ std::string requireEnv(const char* key)
 template <typename T>
 void logOverride(const char* key, const T& before, const T& after)
 {
-    spdlog::info("[config] '{}' overridden by env: '{}' -> '{}'", key,
-                 psh::lib::types::ValueOf(before), psh::lib::types::ValueOf(after));
+    spdlog::info("[config] '{}' overridden by env: '{}' -> '{}'", key, psh::lib::types::ValueOf(before), psh::lib::types::ValueOf(after));
 }
 
 void logOverride(const char* key, const std::string& before, const std::string& after)
