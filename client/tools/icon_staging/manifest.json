@@ -1,0 +1,21 @@
+  {                                                                                                                                                                                                                                                                                                                 
+    "version": 1,                                                                                                                                                                                                                                                                                                   
+    "entries": [                                                                                                                                                                                                                                                                                                    
+      {                                                                                                                                                                                                                                                                                                             
+        "IconKey": "weapon_sword_shield",                                                                                                                                                                                                                                                                           
+        "Category": "Weapon",                                                                                                                                                                                                                                                                                       
+        "Source": "incoming/weapon_sword_shield.png",           
+        "License": "CC0",
+        "SourceUrl": "https://www.flaticon.com/free-icon/shield_916667",
+        "Notes": ""
+      },
+      {                                                                                                                                                                                                                                                                                                             
+        "IconKey": "weapon_greatsword",                                                                                                                                                                                                                                                                           
+        "Category": "Weapon",                                                                                                                                                                                                                                                                                       
+        "Source": "incoming/weapon_greatsword.png",           
+        "License": "CC0",
+        "SourceUrl": "https://www.vecteezy.com/vector-art/46481465-buster-sword-black-silhouette-art-illustration",
+        "Notes": ""
+      }
+    ]
+  }

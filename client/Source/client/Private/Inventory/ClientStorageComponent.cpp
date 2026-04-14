@@ -14,8 +14,10 @@ void UClientStorageComponent::InitializeStorage(const TArray<FClientStorageTabDe
     {
         FClientStorageTabState TabState;
         TabState.TabId = TabDescriptor.TabId;
-        TabState.Capacity = FMath::Max(0, TabDescriptor.Capacity);
-        TabState.Slots.SetNum(TabState.Capacity);
+        TabState.MaxCapacity = GClientStorageTabMaxCapacity;
+        TabState.Capacity = FMath::Clamp(TabDescriptor.Capacity, 0, TabState.MaxCapacity);
+        // 잠금 슬롯까지 UI에서 그릴 수 있도록 Slots는 항상 Max 크기로 할당.
+        TabState.Slots.SetNum(TabState.MaxCapacity);
         Tabs.Add(MoveTemp(TabState));
     }
 }
@@ -27,11 +29,37 @@ void UClientStorageComponent::InitializeDefaultSharedStorage(int32 TabCount, int
     {
         FClientStorageTabDescriptor Descriptor;
         Descriptor.TabId = *FString::Printf(TEXT("Shared_%d"), TabIndex);
-        Descriptor.Capacity = FMath::Max(1, SlotsPerTab);
+        Descriptor.Capacity = FMath::Clamp(SlotsPerTab, 1, GClientStorageTabMaxCapacity);
         TabDescriptors.Add(Descriptor);
     }
 
     InitializeStorage(TabDescriptors);
+}
+
+void UClientStorageComponent::SetTabCurrentCapacity(int32 TabIndex, int32 NewCapacity)
+{
+    if (!IsValidTabIndex(TabIndex))
+    {
+        return;
+    }
+    FClientStorageTabState& Tab = Tabs[TabIndex];
+    const int32 Clamped = FMath::Clamp(NewCapacity, 0, Tab.MaxCapacity);
+    if (Clamped == Tab.Capacity)
+    {
+        return;
+    }
+    Tab.Capacity = Clamped;
+    BroadcastStorageUpdated();
+}
+
+int32 UClientStorageComponent::GetTabCurrentCapacity(int32 TabIndex) const
+{
+    return IsValidTabIndex(TabIndex) ? Tabs[TabIndex].Capacity : 0;
+}
+
+int32 UClientStorageComponent::GetTabMaxCapacity(int32 TabIndex) const
+{
+    return IsValidTabIndex(TabIndex) ? Tabs[TabIndex].MaxCapacity : 0;
 }
 
 bool UClientStorageComponent::AddItemToTab(UClientItemInstance* Item, int32 TabIndex, int32 PreferredSlotIndex)
@@ -41,9 +69,11 @@ bool UClientStorageComponent::AddItemToTab(UClientItemInstance* Item, int32 TabI
         return false;
     }
 
+    const int32 Capacity = Tabs[TabIndex].Capacity;
+
     if (Item->IsStackable())
     {
-        for (int32 SlotIndex = 0; SlotIndex < Tabs[TabIndex].Slots.Num(); ++SlotIndex)
+        for (int32 SlotIndex = 0; SlotIndex < Capacity; ++SlotIndex)
         {
             if (TryStackIntoSlot(Item, TabIndex, SlotIndex) && Item->GetRuntimeData().Count == 0)
             {
@@ -60,7 +90,7 @@ bool UClientStorageComponent::AddItemToTab(UClientItemInstance* Item, int32 TabI
         return true;
     }
 
-    for (int32 SlotIndex = 0; SlotIndex < Tabs[TabIndex].Slots.Num(); ++SlotIndex)
+    for (int32 SlotIndex = 0; SlotIndex < Capacity; ++SlotIndex)
     {
         if (Tabs[TabIndex].Slots[SlotIndex] == nullptr)
         {
@@ -146,7 +176,10 @@ bool UClientStorageComponent::IsValidTabIndex(int32 TabIndex) const
 
 bool UClientStorageComponent::IsValidSlotIndex(int32 TabIndex, int32 SlotIndex) const
 {
-    return IsValidTabIndex(TabIndex) && Tabs[TabIndex].Slots.IsValidIndex(SlotIndex);
+    // 잠금 슬롯(>= Capacity)은 스택/이동 대상에서 제외. Slots 배열은 Max 크기이지만 실제 운용은 Capacity 미만만.
+    return IsValidTabIndex(TabIndex)
+        && SlotIndex >= 0
+        && SlotIndex < Tabs[TabIndex].Capacity;
 }
 
 bool UClientStorageComponent::TryStackIntoSlot(UClientItemInstance* SourceItem, int32 TabIndex, int32 SlotIndex)

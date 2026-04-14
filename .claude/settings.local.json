@@ -3,7 +3,11 @@
     "allow": [
       "Bash(cd:*)",
       "Bash(cmd.exe /c \"dir \\\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\\\\" /b\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
       "Bash(git mv:*)",
+      "Bash(ls build*/)",
+      "Bash(mkdir:*)",
       "Bash(mv:*)",
       "Bash(mv *)",
       "Bash(node:*)",
@@ -12,19 +16,34 @@
       "Bash(python -c *)",
       "Bash(python3 -c:*)",
       "Bash(python \"D:\\\\Users\\\\pshpjr\\\\source\\\\repos\\\\portpolio\\\\tools\\\\extract_opencode_text.py\")",
+      "Bash(rm /d/Users/pshpjr/source/repos/portpolio/server/lib/include/job/job_queue_helper.h)",
+      "Bash(where cmake.exe)",
       "Bash(xargs python:*)",
+
+      "Bash(but --version)",
+      "Bash(clang-format --version)",
+      "Bash(\"/c/Program Files/GitButler/but.exe\" --help)",
+      "Bash(\"/c/Program Files/GitButler/but.exe\" branch --help)",
+      "Bash(\"/c/Program Files/GitButler/but.exe\" branch new --help)",
+      "Bash(\"/c/Program Files/GitButler/but.exe\" commit --help)",
+      "Bash(\"/c/Program Files/GitButler/but.exe\" stage --help)",
+      "Bash(\"/c/Program Files/GitButler/but.exe\" status)",
+      "Bash(/c/Program Files/GitButler/but.exe branch:*)",
+      "Bash(/c/Program Files/GitButler/but.exe commit:*)",
+      "Bash(/c/Program Files/GitButler/but.exe push:*)",
+      "Bash(/c/Program Files/GitButler/but.exe stage:*)",
+      "Bash(echo \"EC1=$?\")",
+      "Bash(echo \"EC2=$?\")",
+
       "Edit(//d/Users/pshpjr/source/repos/**)",
       "Find *",
       "Ls *",
+      "Read(//c/Program Files/CMake/**)",
       "Read(//d/Users/pshpjr/**)",
       "Read(//d/Users/pshpjr/AppData/Local/claude/**)",
       "Read(//d/Users/pshpjr/AppData/Roaming/claude/**)",
-      "Bash(mkdir:*)",
-      "Skill(codex:rescue)",
-      "Bash(rm /d/Users/pshpjr/source/repos/portpolio/server/lib/include/job/job_queue_helper.h)",
-      "Bash(ls build*/)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)"
+
+      "Skill(codex:rescue)"
     ]
   },
   "sandbox": {

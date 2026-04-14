@@ -9,6 +9,7 @@ class UClientEquipmentComponent;
 class UClientSkillHotbarComponent;
 class UClientStorageComponent;
 class UClientConsumableQuickSlotComponent;
+class UClientCurrencyComponent;
 
 /**
  * GameInstanceSubsystem — 캐릭터 도메인 원본 캐시.
@@ -42,6 +43,9 @@ public:
     UFUNCTION(BlueprintPure, Category = "Character")
     UClientConsumableQuickSlotComponent* GetConsumableQuickSlot() const { return ConsumableQuickSlot; }
 
+    UFUNCTION(BlueprintPure, Category = "Character")
+    UClientCurrencyComponent* GetCurrency() const { return Currency; }
+
 private:
     UPROPERTY()
     TObjectPtr<UClientInventoryComponent> Inventory;
@@ -57,4 +61,7 @@ private:
 
     UPROPERTY()
     TObjectPtr<UClientConsumableQuickSlotComponent> ConsumableQuickSlot;
+
+    UPROPERTY()
+    TObjectPtr<UClientCurrencyComponent> Currency;
 };

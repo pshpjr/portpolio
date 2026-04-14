@@ -5,6 +5,7 @@
 #include "Inventory/ClientSkillHotbarComponent.h"
 #include "Inventory/ClientStorageComponent.h"
 #include "Inventory/ClientConsumableQuickSlotComponent.h"
+#include "Inventory/ClientCurrencyComponent.h"
 
 void UClientCharacterSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -15,4 +16,5 @@ void UClientCharacterSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     SkillHotbar      = NewObject<UClientSkillHotbarComponent>(this);
     Storage          = NewObject<UClientStorageComponent>(this);
     ConsumableQuickSlot = NewObject<UClientConsumableQuickSlotComponent>(this);
+    Currency            = NewObject<UClientCurrencyComponent>(this);
 }
