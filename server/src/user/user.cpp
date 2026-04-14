@@ -5,6 +5,7 @@
 #include "user.h"
 
 User::User(UserID uid, psh::database::DbExecutor& dbExecutor)
-    : m_uid{uid}, m_dbStrand{dbExecutor.MakeDbStrand()}
+    : m_uid{uid},
+      m_dbStrand{dbExecutor.MakeDbStrand()}
 {
 }

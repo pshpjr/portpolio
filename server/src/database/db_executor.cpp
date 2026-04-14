@@ -17,7 +17,9 @@ namespace psh::database
 {
 
 DbExecutor::DbExecutor(boost::mysql::pool_params params, std::size_t workerCount)
-    : m_io{}, m_workGuard{m_io.get_executor()}, m_pool{m_io, std::move(params)},
+    : m_io{},
+      m_workGuard{m_io.get_executor()},
+      m_pool{m_io, std::move(params)},
       m_workerCount{workerCount == 0 ? std::thread::hardware_concurrency() : workerCount}
 {
 }
@@ -60,8 +62,7 @@ DbStrand DbExecutor::MakeDbStrand()
     return boost::asio::make_strand(m_io.get_executor());
 }
 
-void DbExecutor::Post(const DbStrand& userDbStrand, std::shared_ptr<IQuery> query,
-                      DbCallback onComplete)
+void DbExecutor::Post(const DbStrand& userDbStrand, std::shared_ptr<IQuery> query, DbCallback onComplete)
 {
     boost::asio::co_spawn(
         userDbStrand,

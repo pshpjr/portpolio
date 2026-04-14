@@ -11,7 +11,11 @@ namespace psh::lib
 class SteadyTickClock final : public IClock
 {
 public:
-    SteadyTickClock() : start_(std::chrono::steady_clock::now()), lastTick_(start_) {}
+    SteadyTickClock()
+        : start_(std::chrono::steady_clock::now()),
+          lastTick_(start_)
+    {
+    }
 
     uint64_t GetCurrentTime() const override { return currentTime_; }
     uint64_t GetDeltaTime() const override   { return deltaTime_; }
