@@ -12,7 +12,8 @@
 // 여러 .cpp에 넣으면 링크 에러(중복 심볼)가 발생한다.
 PERFETTO_TRACK_EVENT_STATIC_STORAGE();
 
-namespace psh::tracing {
+namespace psh::tracing
+{
 
 // ---------------------------------------------------------------------------
 // 내부 상태
@@ -25,7 +26,8 @@ static std::unique_ptr<perfetto::TracingSession> g_session;
 // ---------------------------------------------------------------------------
 // Init
 // ---------------------------------------------------------------------------
-void Init() {
+void Init()
+{
     // TracingInitArgs: Perfetto 초기화 파라미터
     //
     // backends 필드에 사용할 백엔드를 비트 플래그로 지정한다:
@@ -67,7 +69,8 @@ void Init() {
 //               └─ disabled_categories[] — 비활성화할 카테고리
 // ---------------------------------------------------------------------------
 
-static perfetto::TraceConfig BuildConfig(const SessionConfig& sessionCfg) {
+static perfetto::TraceConfig BuildConfig(const SessionConfig& sessionCfg)
+{
     perfetto::TraceConfig cfg;
 
     // --- 버퍼 설정 ---
@@ -78,8 +81,7 @@ static perfetto::TraceConfig BuildConfig(const SessionConfig& sessionCfg) {
     auto* bufferCfg = cfg.add_buffers();
     bufferCfg->set_size_kb(sessionCfg.bufferSizeKb);
     bufferCfg->set_fill_policy(
-        perfetto::protos::gen::TraceConfig_BufferConfig_FillPolicy_RING_BUFFER
-    );
+        perfetto::protos::gen::TraceConfig_BufferConfig_FillPolicy_RING_BUFFER);
 
     // --- 데이터소스 설정 ---
     // "track_event"는 TRACE_EVENT 매크로용 내장 데이터소스 이름.
@@ -93,19 +95,25 @@ static perfetto::TraceConfig BuildConfig(const SessionConfig& sessionCfg) {
     // 직렬화한 뒤 set_track_event_config_raw()로 설정한다.
     perfetto::protos::gen::TrackEventConfig teCfg;
 
-    if (sessionCfg.enabledCategories.empty()) {
+    if (sessionCfg.enabledCategories.empty())
+    {
         // 빈 목록 → 와일드카드: 모든 비-debug 카테고리 활성화
         // debug 태그 카테고리는 enableDebugCategories가 true일 때만 포함
         teCfg.add_enabled_categories("*");
-        if (!sessionCfg.enableDebugCategories) {
+        if (!sessionCfg.enableDebugCategories)
+        {
             teCfg.add_disabled_categories("debug");
         }
-    } else {
+    }
+    else
+    {
         // 명시적 카테고리 목록만 활성화
-        for (const auto& cat : sessionCfg.enabledCategories) {
+        for (const auto& cat : sessionCfg.enabledCategories)
+        {
             teCfg.add_enabled_categories(cat);
         }
-        if (sessionCfg.enableDebugCategories) {
+        if (sessionCfg.enableDebugCategories)
+        {
             teCfg.add_enabled_categories("debug");
         }
     }
@@ -115,12 +123,15 @@ static perfetto::TraceConfig BuildConfig(const SessionConfig& sessionCfg) {
     return cfg;
 }
 
-void StartSession() {
+void StartSession()
+{
     StartSession(SessionConfig{});
 }
 
-void StartSession(const SessionConfig& config) {
-    if (g_session) {
+void StartSession(const SessionConfig& config)
+{
+    if (g_session)
+    {
         spdlog::warn("[Tracing] 이미 활성 세션이 있습니다. 기존 세션을 먼저 종료하세요.");
         return;
     }
@@ -140,8 +151,10 @@ void StartSession(const SessionConfig& config) {
 // ---------------------------------------------------------------------------
 // StopSession
 // ---------------------------------------------------------------------------
-bool StopSession(const std::filesystem::path& outputPath) {
-    if (!g_session) {
+bool StopSession(const std::filesystem::path& outputPath)
+{
+    if (!g_session)
+    {
         spdlog::warn("[Tracing] 활성 세션이 없습니다.");
         return false;
     }
@@ -160,18 +173,21 @@ bool StopSession(const std::filesystem::path& outputPath) {
     // 콜백 방식으로 데이터 청크를 전달하며, 한 번에 모든 데이터를 메모리에
     // 올리지 않아도 스트리밍 방식으로 파일에 쓸 수 있다.
     std::ofstream ofs(outputPath, std::ios::binary);
-    if (!ofs) {
+    if (!ofs)
+    {
         spdlog::error("[Tracing] 파일 열기 실패: {}", outputPath.string());
         g_session.reset();
         return false;
     }
 
-    g_session->ReadTrace([&ofs](perfetto::TracingSession::ReadTraceCallbackArgs args) {
-        // args.data: 트레이스 데이터 청크의 포인터
-        // args.size: 청크 크기
-        // args.has_more: 아직 더 읽을 데이터가 있는지 여부
-        ofs.write(args.data, static_cast<std::streamsize>(args.size));
-    });
+    g_session->ReadTrace(
+        [&ofs](perfetto::TracingSession::ReadTraceCallbackArgs args)
+        {
+            // args.data: 트레이스 데이터 청크의 포인터
+            // args.size: 청크 크기
+            // args.has_more: 아직 더 읽을 데이터가 있는지 여부
+            ofs.write(args.data, static_cast<std::streamsize>(args.size));
+        });
 
     ofs.close();
     g_session.reset();
@@ -184,8 +200,9 @@ bool StopSession(const std::filesystem::path& outputPath) {
 // ---------------------------------------------------------------------------
 // IsSessionActive
 // ---------------------------------------------------------------------------
-bool IsSessionActive() {
+bool IsSessionActive()
+{
     return g_session != nullptr;
 }
 
-}  // namespace psh::tracing
+} // namespace psh::tracing

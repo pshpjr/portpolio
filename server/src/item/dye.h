@@ -5,12 +5,8 @@
 #ifndef PORTPOLIO_DYE_H
 #define PORTPOLIO_DYE_H
 
-
-
-class dye {
-
+class dye
+{
 };
 
-
-
-#endif //PORTPOLIO_DYE_H
+#endif // PORTPOLIO_DYE_H

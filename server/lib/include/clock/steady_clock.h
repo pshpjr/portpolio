@@ -77,8 +77,8 @@ private:
     std::atomic<uint64_t> current_time_{};
     std::atomic<uint64_t> delta_time_{};
     std::atomic<uint64_t> idle_time_{};
-    std::atomic<bool>   running_{false};
-    std::thread         thread_;
+    std::atomic<bool> running_{false};
+    std::thread thread_;
 };
 
-}  // namespace psh::lib
+} // namespace psh::lib

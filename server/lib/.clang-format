@@ -1,6 +1,9 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
-ColumnLimit: 100
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 0
+AccessModifierOffset: -4
 
 # 중괄호 항상 다음 줄 (Allman style)
 BreakBeforeBraces: Allman

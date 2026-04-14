@@ -5,12 +5,8 @@
 #ifndef PORTPOLIO_EQUIPMENTS_H
 #define PORTPOLIO_EQUIPMENTS_H
 
-
-
-class equipments {
-
+class equipments
+{
 };
 
-
-
-#endif //PORTPOLIO_EQUIPMENTS_H
+#endif // PORTPOLIO_EQUIPMENTS_H
