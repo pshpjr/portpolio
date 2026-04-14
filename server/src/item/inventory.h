@@ -20,7 +20,9 @@ class Inventory
     struct Datum
     {
         explicit Datum(NotNull<Item> item, ContentId contentId, size_t slotIndex)
-            : item(std::move(item)), contentId(contentId), slotIndex(slotIndex)
+            : item(std::move(item)),
+              contentId(contentId),
+              slotIndex(slotIndex)
         {
         }
 

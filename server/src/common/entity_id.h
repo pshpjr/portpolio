@@ -22,7 +22,10 @@ class EntityId
 {
 public:
     constexpr EntityId() = default;
-    explicit constexpr EntityId(std::uint64_t entityId) : entityId_(entityId) {}
+    explicit constexpr EntityId(std::uint64_t entityId)
+        : entityId_(entityId)
+    {
+    }
     virtual ~EntityId() = default;
 
     constexpr explicit operator UInt64() const

@@ -43,9 +43,15 @@ struct FloatRange
 class RandomEngine
 {
 public:
-    RandomEngine() : m_engine(detail::MakeSeed()) {}
+    RandomEngine()
+        : m_engine(detail::MakeSeed())
+    {
+    }
 
-    explicit RandomEngine(const std::uint64_t seed) : m_engine(seed) {}
+    explicit RandomEngine(const std::uint64_t seed)
+        : m_engine(seed)
+    {
+    }
 
     [[nodiscard]] int rand_int(int min, int max)
     {

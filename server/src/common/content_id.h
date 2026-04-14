@@ -16,7 +16,10 @@ class ContentId
 {
 public:
     constexpr ContentId() = default;
-    constexpr ContentId(UInt64 contentId) : contentId_(contentId) {}
+    constexpr ContentId(UInt64 contentId)
+        : contentId_(contentId)
+    {
+    }
 
     explicit operator UInt64() const
     {
