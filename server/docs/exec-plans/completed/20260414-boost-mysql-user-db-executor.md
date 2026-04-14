@@ -158,8 +158,10 @@ dbExec.Post(
 - [completed] `src/database/i_query.h` 추가
 - [completed] `src/database/db_executor.h|.cpp` 추가
 - [completed] `src/user/user.h|.cpp`에 DB strand 추가 (DbExecutor::MakeDbStrand 통해 초기화) 및 네이밍 정리
-- [pending] 빌드 검증 (로컬 셸에 cmake 미등록, 사용자 측 CLion/Dev Shell 에서 확인 필요)
-- [pending] 빌드 통과 후 plan 완료 처리 및 `completed/` 이동
+- [completed] 1차 정리: `DbExecutor::m_workGuard` optional 제거 및 `Stop()` 단순화
+- [completed] 빌드 환경 보정: `server/.clangd` MSVC 플래그 번역 보정 + CMake `/utf-8` 전역 적용
+- [completed] 사용자 검토 완료 (2026-04-14)
+- [completed] plan 종결 및 `completed/` 이동
 
 ---
 
