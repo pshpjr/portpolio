@@ -1,13 +1,16 @@
 #include "db_executor.h"
 
 #include <boost/asio/as_tuple.hpp>
+#include <boost/asio/awaitable.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/mysql/error_code.hpp>
 
+#include <coroutine>
 #include <cstdlib>
+#include <exception>
 #include <utility>
 
 namespace psh::database
@@ -76,43 +79,33 @@ void DbExecutor::Post(const DbStrand&         userDbStrand,
                       std::shared_ptr<IQuery> query,
                       DbCallback              onComplete)
 {
-    // 호출 스레드 컨텍스트와 무관하게 항상 deferred 실행을 보장하기 위해
-    // co_spawn 앞에 명시적 post 를 한 번 거친다.
-    boost::asio::post(
+    boost::asio::co_spawn(
         userDbStrand,
         [this,
-         strand  = userDbStrand,
-         queryP  = std::move(query),
-         cb      = std::move(onComplete)]() mutable
+         queryP = std::move(query),
+         cb     = std::move(onComplete)]() mutable
+            -> boost::asio::awaitable<void>
         {
-            boost::asio::co_spawn(
-                strand,
-                [this,
-                 queryP = std::move(queryP),
-                 cb     = std::move(cb)]() mutable
-                    -> boost::asio::awaitable<void>
-                {
-                    auto [ecGet, conn] =
-                        co_await m_pool.async_get_connection(kAsTupleAwaitable);
-                    if (ecGet)
-                    {
-                        cb(ecGet);
-                        co_return;
-                    }
+            auto [ecGet, conn] =
+                co_await m_pool.async_get_connection(kAsTupleAwaitable);
+            if (ecGet)
+            {
+                cb(ecGet);
+                co_return;
+            }
 
-                    std::error_code ecExec = co_await queryP->Execute(*conn);
-                    cb(ecExec);
-                    // pooled_connection dtor 가 연결을 풀로 반환
-                },
-                [](std::exception_ptr ep)
-                {
-                    // 예외 금지 컨벤션: 코루틴 경계에서 빠져나오는 예외는
-                    // 복구 불가능한 프로그래밍 오류로 간주하고 즉시 종료.
-                    if (ep)
-                    {
-                        std::abort();
-                    }
-                });
+            std::error_code ecExec = co_await queryP->Execute(conn.get());
+            cb(ecExec);
+            // pooled_connection dtor 가 연결을 풀로 반환
+        },
+        [](std::exception_ptr ep)
+        {
+            // 예외 금지 컨벤션: 코루틴 경계에서 빠져나오는 예외는
+            // 복구 불가능한 프로그래밍 오류로 간주하고 즉시 종료.
+            if (ep)
+            {
+                std::abort();
+            }
         });
 }
 
