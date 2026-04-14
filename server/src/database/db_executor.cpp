@@ -16,17 +16,12 @@
 namespace psh::database
 {
 
-namespace
-{
-constexpr auto kAsTupleAwaitable =
-    boost::asio::as_tuple(boost::asio::use_awaitable);
-}
-
 DbExecutor::DbExecutor(boost::mysql::pool_params params,
                        std::size_t               workerCount)
     : m_io{}
+    , m_workGuard{m_io.get_executor()}
     , m_pool{m_io, std::move(params)}
-    , m_workerCount{workerCount == 0 ? std::size_t{1} : workerCount}
+    , m_workerCount{workerCount == 0 ? std::thread::hardware_concurrency() : workerCount}
 {
 }
 
@@ -43,7 +38,6 @@ void DbExecutor::Start()
     }
     m_started = true;
 
-    m_workGuard.emplace(m_io.get_executor());
     m_pool.async_run(boost::asio::detached);
 
     m_workers.reserve(m_workerCount);
@@ -55,17 +49,10 @@ void DbExecutor::Start()
 
 void DbExecutor::Stop()
 {
-    if (!m_started)
-    {
+    if (!std::exchange(m_started, false))
         return;
-    }
-    m_started = false;
 
     m_pool.cancel();
-    if (m_workGuard)
-    {
-        m_workGuard->reset();
-    }
     m_io.stop();
     m_workers.clear(); // jthread dtor joins
 }
@@ -79,25 +66,18 @@ void DbExecutor::Post(const DbStrand&         userDbStrand,
                       std::shared_ptr<IQuery> query,
                       DbCallback              onComplete)
 {
-    boost::asio::co_spawn(
-        userDbStrand,
-        [this,
-         queryP = std::move(query),
-         cb     = std::move(onComplete)]() mutable
-            -> boost::asio::awaitable<void>
+    boost::asio::co_spawn(userDbStrand,
+        // 성공
+        [this, queryP = std::move(query), cb = std::move(onComplete)]() mutable  -> boost::asio::awaitable<void>
         {
-            auto [ecGet, conn] =
-                co_await m_pool.async_get_connection(kAsTupleAwaitable);
-            if (ecGet)
+            auto [ec, conn] = co_await m_pool.async_get_connection(boost::asio::as_tuple(boost::asio::use_awaitable));
+            if (!ec)
             {
-                cb(ecGet);
-                co_return;
+                std::error_code ecExec = co_await queryP->Execute(conn.get());
+                cb(ecExec);
             }
-
-            std::error_code ecExec = co_await queryP->Execute(conn.get());
-            cb(ecExec);
-            // pooled_connection dtor 가 연결을 풀로 반환
         },
+        // 실패
         [](std::exception_ptr ep)
         {
             // 예외 금지 컨벤션: 코루틴 경계에서 빠져나오는 예외는

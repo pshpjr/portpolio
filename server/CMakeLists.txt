@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.23)
 
 project(portpolio VERSION 0.1.0 LANGUAGES CXX)
 
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 include(CTest)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 

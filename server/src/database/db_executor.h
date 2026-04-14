@@ -12,7 +12,6 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
-#include <optional>
 #include <system_error>
 #include <thread>
 #include <vector>
@@ -22,6 +21,7 @@ namespace psh::database
 
 using DbStrand   = boost::asio::strand<boost::asio::io_context::executor_type>;
 using DbCallback = std::function<void(std::error_code)>;
+using WorkGuard  = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
 
 // DB IO 전용 io_context + 워커 스레드를 소유한다.
 // Post 는 호출 스레드와 무관하게 항상 deferred 로 실행되며,
@@ -53,14 +53,12 @@ public:
               DbCallback              onComplete);
 
 private:
-    boost::asio::io_context m_io;
-    std::optional<boost::asio::executor_work_guard<
-        boost::asio::io_context::executor_type>>
-                                  m_workGuard;
-    boost::mysql::connection_pool m_pool;
-    std::vector<std::jthread>     m_workers;
-    std::size_t                   m_workerCount;
-    bool                          m_started{false};
+    boost::asio::io_context         m_io;
+    WorkGuard                       m_workGuard;
+    boost::mysql::connection_pool   m_pool;
+    std::vector<std::jthread>       m_workers;
+    std::size_t                     m_workerCount;
+    bool                            m_started{false};
 };
 
 } // namespace psh::database

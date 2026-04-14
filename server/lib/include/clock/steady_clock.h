@@ -11,8 +11,7 @@ namespace psh::lib {
 class SteadyClock final : public IClock {
 public:
     explicit SteadyClock(std::chrono::nanoseconds tick_interval = std::chrono::milliseconds(1))
-        : tick_interval_(tick_interval),
-          start_(std::chrono::steady_clock::now()) {}
+        : tick_interval_(tick_interval), start_(std::chrono::steady_clock::now()) {}
 
     ~SteadyClock() override { Stop(); }
 
