@@ -95,6 +95,14 @@ target_include_directories(portpolio_server
 
 target_compile_features(portpolio_server PUBLIC cxx_std_23)
 
+if(WIN32)
+    target_compile_definitions(portpolio_server PUBLIC
+        _WIN32_WINNT=0x0A00
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+    )
+endif()
+
 target_link_libraries(portpolio_server
     PUBLIC
         Boost::system

@@ -6,7 +6,6 @@
 #include <boost/asio/post.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/mysql/error_code.hpp>
-#include <boost/mysql/pooled_connection.hpp>
 
 #include <cstdlib>
 #include <utility>
