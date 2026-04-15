@@ -10,7 +10,8 @@ include(CTest)
 
 find_package(strong_type CONFIG REQUIRED)
 
-add_library(portpolio_lib INTERFACE)
+add_library(portpolio_lib INTERFACE
+        include/utils/atomic_util.h)
 add_library(psh::lib ALIAS portpolio_lib)
 
 target_include_directories(portpolio_lib
@@ -42,6 +43,11 @@ if(BUILD_TESTING)
         PRIVATE
             psh::lib
             GTest::gtest_main
+    )
+
+    target_compile_definitions(portpolio_lib_unit_tests
+        PRIVATE
+            PSH_JOBQUEUE_ENABLE_TEST_API=1
     )
 
     include(GoogleTest)

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "telemetry/histogram.h"
-#include "telemetry/latency_summary.h"
-#include "telemetry/rate_stats.h"
+#include "telemetry/rate.h"
 
 #include <chrono>
 #include <cstdint>
@@ -14,14 +13,14 @@ namespace psh::lib::job
 {
 using HistogramBucket = telemetry::HistogramBucket;
 using HistogramSnapshot = telemetry::HistogramSnapshot;
-using RateStats = telemetry::RateStats;
-using LatencySummary = telemetry::LatencySummary;
+using DistributionSummary = telemetry::DistributionSummary;
+using RateSnapshot = telemetry::RateSnapshot;
 
 using ClockDuration = std::chrono::nanoseconds;
 using TimePoint = std::chrono::steady_clock::time_point;
 using Duration = std::chrono::nanoseconds;
 
-using EntryId = uint64_t;   // 컴포넌트(JobQueue / Timer) 별 단조 증가 id. 디버그/로그 용도.
+using EntryId = uint64_t; // 컴포넌트(JobQueue / Timer) 별 단조 증가 id. 디버그/로그 용도.
 
 // ------------------------------------------------------------
 // Enums
@@ -35,7 +34,8 @@ enum class EnumJobState : uint8_t
     Done,
     Failed,
     Canceled,
-    Rejected
+    Rejected,
+    Expired, // 핸들이 weak_ptr 로만 보유 — 컨테이너에서 entry 가 이미 해제됨 (관측 불가)
 };
 
 enum class EnumJobQueueState : uint8_t
@@ -80,16 +80,18 @@ struct JobQueueStatsSnapshot
     uint64_t SubmittedCount = 0;
     uint64_t ExecutedCount = 0;
     uint64_t FailedCount = 0;
-    uint64_t RejectedCount = 0;
     uint64_t CanceledCount = 0;
     uint64_t BatchLimitHitCount = 0;
     uint64_t DrainRescheduleCount = 0;
 
-    RateStats Rates{};
-    LatencySummary WaitTime{};
-    LatencySummary ExecutionTime{};
-    HistogramSnapshot WaitHistogram{};
-    HistogramSnapshot ExecutionHistogram{};
+    RateSnapshot SubmittedRate{};
+    RateSnapshot ExecutedRate{};
+    RateSnapshot FailedRate{};
+
+    HistogramSnapshot WaitHistogram{};      // ns
+    HistogramSnapshot ExecutionHistogram{}; // ns
+    DistributionSummary WaitTime{};         // ns
+    DistributionSummary ExecutionTime{};    // ns
 };
 
 struct WorkerStateSnapshot
@@ -109,13 +111,15 @@ struct WorkerPoolStatsSnapshot
     uint64_t SubmittedCount = 0;
     uint64_t ExecutedCount = 0;
     uint64_t FailedCount = 0;
-    uint64_t RejectedCount = 0;
 
-    RateStats Rates{};
-    LatencySummary QueueWaitTime{};
-    LatencySummary ExecutionTime{};
-    HistogramSnapshot QueueWaitHistogram{};
-    HistogramSnapshot ExecutionHistogram{};
+    RateSnapshot SubmittedRate{};
+    RateSnapshot ExecutedRate{};
+    RateSnapshot FailedRate{};
+
+    HistogramSnapshot QueueWaitHistogram{}; // ns
+    HistogramSnapshot ExecutionHistogram{}; // ns
+    DistributionSummary QueueWaitTime{};    // ns
+    DistributionSummary ExecutionTime{};    // ns
 
     std::vector<WorkerStateSnapshot> Threads;
 };

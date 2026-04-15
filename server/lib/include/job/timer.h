@@ -1,19 +1,17 @@
 #pragma once
 
-#include "executor.h"
-#include "job.h"
-#include "job_queue.h"
 #include "entry.h"
+#include "job_handle.h"
 
 #include <atomic>
 #include <chrono>
-#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <list>
 #include <memory>
 #include <mutex>
+#include <ranges>
 #include <set>
 #include <string>
 #include <string_view>
@@ -23,46 +21,62 @@
 
 namespace psh::lib::job
 {
-// ------------------------------------------------------------
-// Timer — 시각 기반 Job 스케줄러.
-//
-// 설계 원칙:
-//   - 생성 시 shared_ptr<IExecutor> 를 바인딩. 바인딩된 executor 가 기본 대상.
-//   - JobQueue 대상 스케줄은 별도 overload. 내부에 weak_ptr<JobQueue> 를 캡처한 DispatchFn 으로 보관.
-//   - Watcher 스레드는 사용자 콜백을 직접 실행하지 않고 Executor / JobQueue 로 위임.
-//   - Paused 인 repeat 엔트리는 dispatch 만 skip 하고 재등록은 수행 → Resume 즉시 다음 회차부터 정상화.
-//
-// 생성 규약:
-//   std::make_shared<Timer>(executor, options)
-//   enable_shared_from_this 사용.
-// ------------------------------------------------------------
 
-class Timer : public std::enable_shared_from_this<Timer>
+/*
+ * Timer — 시각 기반 콜백 스케줄러.
+ *
+ * 특정 시간에 특정 함수를 호출한다.
+ * 해상도(TickResolution)를 기반으로 버킷 단위로 관리하며,
+ * 해상도 이하의 정확도는 보장하지 않는다.
+ *
+ * Executor 를 모른다. 내부 watcher 스레드가 콜백을 직접 실행한다.
+ *
+ * 인터페이스:
+ *   PostAt(time, fn)  — 지정 시각에 콜백 예약.
+ *   Start() / Stop()  — 수명 관리.
+ *   GetPendingCount() / GetTickResolution() — 관측.
+ *
+ * 시간 소스:
+ *   기본은 steady_clock::now(). CreateOptions::NowProvider 로 주입 가능.
+ *   테스트 시 FakeClock 람다를 넣으면 외부에서 시간을 제어할 수 있다.
+ *
+ * 해상도: 기본 틱 10ms.
+ */
+
+struct TimerCreateOptions
+{
+    Duration TickResolution = std::chrono::milliseconds(10);
+    // NowProvider 가 비어있으면 std::chrono::steady_clock::now() 사용.
+    // 테스트는 FakeClock 람다를 주입.
+    std::function<TimePoint()> NowProvider;
+    std::string DebugName;
+};
+
+class Timer
 {
   public:
-    using Callback = IExecutor::Callback;
+    using Callback = std::function<void()>;
+    using CreateOptions = TimerCreateOptions;
 
-    struct CreateOptions
+    explicit Timer(CreateOptions options = {})
+        : options_(std::move(options)), tickResolution_(options_.TickResolution)
     {
-        Duration TickResolution = std::chrono::milliseconds(10);
-        // NowProvider 가 비어있으면 std::chrono::steady_clock::now() 사용.
-        // 테스트는 FakeClock 람다를 주입.
-        std::function<TimePoint()> NowProvider;
-        std::string DebugName;
-    };
+        if (tickResolution_.count() <= 0)
+            tickResolution_ = std::chrono::milliseconds(10);
 
-    Timer(std::shared_ptr<IExecutor> executor, CreateOptions options = {})
-        : executor_(std::move(executor))
-        , options_(std::move(options))
-        , tickResolution_(options_.TickResolution)
-    {
         if (!options_.NowProvider)
-            nowProvider_ = [] { return std::chrono::steady_clock::now(); };
+            nowProvider_ = []
+            {
+                return std::chrono::steady_clock::now();
+            };
         else
             nowProvider_ = options_.NowProvider;
     }
 
-    ~Timer() { Stop(); }
+    ~Timer()
+    {
+        Stop();
+    }
 
     Timer(const Timer&) = delete;
     Timer& operator=(const Timer&) = delete;
@@ -70,33 +84,32 @@ class Timer : public std::enable_shared_from_this<Timer>
   public:
     void Start()
     {
-        bool expected = false;
-        if (!started_.compare_exchange_strong(expected, true))
+        if (started_.exchange(true))
             return;
         stopping_.store(false, std::memory_order_release);
-        watcher_ = std::thread([this] { WatcherLoop(); });
+        watcher_ = std::thread(
+            [this]
+            {
+                WatcherLoop();
+            });
     }
 
     void Stop()
     {
-        {
-            std::lock_guard lock(mtx_);
-            if (stopping_.load(std::memory_order_acquire))
-                return;
-            stopping_.store(true, std::memory_order_release);
-        }
-        cv_.notify_all();
+        if (stopping_.load(std::memory_order_acquire))
+            return;
+        stopping_.store(true, std::memory_order_release);
+
         if (watcher_.joinable())
             watcher_.join();
 
         std::lock_guard lock(mtx_);
-        for (auto& [bucket, list] : buckets_)
+        for (auto& list : buckets_ | std::views::values)
         {
             for (auto& entry : list)
             {
-                entry->Canceled.store(true, std::memory_order_release);
-                entry->State.store(EnumJobState::Canceled,
-                                   std::memory_order_release);
+                entry->cancelRequested_.store(true, std::memory_order_release);
+                entry->state_.store(EnumJobState::Canceled, std::memory_order_release);
             }
         }
         buckets_.clear();
@@ -104,56 +117,24 @@ class Timer : public std::enable_shared_from_this<Timer>
     }
 
   public:
-    // === 바인딩된 Executor 대상 ===
-    JobHandle ScheduleAt(TimePoint at, Callback fn, std::string_view label = {})
+    JobHandle PostAt(TimePoint at, Callback fn, std::string_view label = {})
     {
-        return ScheduleAtImpl(at, std::move(fn), label, MakeExecutorDispatch());
-    }
+        if (!fn)
+            return JobHandle{};
 
-    JobHandle ScheduleAfter(Duration delay,
-                            Callback fn,
-                            std::string_view label = {})
-    {
-        return ScheduleAt(Now() + delay, std::move(fn), label);
-    }
+        if (stopping_.load(std::memory_order_acquire))
+            return JobHandle{};
 
-    RepeatHandle ScheduleRepeat(Duration period,
-                                Callback fn,
-                                EnumRepeatMode mode = EnumRepeatMode::FixedDelay,
-                                bool executeNow = false,
-                                std::string_view label = {})
-    {
-        return ScheduleRepeatImpl(period, std::move(fn), mode, executeNow, label,
-                                  MakeExecutorDispatch());
-    }
+        auto entry = std::make_shared<Entry>(NextId(), label, std::move(fn), at);
+        entry->bucket_ = BucketOf(at);
+        entry->state_.store(EnumJobState::WaitingTimer, std::memory_order_relaxed);
 
-    // === JobQueue 대상 ===
-    JobHandle ScheduleAt(const std::shared_ptr<JobQueue>& target,
-                         TimePoint at,
-                         Callback fn,
-                         std::string_view label = {})
-    {
-        return ScheduleAtImpl(at, std::move(fn), label,
-                              MakeQueueDispatch(target));
-    }
+        {
+            std::lock_guard lock(mtx_);
+            Insert(entry);
+        }
 
-    JobHandle ScheduleAfter(const std::shared_ptr<JobQueue>& target,
-                            Duration delay,
-                            Callback fn,
-                            std::string_view label = {})
-    {
-        return ScheduleAt(target, Now() + delay, std::move(fn), label);
-    }
-
-    RepeatHandle ScheduleRepeat(const std::shared_ptr<JobQueue>& target,
-                                Duration period,
-                                Callback fn,
-                                EnumRepeatMode mode = EnumRepeatMode::FixedDelay,
-                                bool executeNow = false,
-                                std::string_view label = {})
-    {
-        return ScheduleRepeatImpl(period, std::move(fn), mode, executeNow, label,
-                                  MakeQueueDispatch(target));
+        return JobHandle{entry, label};
     }
 
   public:
@@ -161,7 +142,7 @@ class Timer : public std::enable_shared_from_this<Timer>
     {
         std::lock_guard lock(mtx_);
         size_t total = 0;
-        for (const auto& [bucket, list] : buckets_)
+        for (const auto& list : buckets_ | std::views::values)
             total += list.size();
         return total;
     }
@@ -176,50 +157,18 @@ class Timer : public std::enable_shared_from_this<Timer>
 
     [[nodiscard]] BucketKey BucketOf(TimePoint tp) const
     {
-        const auto nsSinceEpoch =
-            std::chrono::duration_cast<Duration>(tp.time_since_epoch()).count();
-        const auto tickNs = tickResolution_.count();
-        if (tickNs <= 0)
-            return static_cast<BucketKey>(nsSinceEpoch);
-        // floor division
-        auto q = nsSinceEpoch / tickNs;
-        if (nsSinceEpoch % tickNs < 0)
-            --q;
-        return static_cast<BucketKey>(q);
+        const auto ns = std::chrono::duration_cast<Duration>(tp.time_since_epoch()).count();
+        return static_cast<BucketKey>(ns / tickResolution_.count());
     }
 
     [[nodiscard]] TimePoint BucketTime(BucketKey bucket) const
     {
-        return TimePoint(Duration(static_cast<Duration::rep>(bucket)
-                                  * tickResolution_.count()));
+        return TimePoint(Duration(static_cast<Duration::rep>(bucket) * tickResolution_.count()));
     }
 
-    [[nodiscard]] TimePoint Now() const { return nowProvider_(); }
-
-    Entry::DispatchFn MakeExecutorDispatch()
+    [[nodiscard]] TimePoint Now() const
     {
-        std::weak_ptr<IExecutor> weakExec = executor_;
-        return [weakExec](IExecutor::Callback cb,
-                          std::string_view /*label*/) -> bool {
-            if (auto exec = weakExec.lock())
-                return exec->Post(std::move(cb));
-            return false;
-        };
-    }
-
-    Entry::DispatchFn
-    MakeQueueDispatch(const std::shared_ptr<JobQueue>& target)
-    {
-        std::weak_ptr<JobQueue> weakQ = target;
-        return [weakQ](IExecutor::Callback cb,
-                       std::string_view label) -> bool {
-            if (auto q = weakQ.lock())
-            {
-                auto handle = q->Post(std::move(cb), label);
-                return handle.IsValid();
-            }
-            return false;
-        };
+        return nowProvider_();
     }
 
     EntryId NextId() noexcept
@@ -227,193 +176,74 @@ class Timer : public std::enable_shared_from_this<Timer>
         return nextId_.fetch_add(1, std::memory_order_relaxed) + 1;
     }
 
-    JobHandle ScheduleAtImpl(TimePoint at,
-                             Callback fn,
-                             std::string_view label,
-                             Entry::DispatchFn dispatch)
+    void Insert(const std::shared_ptr<Entry>& entry)
     {
-        if (!fn)
-            return JobHandle{};
-
-        auto entry = std::make_shared<Entry>(
-            NextId(), label, std::move(fn), at, BucketOf(at),
-            std::move(dispatch));
-
-        bool wasNewMin = false;
-        {
-            std::lock_guard lock(mtx_);
-            if (stopping_.load(std::memory_order_acquire))
-                return JobHandle{};
-            wasNewMin = Insert(entry);
-        }
-        if (wasNewMin)
-            cv_.notify_one();
-
-        return JobHandle{std::weak_ptr<Entry>(entry), label};
-    }
-
-    RepeatHandle ScheduleRepeatImpl(Duration period,
-                                    Callback fn,
-                                    EnumRepeatMode mode,
-                                    bool executeNow,
-                                    std::string_view label,
-                                    Entry::DispatchFn dispatch)
-    {
-        if (!fn || period <= Duration::zero())
-            return RepeatHandle{};
-
-        const TimePoint at = executeNow ? Now() : Now() + period;
-        auto entry = std::make_shared<Entry>(
-            NextId(), label, std::move(fn), at, BucketOf(at),
-            std::move(dispatch));
-
-        entry->Period = period;
-        entry->PeriodNs.store(period.count(), std::memory_order_release);
-        entry->Mode.store(mode, std::memory_order_release);
-
-        bool wasNewMin = false;
-        {
-            std::lock_guard lock(mtx_);
-            if (stopping_.load(std::memory_order_acquire))
-                return RepeatHandle{};
-            wasNewMin = Insert(entry);
-        }
-        if (wasNewMin)
-            cv_.notify_one();
-
-        return RepeatHandle{std::weak_ptr<Entry>(entry), period, mode, label};
-    }
-
-    // mtx_ 보유 상태로 호출. 새 엔트리가 최소 bucket 을 앞당겼는지 반환.
-    bool Insert(const std::shared_ptr<Entry>& entry)
-    {
-        const BucketKey bucket = entry->Bucket;
+        const BucketKey bucket = entry->bucket_;
         buckets_[bucket].push_back(entry);
-        const bool wasNewMin =
-            occupied_.empty() || bucket < *occupied_.begin();
         occupied_.insert(bucket);
-        return wasNewMin;
     }
 
     void WatcherLoop()
     {
         while (!stopping_.load(std::memory_order_acquire))
         {
-            BucketKey nextBucket = 0;
-            {
-                std::unique_lock lock(mtx_);
-                cv_.wait(lock, [this] {
-                    return stopping_.load(std::memory_order_acquire)
-                           || !occupied_.empty();
-                });
-                if (stopping_.load(std::memory_order_acquire))
-                    return;
-                nextBucket = *occupied_.begin();
-            }
+            std::this_thread::sleep_for(tickResolution_);
 
-            const TimePoint fireAt = BucketTime(nextBucket);
-            if (Now() < fireAt)
-            {
-                std::unique_lock lock(mtx_);
-                cv_.wait_until(lock, fireAt, [this, nextBucket] {
-                    return stopping_.load(std::memory_order_acquire)
-                           || (!occupied_.empty()
-                               && *occupied_.begin() < nextBucket);
-                });
-                continue;
-            }
+            const BucketKey currentBucket = BucketOf(Now());
 
             std::list<std::shared_ptr<Entry>> fired;
             {
                 std::lock_guard lock(mtx_);
-                if (auto it = buckets_.find(nextBucket); it != buckets_.end())
+                while (!occupied_.empty() && *occupied_.begin() <= currentBucket)
                 {
-                    fired.splice(fired.end(), it->second);
-                    buckets_.erase(it);
+                    const BucketKey bucket = *occupied_.begin();
+                    if (auto it = buckets_.find(bucket); it != buckets_.end())
+                    {
+                        fired.splice(fired.end(), it->second);
+                        buckets_.erase(it);
+                    }
+                    occupied_.erase(occupied_.begin());
                 }
-                occupied_.erase(nextBucket);
             }
 
             for (auto& entry : fired)
             {
-                if (entry->Canceled.load(std::memory_order_acquire))
+                if (entry->cancelRequested_.load(std::memory_order_acquire))
                 {
-                    entry->State.store(EnumJobState::Canceled,
-                                       std::memory_order_release);
+                    entry->state_.store(EnumJobState::Canceled, std::memory_order_release);
                     continue;
                 }
 
-                const bool paused =
-                    entry->Paused.load(std::memory_order_acquire);
-
-                if (!paused)
+                entry->state_.store(EnumJobState::Executing, std::memory_order_release);
+                try
                 {
-                    entry->State.store(EnumJobState::Queued,
-                                       std::memory_order_release);
-                    const bool ok = entry->Dispatch(entry->Fn, entry->DebugLabel);
-                    if (!ok)
-                    {
-                        entry->Canceled.store(true, std::memory_order_release);
-                        entry->State.store(EnumJobState::Canceled,
-                                           std::memory_order_release);
-                        continue;
-                    }
+                    entry->fn_();
+                    entry->fn_ = nullptr;
+                    entry->state_.store(EnumJobState::Done, std::memory_order_release);
                 }
-
-                if (entry->Period.has_value()
-                    && !entry->Canceled.load(std::memory_order_acquire))
+                catch (...)
                 {
-                    const Duration period = Duration(
-                        entry->PeriodNs.load(std::memory_order_acquire));
-                    const EnumRepeatMode mode =
-                        entry->Mode.load(std::memory_order_acquire);
-                    const TimePoint nextAt =
-                        ComputeNext(entry->ScheduledAt, mode, period, Now());
-                    entry->ScheduledAt = nextAt;
-                    entry->Bucket = BucketOf(nextAt);
-
-                    bool wasNewMin = false;
-                    {
-                        std::lock_guard lock(mtx_);
-                        wasNewMin = Insert(entry);
-                    }
-                    if (wasNewMin)
-                        cv_.notify_one();
+                    entry->fn_ = nullptr;
+                    entry->state_.store(EnumJobState::Failed, std::memory_order_release);
                 }
             }
         }
     }
 
-    static TimePoint ComputeNext(TimePoint scheduledAt,
-                                 EnumRepeatMode mode,
-                                 Duration period,
-                                 TimePoint now)
-    {
-        if (mode == EnumRepeatMode::FixedDelay)
-            return now + period;
-        // FixedRate: catch-up 누적 없음.
-        TimePoint t = scheduledAt + period;
-        if (t <= now)
-            t = now;
-        return t;
-    }
-
   private:
     // 설정 영역
-    std::shared_ptr<IExecutor> executor_;
     CreateOptions options_;
     Duration tickResolution_;
     std::function<TimePoint()> nowProvider_;
 
     // 버킷 영역
     mutable std::mutex mtx_;
-    std::condition_variable cv_;
     std::unordered_map<BucketKey, std::list<std::shared_ptr<Entry>>> buckets_;
-    std::set<BucketKey> occupied_; // 비어있지 않은 버킷 키들. begin() 이 곧 다음 만료.
+    std::set<BucketKey> occupied_;
 
     // 상태 영역
-    std::atomic<EntryId> nextId_{0};
-    std::atomic<bool> stopping_{true};  // Start 호출 전에는 정지 상태.
+    std::atomic<EntryId> nextId_{};
+    std::atomic<bool> stopping_{true};
     std::atomic<bool> started_{false};
     std::thread watcher_;
 };

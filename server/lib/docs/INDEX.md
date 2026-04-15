@@ -15,6 +15,8 @@
   [context-map.md](./context-map.md)
 - 활성 실행 계획:
   [exec-plans/active/INDEX.md](./exec-plans/active/INDEX.md)
+- 네트워크 세션 인터페이스 계약:
+  [network-session-interface.md](./network-session-interface.md)
 - 공용 Python 도구 규칙:
   [../../docs/conventions/tooling.md](../../docs/conventions/tooling.md)
 

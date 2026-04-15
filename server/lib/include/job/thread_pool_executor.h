@@ -26,12 +26,11 @@ namespace psh::lib::job
 class ThreadPoolExecutor final : public IExecutor,
                                  public std::enable_shared_from_this<ThreadPoolExecutor>
 {
-  public:
+public:
     struct CreateOptions
     {
-        uint32_t WorkerCount = 0;           // 0 → std::thread::hardware_concurrency()
-        uint32_t ReadyQueueCapacity = 0;    // 0 → unbounded. 초과 시 Post → false.
-        SlowJobOptions SlowJob{};           //
+        uint32_t WorkerCount = 0; // 0 → std::thread::hardware_concurrency()
+        SlowJobOptions SlowJob{};
         std::string DebugName;
     };
 
@@ -43,7 +42,10 @@ class ThreadPoolExecutor final : public IExecutor,
         workers_.reserve(count);
         for (auto i = 0; i < count; ++i)
         {
-            workers_.emplace_back([this, i] { WorkerLoop(i); });
+            workers_.emplace_back([this, i]
+                                  {
+                                      WorkerLoop(i);
+                                  });
         }
     }
 
@@ -55,27 +57,20 @@ class ThreadPoolExecutor final : public IExecutor,
     ThreadPoolExecutor(const ThreadPoolExecutor&) = delete;
     ThreadPoolExecutor& operator=(const ThreadPoolExecutor&) = delete;
 
-  public:
-    bool Post(Callback fn) override
+public:
+    void Post(Callback fn) override
     {
         if (!fn)
-            return false;
+            return;
 
-        auto& capacity = options_.ReadyQueueCapacity;
         {
             std::lock_guard lock(mtx_);
             if (state_ != EnumJobQueueState::Running)
-                return false;
-            if (capacity > 0 && ready_.size() >= capacity)
-            {
-                rejectedCount_.fetch_add(1, std::memory_order_relaxed);
-                return false;
-            }
+                return;
             ready_.push_back(std::move(fn));
             submittedCount_.fetch_add(1, std::memory_order_relaxed);
         }
         cv_.notify_one();
-        return true;
     }
 
     EnumJobQueueState GetState() const noexcept override
@@ -91,32 +86,31 @@ class ThreadPoolExecutor final : public IExecutor,
             if (state_ == EnumJobQueueState::Stopped)
                 return;
             state_ = EnumJobQueueState::Draining;
-            drainOnStop_ = drain;
             if (!drain)
+            {
+                droppedOnStopCount_.fetch_add(ready_.size(), std::memory_order_relaxed);
                 ready_.clear();
+            }
         }
         cv_.notify_all();
 
         if (drain)
         {
             std::unique_lock lock(mtx_);
-            const bool unbounded = (drainTimeout == Duration::zero());
-            const auto deadline = std::chrono::steady_clock::now() + drainTimeout;
-
-            auto pred = [&] {
+            auto pred = [&]
+            {
                 return ready_.empty();
             };
 
-            if (unbounded)
+            if (drainTimeout == Duration::zero())
             {
                 cv_.wait(lock, pred);
             }
-            else if (!cv_.wait_until(lock, deadline, pred))
+            else if (const auto deadline = std::chrono::steady_clock::now() + drainTimeout;
+                     !cv_.wait_until(lock, deadline, pred))
             {
-                const auto dropped = ready_.size();
+                droppedOnStopCount_.fetch_add(ready_.size(), std::memory_order_relaxed);
                 ready_.clear();
-                if (dropped > 0)
-                    droppedOnStopCount_.fetch_add(dropped, std::memory_order_relaxed);
             }
         }
 
@@ -140,16 +134,15 @@ class ThreadPoolExecutor final : public IExecutor,
             std::lock_guard lock(mtx_);
             snap.State = state_;
             snap.WorkerCount = static_cast<uint32_t>(workers_.size());
-            snap.PendingCount = static_cast<uint64_t>(ready_.size());
+            snap.PendingCount = ready_.size();
         }
         snap.SubmittedCount = submittedCount_.load(std::memory_order_relaxed);
         snap.ExecutedCount = executedCount_.load(std::memory_order_relaxed);
         snap.FailedCount = failedCount_.load(std::memory_order_relaxed);
-        snap.RejectedCount = rejectedCount_.load(std::memory_order_relaxed);
         return snap;
     }
 
-  private:
+private:
     void WorkerLoop(uint32_t /*index*/)
     {
         while (true)
@@ -157,9 +150,10 @@ class ThreadPoolExecutor final : public IExecutor,
             Callback fn;
             {
                 std::unique_lock lock(mtx_);
-                cv_.wait(lock, [&] {
-                    return !ready_.empty() || state_ != EnumJobQueueState::Running;
-                });
+                cv_.wait(lock, [&]
+                         {
+                             return !ready_.empty() || state_ != EnumJobQueueState::Running;
+                         });
                 if (ready_.empty())
                 {
                     if (state_ != EnumJobQueueState::Running)
@@ -182,8 +176,7 @@ class ThreadPoolExecutor final : public IExecutor,
             }
             executedCount_.fetch_add(1, std::memory_order_relaxed);
 
-            if (options_.SlowJob.EnableWarningLog
-                && options_.SlowJob.WarningThreshold > Duration::zero())
+            if (options_.SlowJob.EnableWarningLog && options_.SlowJob.WarningThreshold > Duration::zero())
             {
                 const auto elapsed = std::chrono::steady_clock::now() - start;
                 if (elapsed > options_.SlowJob.WarningThreshold)
@@ -192,9 +185,9 @@ class ThreadPoolExecutor final : public IExecutor,
                 }
             }
         }
-    }  
+    }
 
-  private:
+private:
     CreateOptions options_;
 
     // 큐 영역
@@ -204,17 +197,15 @@ class ThreadPoolExecutor final : public IExecutor,
 
     // 상태 영역
     EnumJobQueueState state_ = EnumJobQueueState::Running;
-    bool drainOnStop_ = false; // Stop(true) 시 set. cv 깨움 후 워커가 관측.
 
     // 워커 영역
     std::vector<std::thread> workers_;
 
     // 통계 영역
-    std::atomic<uint64_t> submittedCount_{0};
-    std::atomic<uint64_t> executedCount_{0};
-    std::atomic<uint64_t> failedCount_{0};
-    std::atomic<uint64_t> rejectedCount_{0};
-    std::atomic<uint64_t> droppedOnStopCount_{0}; // Stop(false) 또는 timeout 폐기 누계.
+    std::atomic<uint64_t> submittedCount_{};
+    std::atomic<uint64_t> executedCount_{};
+    std::atomic<uint64_t> failedCount_{};
+    std::atomic<uint64_t> droppedOnStopCount_{}; // Stop(false) 또는 timeout 폐기 누계.
 };
 
 } // namespace psh::lib::job

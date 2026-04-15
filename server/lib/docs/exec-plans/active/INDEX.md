@@ -6,6 +6,7 @@
 
 - [20260317-utility-functions.md](./20260317-utility-functions.md) - 문자열·컨테이너·랜덤 유틸리티 추가
 - [20260317-assert-utility.md](./20260317-assert-utility.md) - Assert 런타임 불변식 검증 유틸리티 구현
+- [20260415-network-session.md](./20260415-network-session.md) - 네트워크 세션 골격 헤더 추가 (인터페이스 문서 확정)
 
 ## 운영 규칙
 

@@ -8,13 +8,13 @@ namespace psh::lib::job
 {
 class IExecutor
 {
-  public:
+public:
     using Callback = std::function<void()>;
 
     virtual ~IExecutor() = default;
 
-    // 정상 true. 포화/종료 상태 false. 실패 시 fn 은 호출되지 않고 소멸.
-    virtual bool Post(Callback fn) = 0;
+    // Post 는 실패하지 않는다. 종료 상태에서 호출하면 fn 은 호출되지 않고 조용히 소멸.
+    virtual void Post(Callback fn) = 0;
 
     virtual EnumJobQueueState GetState() const noexcept = 0;
 

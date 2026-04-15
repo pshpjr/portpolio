@@ -8,26 +8,26 @@
 
 | 컴포넌트 | 역할 | 파일 |
 |---|---|---|
-| `IExecutor` / `ThreadPoolExecutor` | 함수 실행 엔진 (스레드풀 추상). 단일 API `Post(Callback) → bool`. | `executor.h`, `thread_pool_executor.h` |
-| `JobQueue` | Executor 위에 쌓이는 **직렬 실행 큐**. 자체 저장소 + 백프레셔. | `job_queue.h` |
+| `IExecutor` / `ThreadPoolExecutor` | 함수 실행 엔진 (스레드풀 추상). 단일 API `Post(Callback)` (실패 없음). | `executor.h`, `thread_pool_executor.h` |
+| `JobQueue` | Executor 위에 쌓이는 **직렬 실행 큐**. 자체 저장소. | `job_queue.h` |
 | `Timer` | 시각 기반 스케줄러. 만료 시 Executor / JobQueue 로 재위임. | `timer.h` |
 | `Entry` | 두 경로(JobQueue / Timer) 가 공유하는 단일 엔트리 타입. | `entry.h` |
 | `JobHandle` / `RepeatHandle` | Entry 를 weak 참조. 취소·일시정지·설정 변경. | `job.h` |
 | 공용 타입 / 통계 | enum, snapshot 구조체. | `job_queue_types.h` |
 
-계측 공용 타입(`HistogramSnapshot` / `RateStats` / `LatencySummary`) 은 `psh::lib::telemetry` 하위 (`server/lib/include/telemetry/`).
+계측 공용 타입·Recorder(`Histogram` / `RateMeter` / `DistributionSummary`)는 `psh::lib::telemetry` (`server/lib/include/telemetry/`). 도메인 무관 — JobQueue 외 다른 컴포넌트(network/io 등)도 동일 Recorder 를 직접 사용한다.
 
 ## 2. 핵심 모델
 
 ### 2.1 단일 스케줄링 프리미티브
 
-`IExecutor::Post(Callback) → bool` 하나가 전부. 성공 시 true, 포화/종료 시 false.
+`IExecutor::Post(Callback)` 하나가 전부. 실패하지 않는다 (종료 상태에서 호출하면 fn 은 조용히 소멸).
 
 ```cpp
 auto pool = std::make_shared<ThreadPoolExecutor>(
     ThreadPoolExecutor::CreateOptions{ .WorkerCount = 4, .DebugName = "main-pool" });
 
-bool ok = pool->Post([] { /* run on a worker */ });
+pool->Post([] { /* run on a worker */ });
 ```
 
 ### 2.2 JobQueue (직렬 실행)
@@ -40,7 +40,7 @@ session->Post([] { /* runs serially per session */ });
 session->Post([] { /* runs after the previous one completes */ });
 ```
 
-`BatchLimit` 소진 시 self-requeue 로 starvation 방지. `QueueCapacity` 초과 시 `Post` 가 false 로 백프레셔.
+`BatchLimit` 소진 시 self-requeue 로 starvation 방지.
 
 ### 2.3 Timer
 
