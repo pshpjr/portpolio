@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"/c/Program Files/GitButler/but.exe\" status)",
+      "Read(//c/Users/admin/Desktop/portpolio/shared/protocol/**)",
+      "Read(//c/Users/admin/Desktop/portpolio/shared/**)"
+    ]
+  }
+}

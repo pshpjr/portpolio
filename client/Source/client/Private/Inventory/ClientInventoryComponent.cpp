@@ -21,6 +21,12 @@ bool UClientInventoryComponent::AddItem(UClientItemInstance* Item)
         return true;
     }
 
+    // 새 슬롯이 필요한데 열린 용량이 꽉 찼으면 실패.
+    if (Items.Num() >= CurrentCapacity)
+    {
+        return false;
+    }
+
     FClientItemLocation NewLocation = Item->GetRuntimeData().Location;
     NewLocation.StorageKind = EClientItemStorageKind::Inventory;
     NewLocation.SlotIndex = INDEX_NONE;
@@ -30,6 +36,18 @@ bool UClientInventoryComponent::AddItem(UClientItemInstance* Item)
     SortItems();
     BroadcastItemUpdated(Item);
     return true;
+}
+
+void UClientInventoryComponent::SetCurrentCapacity(int32 NewCapacity)
+{
+    const int32 Clamped = FMath::Clamp(NewCapacity, 0, GClientInventoryMaxCapacity);
+    if (Clamped == CurrentCapacity)
+    {
+        return;
+    }
+    CurrentCapacity = Clamped;
+    // 전체 재렌더 신호: UI가 잠금 상태를 다시 계산하도록 null 브로드캐스트.
+    BroadcastItemUpdated(nullptr);
 }
 
 bool UClientInventoryComponent::RemoveItemByKey(const FString& ItemKey)

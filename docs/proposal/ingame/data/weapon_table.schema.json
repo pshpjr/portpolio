@@ -47,5 +47,9 @@
     { "name": "CombatRoleTag", "type": "string" },
     { "name": "RangeProfile", "type": "enum", "enum_name": "ERangeProfile" },
     { "name": "BalanceVersion", "type": "int32" }
+  ],
+  "enums": [
+    { "name": "EWeaponHandType", "values": ["None", "OneHandShield", "TwoHand", "Channeling"] },
+    { "name": "ERangeProfile", "values": ["None", "Melee", "Ranged"] }
   ]
 }

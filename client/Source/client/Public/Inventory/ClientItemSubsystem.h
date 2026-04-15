@@ -17,10 +17,13 @@ class UClientItemInstance;
  *   3. 반환된 UClientItemInstance를 인벤토리 컴포넌트에 전달한다.
  *
  * 데이터 로딩:
- *   Initialize() 에서 Content/Data/item_table.data.json 을 자동으로 로드한다.
+ *   Initialize() 에서 DataDirectory/item_table.data.json 을 자동으로 로드한다.
+ *   DataDirectory 는 DefaultGame.ini 의 [/Script/client.ClientItemSubsystem] 섹션에서
+ *   지정하며, 상대 경로는 프로젝트 디렉터리 기준으로 해석된다.
+ *   설정이 없거나 로드 실패 시 Content/Data 로 폴백한다.
  *   다른 경로를 사용하려면 LoadFromFile()을 직접 호출한다.
  */
-UCLASS()
+UCLASS(Config=Game)
 class CLIENT_API UClientItemSubsystem : public UGameInstanceSubsystem
 {
     GENERATED_BODY()
@@ -28,6 +31,14 @@ class CLIENT_API UClientItemSubsystem : public UGameInstanceSubsystem
 public:
     // UGameInstanceSubsystem
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
+    /**
+     * 데이터 JSON 파일이 있는 디렉터리.
+     * 절대 경로 또는 ProjectDir 기준 상대 경로.
+     * DefaultGame.ini 의 DataDirectory= 값에서 주입된다.
+     */
+    UPROPERTY(Config, EditAnywhere, Category = "Item")
+    FString DataDirectory;
 
     /**
      * JSON 파일에서 아이템 테이블을 로드한다.

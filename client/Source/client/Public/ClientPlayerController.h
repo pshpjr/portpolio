@@ -5,6 +5,27 @@
 #include "ClientPlayerController.generated.h"
 
 class UUserWidget;
+class UClientMainHUD;
+class UInputAction;
+class UInputMappingContext;
+struct FInputActionValue;
+
+/**
+ * IMC의 InputAction 하나를 특정 HUD 패널 ID에 묶는 바인딩.
+ * Triggered 시 AClientPlayerController::OnTogglePanelAction이 호출되고
+ * 이 값의 PanelId가 TogglePanel 인자로 전달된다.
+ */
+USTRUCT(BlueprintType)
+struct FClientHUDPanelToggleBinding
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    TObjectPtr<UInputAction> Action = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    FName PanelId;
+};
 
 /**
  * 플레이어 컨트롤러.
@@ -37,6 +58,24 @@ public:
 
     UFUNCTION(BlueprintPure, Category = "HUD")
     UUserWidget* GetHUDWidget() const { return HUDWidget; }
+
+    /** HUDWidget이 UClientMainHUD면 캐스트해 반환. 아니면 nullptr. */
+    UFUNCTION(BlueprintPure, Category = "HUD")
+    UClientMainHUD* GetMainHUD() const;
+
+    /** HUD에 패널 토글 전달. 패널이 커서를 요구하면 입력 모드를 Game+UI로 자동 전환. */
+    UFUNCTION(BlueprintCallable, Category = "HUD")
+    void TogglePanel(FName PanelId);
+
+    UFUNCTION(BlueprintCallable, Category = "HUD")
+    void OpenPanel(FName PanelId);
+
+    UFUNCTION(BlueprintCallable, Category = "HUD")
+    void ClosePanel(FName PanelId);
+
+    /** ESC 등에서 호출. 가장 최근 패널을 닫고, 다 닫히면 Game Only 모드로 복귀. */
+    UFUNCTION(BlueprintCallable, Category = "HUD")
+    bool CloseTopmostPanel();
 
     // ── 입력 모드 전환 ───────────────────────────────────────────────────────
 
@@ -74,11 +113,38 @@ public:
     AActor* GetCurrentTarget() const { return CurrentTarget.Get(); }
 
 protected:
-    /** Blueprint에서 사용할 HUD 위젯 클래스 */
+    virtual void BeginPlay() override;
+    virtual void SetupInputComponent() override;
+
+    /** Blueprint에서 사용할 HUD 위젯 클래스. UClientMainHUD 서브클래스 권장. */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD")
     TSubclassOf<UUserWidget> HUDWidgetClass;
 
+    /** BeginPlay 시 LocalPlayer에 주입할 기본 IMC. */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    TObjectPtr<UInputMappingContext> DefaultMappingContext = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (ClampMin = "0"))
+    int32 DefaultMappingPriority = 0;
+
+    /** 패널 ID → InputAction 바인딩 테이블. Triggered 시 TogglePanel 호출. */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    TArray<FClientHUDPanelToggleBinding> PanelToggleBindings;
+
+    /** ESC 등으로 최상단 패널을 닫는 액션. */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    TObjectPtr<UInputAction> CloseTopAction = nullptr;
+
+    /** 열린 패널 상태에 맞춰 입력 모드·커서를 동기화. */
+    void SyncInputModeForHUD();
+
 private:
+    void OnTogglePanelAction(const FInputActionValue& Value, FName PanelId);
+    void OnCloseTopAction(const FInputActionValue& Value);
+
+    UFUNCTION()
+    void HandleHUDPanelVisibilityChanged(FName PanelId, bool bOpen);
+
     UPROPERTY()
     TObjectPtr<UUserWidget> HUDWidget;
 

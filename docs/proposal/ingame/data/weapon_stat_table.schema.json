@@ -25,5 +25,8 @@
     { "name": "ThreatGen", "type": "float" },
     { "name": "ParryWindowBonus", "type": "float" },
     { "name": "BalanceVersion", "type": "int32" }
+  ],
+  "enums": [
+    { "name": "EResourceType", "values": ["None", "Stamina", "Mana"] }
   ]
 }

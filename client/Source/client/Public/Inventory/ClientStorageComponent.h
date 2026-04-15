@@ -20,8 +20,19 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Storage")
     void InitializeStorage(const TArray<FClientStorageTabDescriptor>& TabDescriptors);
 
+    // 기본값 24는 GClientStorageTabDefaultCapacity와 동일. UHT가 constexpr 기본 인자를 파싱 못 해 리터럴로 둠.
     UFUNCTION(BlueprintCallable, Category = "Storage")
-    void InitializeDefaultSharedStorage(int32 TabCount = 1, int32 SlotsPerTab = 48);
+    void InitializeDefaultSharedStorage(int32 TabCount = 1, int32 SlotsPerTab = 24);
+
+    /** 서버가 준 현재 용량으로 탭 Capacity 갱신. [0, 탭 MaxCapacity]로 클램프, OnStorageUpdated 브로드캐스트. */
+    UFUNCTION(BlueprintCallable, Category = "Storage")
+    void SetTabCurrentCapacity(int32 TabIndex, int32 NewCapacity);
+
+    UFUNCTION(BlueprintPure, Category = "Storage")
+    int32 GetTabCurrentCapacity(int32 TabIndex) const;
+
+    UFUNCTION(BlueprintPure, Category = "Storage")
+    int32 GetTabMaxCapacity(int32 TabIndex) const;
 
     UFUNCTION(BlueprintCallable, Category = "Storage")
     bool AddItemToTab(UClientItemInstance* Item, int32 TabIndex, int32 PreferredSlotIndex = -1);

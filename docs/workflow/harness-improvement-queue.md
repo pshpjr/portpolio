@@ -53,6 +53,17 @@
 
 ## Open Tasks
 
+## 2026-04-14 - document-gitbutler-cli-workflow-as-skill
+- status: open
+- suggested-agent: harness-improver
+- area: skill
+- recommended-artifact: skill
+- context-savings: medium
+- token-meter: pending
+- task: GitButler CLI(`but`) 사용 흐름을 별도 문서 + skill로 정리한다. 스테이징/커밋/푸시, hunk lock 동작, 잠금된 hunk가 다른 브랜치로 자동 분리될 때의 처리 절차를 포함.
+- message: clang-format 일괄 적용 작업에서 `but stage` → `but commit <branch> --only -m` → `but push <branch>` 루틴을 사용했는데, 파일 hunk가 기존 브랜치의 커밋(🔒)에 잠겨 다른 브랜치로 자동 스테이지되는 동작 때문에 동일한 포매팅 작업이 두 개 브랜치에 나뉘어 커밋되는 일이 반복됐다. 매 세션마다 CLI 헬프를 탐색하지 않도록 기본 절차, 잠금 처리 선택지(해당 브랜치에 같이 커밋 / unapply 후 재시도), 바이너리 경로(`/c/Program Files/GitButler/but.exe`), 단일 소스 위치(`.claude/skills/` 원본, `.codex/skills/` 래퍼) 규칙을 명시해야 한다.
+- source: server/ clang-format sweep 세션 (chore/clang-format-sweep, boost-mysql-user-db-executor 분리 커밋 경험)
+
 ## 2026-04-08 - review-delegate-opencode-text-extraction-robustness
 - status: open
 - suggested-agent: harness-improver

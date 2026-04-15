@@ -18,9 +18,9 @@
     "IconKey": "weapon_sword_shield",
     "ModelKey": "mdl_weapon_sword_shield",
     "DisplayOrder": 10,
-    "HandType": "ONE_HAND_SHIELD",
+    "HandType": "OneHandShield",
     "CombatRoleTag": "GUARD",
-    "RangeProfile": "MELEE",
+    "RangeProfile": "Melee",
     "BalanceVersion": 1
   },
   {
@@ -42,9 +42,9 @@
     "IconKey": "weapon_greatsword",
     "ModelKey": "mdl_weapon_greatsword",
     "DisplayOrder": 20,
-    "HandType": "TWO_HAND",
+    "HandType": "TwoHand",
     "CombatRoleTag": "BURST",
-    "RangeProfile": "MELEE",
+    "RangeProfile": "Melee",
     "BalanceVersion": 1
   },
   {
@@ -66,9 +66,9 @@
     "IconKey": "weapon_staff",
     "ModelKey": "mdl_weapon_staff",
     "DisplayOrder": 30,
-    "HandType": "CHANNELING",
+    "HandType": "Channeling",
     "CombatRoleTag": "CASTER",
-    "RangeProfile": "RANGED",
+    "RangeProfile": "Ranged",
     "BalanceVersion": 1
   }
 ]

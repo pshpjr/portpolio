@@ -30,6 +30,10 @@ public:
     UFUNCTION(BlueprintPure, Category = "Inventory")
     int32 GetItemId() const { return StaticData.ItemId; }
 
+    /** InitializeFromData가 실제 테이블 행으로 호출됐는지. ItemId == 0이면 미초기화/빈 슬롯. */
+    UFUNCTION(BlueprintPure, Category = "Inventory")
+    bool HasValidData() const { return StaticData.ItemId != 0; }
+
     UFUNCTION(BlueprintPure, Category = "Inventory")
     FString GetItemName() const { return StaticData.ItemName; }
 

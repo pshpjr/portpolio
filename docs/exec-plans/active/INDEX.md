@@ -4,6 +4,8 @@
 
 ## 현재 활성 계획
 
+- [20260414-client-icon-pipeline.md](./20260414-client-icon-pipeline.md) - 클라이언트 UI 아이콘 자동 임포트 파이프라인 (에디터 기동 시 manifest 해시 비교)
+
 - [20260408-harness-polish.md](./20260408-harness-polish.md) - 모노레포 에이전트 하네스 폴리싱 + 미사용 스킬 정리 + 재귀 개선 큐 보강
 
 - [20260408-network-library.md](./20260408-network-library.md) - 서버 TCP 네트워크 레이어 + 클라이언트 서브시스템 구현 계획 (미확정 결정 선행 필요)
