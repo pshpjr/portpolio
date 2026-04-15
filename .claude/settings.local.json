@@ -20,7 +20,11 @@
       "Read(//d/Users/pshpjr/AppData/Local/claude/**)",
       "Read(//d/Users/pshpjr/AppData/Roaming/claude/**)",
       "Bash(mkdir:*)",
-      "Skill(codex:rescue)"
+      "Skill(codex:rescue)",
+      "Bash(rm /d/Users/pshpjr/source/repos/portpolio/server/lib/include/job/job_queue_helper.h)",
+      "Bash(ls build*/)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   },
   "sandbox": {

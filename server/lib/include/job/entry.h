@@ -32,7 +32,7 @@ namespace psh::lib::job
 class Entry
 {
   private:
-    // 엔트리 경로 태그. 외부 계약이 아니라 구현 내 assertion/debug 용도.
+    // 엔트리 타입
     enum class EnumKind : uint8_t
     {
         Plain,  // JobQueue::Post 로 생성. 즉시 실행.
@@ -40,8 +40,7 @@ class Entry
     };
 
   public:
-    using DispatchFn =
-        std::function<bool(IExecutor::Callback, std::string_view /*label*/)>;
+    using DispatchFn = std::function<bool(IExecutor::Callback, std::string_view /*label*/)>;
 
     // JobQueue 경로용 생성자. 초기 상태 Queued.
     Entry(EntryId id,
@@ -49,9 +48,9 @@ class Entry
           IExecutor::Callback fn,
           TimePoint scheduledAt)
         : Id(id)
-        , DebugLabel(debugLabel)
         , Fn(std::move(fn))
         , ScheduledAt(scheduledAt)
+        , DebugLabel(debugLabel)
         , kind_(EnumKind::Plain)
     {
     }
@@ -64,9 +63,9 @@ class Entry
           uint64_t bucket,
           DispatchFn dispatch)
         : Id(id)
-        , DebugLabel(debugLabel)
         , Fn(std::move(fn))
         , ScheduledAt(scheduledAt)
+        , DebugLabel(debugLabel)
         , Bucket(bucket)
         , Dispatch(std::move(dispatch))
         , kind_(EnumKind::Timer)
@@ -74,29 +73,27 @@ class Entry
         State.store(EnumJobState::WaitingTimer, std::memory_order_relaxed);
     }
 
+    // JobQueue
     const EntryId Id;
-    const std::string DebugLabel;
-
     IExecutor::Callback Fn;
-
-    // JobQueue: 제출 시각. Timer: 만료(예정) 시각. Repeat 재예약 시 갱신.
-    TimePoint ScheduledAt;
-
-    // Timer 영역
-    uint64_t Bucket = 0; //버킷 키. Repeat 재예약 시 갱신. JobQueue 에서는 사용 안 함.
-    DispatchFn Dispatch;
+    TimePoint ScheduledAt; // 제출 시각
+    const std::string DebugLabel;
 
     std::atomic<EnumJobState> State{EnumJobState::Queued};
     std::atomic<bool> Canceled{false};
 
+    // Timer 영역
+    uint64_t Bucket = 0; //timer의 버킷 키. Repeat 재예약 시 갱신. JobQueue 에서는 사용 안 함.
+    DispatchFn Dispatch;
+
     // Repeat 영역
-    std::optional<Duration> Period; // nullopt 이면 1회성. Timer 에서만 세팅된다.
-    std::atomic<Duration::rep> PeriodNs{0};
+    Duration Period{}; // 0이면 1회성. Timer 에서만 세팅된다.
+    std::atomic<Duration::rep> PeriodNs{};
     std::atomic<EnumRepeatMode> Mode{EnumRepeatMode::FixedDelay};
     std::atomic<bool> Paused{false};
 
-  private:
-    const EnumKind kind_;
+private:
+    EnumKind kind_;
 };
 
 } // namespace psh::lib::job

@@ -13,13 +13,13 @@ namespace psh::lib::job
 // JobHandle
 //   - JobQueue::Post / Timer::ScheduleAt / ScheduleAfter 에서 반환.
 //   - weak_ptr<Entry> 로만 참조. 기본 생성은 invalid.
-//   - Cancel / TryGetState 는 Entry 의 atomic 필드를 직접 조작/관측.
+//   - Cancel / GetState 는 Entry 의 atomic 필드를 직접 조작/관측.
 //   - Entry.Kind 로 Timer/Plain 구분이 필요하면 참조 가능.
 // ============================================================
 
 class JobHandle
 {
-  public:
+public:
     JobHandle() = default;
 
     JobHandle(std::weak_ptr<Entry> entry, std::string_view debugLabel)
@@ -27,8 +27,8 @@ class JobHandle
     {
     }
 
-    [[nodiscard]] bool IsValid() const noexcept { return !ref_.expired(); }
     [[nodiscard]] bool Expired() const noexcept { return ref_.expired(); }
+    [[nodiscard]] bool IsValid() const noexcept { return !Expired(); }
 
     EnumCancelResult Cancel()
     {
@@ -36,30 +36,35 @@ class JobHandle
         if (!entry)
             return EnumCancelResult::Expired;
 
-        const bool wasCanceled =
-            entry->Canceled.exchange(true, std::memory_order_acq_rel);
-        const auto state = entry->State.load(std::memory_order_acquire);
-
-        if (wasCanceled)
-        {
-            if (state == EnumJobState::Done || state == EnumJobState::Failed)
-                return EnumCancelResult::AlreadyFinished;
+        if (entry->Canceled.exchange(true, std::memory_order_acq_rel))
             return EnumCancelResult::AlreadyCanceled;
+
+        switch (entry->State.load(std::memory_order_acquire))
+        {
+        case EnumJobState::Executing:
+            return EnumCancelResult::AlreadyExecuting;
+
+        case EnumJobState::Done: [[fallthrough]];
+        case EnumJobState::Failed:
+            return EnumCancelResult::AlreadyFinished;
+
+        case EnumJobState::Canceled:
+            //  불가능한 상황
+            break;
+        //  이 외의 경우에는 취소가 가능하다
+        default:
+            break;
         }
 
-        if (state == EnumJobState::Executing)
-            return EnumCancelResult::AlreadyExecuting;
-        if (state == EnumJobState::Done || state == EnumJobState::Failed)
-            return EnumCancelResult::AlreadyFinished;
         return EnumCancelResult::Canceled;
     }
 
-    [[nodiscard]] EnumJobState TryGetState() const
+    [[nodiscard]] EnumJobState GetState() const
     {
-        auto entry = ref_.lock();
-        if (!entry)
-            return EnumJobState::Done;
-        return entry->State.load(std::memory_order_acquire);
+        if (auto entry = ref_.lock())
+            return entry->State.load(std::memory_order_acquire);
+
+        return EnumJobState::Done;
     }
 
     [[nodiscard]] std::string_view GetDebugLabel() const noexcept

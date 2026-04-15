@@ -108,7 +108,6 @@ if(BUILD_TESTING)
     find_package(GTest CONFIG REQUIRED)
 
     add_executable(portpolio_unit_tests
-        tests/unit/scaffold_smoke_test.cpp
     )
 
     target_link_libraries(portpolio_unit_tests

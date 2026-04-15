@@ -38,12 +38,13 @@ class ThreadPoolExecutor final : public IExecutor,
     explicit ThreadPoolExecutor(CreateOptions options)
         : options_(std::move(options))
     {
-        uint32_t count = options_.WorkerCount;
-        if (count == 0)
-            count = std::max<uint32_t>(1, std::thread::hardware_concurrency());
+        auto count = options_.WorkerCount ? options_.WorkerCount : std::thread::hardware_concurrency();
+
         workers_.reserve(count);
-        for (uint32_t i = 0; i < count; ++i)
+        for (auto i = 0; i < count; ++i)
+        {
             workers_.emplace_back([this, i] { WorkerLoop(i); });
+        }
     }
 
     ~ThreadPoolExecutor() override
@@ -59,12 +60,13 @@ class ThreadPoolExecutor final : public IExecutor,
     {
         if (!fn)
             return false;
+
+        auto& capacity = options_.ReadyQueueCapacity;
         {
             std::lock_guard lock(mtx_);
             if (state_ != EnumJobQueueState::Running)
                 return false;
-            if (options_.ReadyQueueCapacity > 0
-                && ready_.size() >= options_.ReadyQueueCapacity)
+            if (capacity > 0 && ready_.size() >= capacity)
             {
                 rejectedCount_.fetch_add(1, std::memory_order_relaxed);
                 return false;
@@ -190,7 +192,7 @@ class ThreadPoolExecutor final : public IExecutor,
                 }
             }
         }
-    }
+    }  
 
   private:
     CreateOptions options_;

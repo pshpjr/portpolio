@@ -1,4 +1,3 @@
-#include "02_config/server_config.h"
 #include "types/not_null.h"
 
 #include <boost/asio/io_context.hpp>

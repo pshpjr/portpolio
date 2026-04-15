@@ -20,15 +20,8 @@
 namespace psh::lib::job
 {
 // ------------------------------------------------------------
-// JobQueue — IExecutor 위에 쌓이는 직렬 실행 큐.
-//
-// 생성 규약:
-//   std::make_shared<JobQueue>(executor, options)
-//   enable_shared_from_this 사용. 반드시 shared_ptr 로 생성.
-//
 // 핵심 불변:
-//   running_ == true  ⇔  "executor 큐에 drain 클로저가 대기 중" 또는
-//                        "어떤 워커가 DrainOnce 내부에서 실행 중" (둘 중 하나).
+//   running_ == true : Executor 내부 큐에 있거나 실행되고 있음
 //   running_ 과 queue_ 는 mtx_ 하에서 함께 관찰/수정.
 // ------------------------------------------------------------
 
@@ -40,7 +33,7 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
     struct CreateOptions
     {
         uint32_t QueueCapacity = 0;  // 0 = unbounded
-        uint32_t BatchLimit = 256;   // 한 drain 에서 연속 실행 최대
+        uint32_t BatchLimit = 256;   // 한 drain 에서 연속 실행 최대. 넘치면 다른 queue에게 실행 양보
         std::string DebugName;
     };
 
@@ -61,8 +54,7 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
     // 성공 시 유효한 JobHandle, 실패 시 invalid JobHandle.
     JobHandle Post(Callback fn, std::string_view debugLabel = {})
     {
-        if (!fn)
-            return JobHandle{};
+        if (!fn) return JobHandle{};
 
         auto entry = std::make_shared<Entry>(
             NextId(), debugLabel, std::move(fn),
@@ -71,14 +63,16 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
         bool needSchedule = false;
         {
             std::lock_guard lock(mtx_);
+
             if (state_ != EnumJobQueueState::Running)
                 return JobHandle{};
-            if (options_.QueueCapacity > 0
-                && queue_.size() >= options_.QueueCapacity)
+
+            if (options_.QueueCapacity > 0 && queue_.size() >= options_.QueueCapacity)
             {
                 rejectedCount_.fetch_add(1, std::memory_order_relaxed);
                 return JobHandle{};
             }
+
             queue_.push_back(entry);
             submittedCount_.fetch_add(1, std::memory_order_relaxed);
             if (!running_)
@@ -90,15 +84,14 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
 
         if (needSchedule)
         {
-            auto self = shared_from_this();
-            if (!executor_->Post([self] { self->DrainOnce(); }))
+            if (!executor_->Post([this, self = shared_from_this()] {DrainOnce(); }))
             {
                 MarkFailedSchedule();
                 return JobHandle{};
             }
         }
 
-        return JobHandle{std::weak_ptr<Entry>(entry), debugLabel};
+        return JobHandle{std::weak_ptr(entry), debugLabel};
     }
 
     template <typename Fn>
@@ -123,7 +116,7 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
     [[nodiscard]] uint64_t GetPendingCount() const noexcept
     {
         std::lock_guard lock(mtx_);
-        return static_cast<uint64_t>(queue_.size());
+        return queue_.size();
     }
 
     [[nodiscard]] uint32_t GetBatchLimit() const noexcept
@@ -138,15 +131,6 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
             if (state_ == EnumJobQueueState::Stopped)
                 return;
             state_ = EnumJobQueueState::Draining;
-            if (!drain)
-            {
-                for (auto& e : queue_)
-                    e->State.store(EnumJobState::Canceled,
-                                   std::memory_order_release);
-                canceledCount_.fetch_add(queue_.size(),
-                                         std::memory_order_relaxed);
-                queue_.clear();
-            }
         }
 
         if (drain)
@@ -160,19 +144,29 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
             }
             else
             {
-                const auto deadline =
-                    std::chrono::steady_clock::now() + drainTimeout;
+                const auto deadline = std::chrono::steady_clock::now() + drainTimeout;
                 if (!stopCv_.wait_until(lock, deadline, pred))
                 {
-                    const auto dropped = queue_.size();
+
                     for (auto& e : queue_)
-                        e->State.store(EnumJobState::Canceled,
-                                       std::memory_order_release);
-                    canceledCount_.fetch_add(dropped,
-                                             std::memory_order_relaxed);
+                    {
+                        e->State.store(EnumJobState::Canceled, std::memory_order_release);
+                    }
+
+                    canceledCount_.fetch_add(queue_.size(), std::memory_order_relaxed);
                     queue_.clear();
                 }
             }
+        }
+        else
+        {
+            for (auto& e : queue_)
+            {
+                e->State.store(EnumJobState::Canceled, std::memory_order_release);
+            }
+
+            canceledCount_.fetch_add(queue_.size(), std::memory_order_relaxed);
+            queue_.clear();
         }
 
         {
@@ -254,10 +248,10 @@ class JobQueue : public std::enable_shared_from_this<JobQueue>
 
     void ExecuteEntry(const std::shared_ptr<Entry>& entry)
     {
+        //  d
         if (entry->Canceled.load(std::memory_order_acquire))
         {
-            entry->State.store(EnumJobState::Canceled,
-                               std::memory_order_release);
+            entry->State.store(EnumJobState::Canceled, std::memory_order_release);
             canceledCount_.fetch_add(1, std::memory_order_relaxed);
             return;
         }

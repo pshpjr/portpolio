@@ -112,10 +112,7 @@ R-1에서 빠진 계약 중 현재 답변된 것과 미답변:
 | 단일 프로세스 내 구역 전환 stale packet | ❌ 미답변 | v1은 단일 프로세스인데, 인던 A→인던 B 전환 시 같은 EntityId가 양쪽에 존재하면?                               |
 | 프로세스 간 EntityID 식별               | 🔶 방향만 | scale-out 시`(ProcessId, EntityId)` 또는 다른 복합키? 지금 정할 필요는 없지만 v1 설계가 막지 않는지 확인 필요 |
 
-
-
 ---
-
 
 ### A-3. 세션 FSM — 3자 합의: 필수 도입
 
@@ -212,6 +209,8 @@ FlatBuffers/Cap'n Proto는 v1에서 교체 사유 없음. generator 파이프라
 - **구현**: 카운터/히스토그램을 코드에 삽입 → 주기적으로 로그 또는 외부 시스템에 전송
 - 포트폴리오에서는 Prometheus/Grafana까지 안 가도, 서버 콘솔에 주기적으로 출력하는 것만으로도 가치 있음
 - 콘솔 로깅. 이를 위한 시스템 필요
+
+> perfetto 사용
 
 #### 7. RTT 측정 — **v1 권장**
 
@@ -320,7 +319,7 @@ Authenticated → InLobby → InDungeon → Transitioning
 
 open code 방식의 경우 필드 전환 패킷 수신 시 transport 상태로 전환. connection이 transport 상태이면 로직 스레드에서 이동 관련 패킷 드랍. 필드 전환 완료 패킷 수신 시 큐 atomic 교체 및 상태 교체. 아니면 그냥 락 잡아도 될 듯. 꼭 포인터여야 하는지?
 
-barrier 삽입은 어떤 말인지? 
+barrier 삽입은 어떤 말인지?
 
 #### 쟁점 4. DB callback 귀속
 
@@ -332,7 +331,7 @@ barrier 삽입은 어떤 말인지?
 | **장점**         | 전환 후에도 항상 올바른 스레드로 전달                                                  | 구현 단순. 대부분 던전 내 요청이라 원 스레드=현재 스레드       |
 | **단점**         | owner lookup + stale 검증 필요                                                         | 전환 중 DB 금지라는 제약. 비행 중 쿼리 예외 처리 필요          |
 
-던전에서 DB 작업은 게임 스레드에 요청하는 방식으로.
+던전에서 DB 작업은 게임 스레드에 요청하는 방식으로. 실제 던전 프로세스에서 메인 프로세스에 DB 작업 요청하듯
 
 #### 쟁점 5. EntityID stale packet — epoch vs 복합키
 
