@@ -19,6 +19,7 @@ public:
     UClientStorageComponent* GetStorageComponent() const;
 
 protected:
+    virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;
 
     UFUNCTION(BlueprintImplementableEvent, Category = "UI")

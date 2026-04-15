@@ -1,14 +1,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "UObject/Object.h"
 #include "Inventory/ClientInventoryTypes.h"
 #include "ClientSkillHotbarComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FClientSkillHotbarUpdatedSignature);
 
-UCLASS(ClassGroup = (Custom), BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
-class CLIENT_API UClientSkillHotbarComponent : public UActorComponent
+UCLASS(BlueprintType)
+class CLIENT_API UClientSkillHotbarComponent : public UObject
 {
     GENERATED_BODY()
 
@@ -16,7 +16,7 @@ public:
     UClientSkillHotbarComponent();
 
     UFUNCTION(BlueprintCallable, Category = "Skill")
-    void SetEquippedWeaponType(EClientWeaponType InWeaponType);
+    void SetEquippedWeaponType(EWeaponType InWeaponType);
 
     UFUNCTION(BlueprintPure, Category = "Skill")
     bool CanRegisterSkillToSlot(const FClientSkillDefinition& SkillDefinition, EClientSkillHotSlot Slot) const;
@@ -43,7 +43,7 @@ private:
     void BroadcastHotbarUpdated();
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill", meta = (AllowPrivateAccess = "true"))
-    EClientWeaponType EquippedWeaponType = EClientWeaponType::None;
+    EWeaponType EquippedWeaponType = EWeaponType::None;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill", meta = (AllowPrivateAccess = "true"))
     TMap<EClientSkillHotSlot, FClientSkillDefinition> SlotBindings;

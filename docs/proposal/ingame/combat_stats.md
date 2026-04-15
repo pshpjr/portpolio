@@ -19,6 +19,27 @@
 - 서버 내부 계산은 부동소수점으로 처리하되, 최종 피해와 게이지 감소량은 소수 첫째 자리에서 반올림 후 정수로 확정한다.
 - 모든 퍼센트형 증감 스탯은 내부적으로 `0.15 = 15%` 형식을 사용한다.
 
+## 최종 스탯 조립 규칙
+
+### 조립 순서
+
+1. `PlayerStatTable`에서 레벨 기반 공통 기본값을 가져온다.
+2. `WeaponStatTable`에서 무기 타입 기반 기본 전투값을 더한다.
+3. 방어구/장신구의 고정 스탯을 슬롯별로 합산한다.
+4. 랜덤 옵션과 재련 결과를 장비군별 옵션 규칙에 따라 더한다.
+5. 패시브, 스킬 변형, 버프/디버프 같은 전투 중 임시 보정을 적용한다.
+6. 최종 상한선을 적용한 뒤 실제 전투 공식 계산에 사용한다.
+
+### 책임 경계
+
+- `레벨`: 캐릭터 공통 성장 축
+- `무기`: 공격 리듬, 자원, 아이덴티티, 무력화 성향
+- `방어구`: 생존과 기본 안정성
+- `장신구`: 치명, 쿨다운, 패링 보조, 속도 계열 보조
+- `임시 효과`: 순간적인 전투 상태 변화
+
+이 순서는 "무기 정체성은 선명하게, 나머지 장비는 무기를 보완하게" 만들기 위한 v1 기준선이다.
+
 ## v1 플레이어 기본값
 
 | 스탯 | 값 |
@@ -66,6 +87,20 @@
 
 - 위 표는 "해당 무기 장착 시 적용되는 기본 무기 스탯"이다.
 - `BaseMoveSpeed`, `AttackSpeed`, `CastSpeed`, `ThreatGen`, `ParryWindowBonus`는 무기 장착으로 바뀌는 값이다.
+
+## v1 장비군별 고정 책임
+
+### 방어구 기본 책임
+
+- `머리`, `상의`, `장갑`, `신발`은 `MaxHP`, `Defense`, `DamageReduction`, `MoveSpeedBonus` 축을 분담한다.
+- 방어구는 공격 리듬 자체를 뒤집지 않고, 생존과 안정성 보강을 맡는다.
+- v1 방어구는 세트 효과보다 "고정 스탯 + 랜덤 옵션" 구조를 우선한다.
+
+### 장신구 기본 책임
+
+- `목걸이`, `반지`는 `CriticalChance`, `CriticalDamage`, `CooldownReduction`, `ParryWindowBonus`, `AttackSpeed`, `CastSpeed` 같은 보조 축을 담당한다.
+- 장신구는 무기의 역할을 바꾸기보다 같은 무기의 운용감을 다듬는 방향으로 사용한다.
+- `ThreatGen`처럼 역할 특화 성격이 강한 값은 장신구 옵션 풀에 제한적으로만 연다.
 
 ## v1 상한선
 
@@ -116,6 +151,13 @@
 - `CastSpeed`: 시전형 스킬 준비 속도 보정.
 - `ElementAttack_X`: 속성 추가 피해용 공격 값.
 - `ElementResist_X`: 속성 저항 값.
+
+### 3-1. 장비군별 우선 배치 원칙
+
+- `WeaponPower`, `StaggerPower`, `IdentityGaugeGain`은 기본적으로 무기 중심 값이다.
+- `MaxHP`, `Defense`, `DamageReduction`은 기본적으로 방어구 중심 값이다.
+- `CriticalChance`, `CriticalDamage`, `CooldownReduction`, `ParryWindowBonus`는 기본적으로 장신구 중심 값이다.
+- 같은 스탯을 여러 장비군에 모두 열 경우 값 폭주와 빌드 판독 난도가 커지므로, v1에서는 장비군별 주 담당을 유지한다.
 
 ### 4. 스킬 데이터로 내려야 하는 값
 
@@ -201,6 +243,7 @@
   - `StaggerPower`, `StaggerResistance`
   - `CriticalChance`, `CriticalDamage`
   - `ParryWindowBonus`
+  - 장비 고정 스탯 합산과 랜덤 옵션 1계층
 - Phase 3 이후 확장 필드:
   - `ThreatGen`, `ElementAttack_X`, `ElementResist_X`
   - `CooldownReduction`, `AttackSpeed`, `CastSpeed`, `MoveSpeedBonus`
@@ -211,6 +254,7 @@
 
 - `AttackPower`와 `WeaponPower`는 1차 구현에서는 분리 유지한다.
 - 유저 레벨 성장과 무기 장착 스탯은 분리 유지한다.
+- 방어구/장신구는 무기와 별도의 템플릿/옵션 책임을 가지되, 최종 전투 스탯 단계에서만 합산한다.
 - `BaseMoveSpeed`와 `MoveSpeedBonus`는 분리 유지한다.
 - `Defense`와 `DamageReduction`도 분리 유지한다. 전자는 상시 감쇠용, 후자는 특수 효과용이다.
 - 상태 이상 종류 자체는 아직 별도 문서가 없으므로 1차 전투 코어에서는 필수 스키마로 고정하지 않는다.

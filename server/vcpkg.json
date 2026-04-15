@@ -31,6 +31,10 @@
     {
       "name": "gtest",
       "version>=": "1.14.0"
+    },
+    {
+      "name": "perfetto",
+      "version>=": "53.0"
     }
   ]
 }

@@ -1,0 +1,4 @@
+version: 1
+display_name: Tradeoff Resolution
+short_description: Resolve competing design options with explicit mitigation.
+default_prompt: Use $tradeoff-resolution to compare the current options and recommend a path with mitigation.

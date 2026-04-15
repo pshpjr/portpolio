@@ -1,0 +1,4 @@
+version: 1
+display_name: Architecture Eval
+short_description: Compare architecture options and recommend one.
+default_prompt: Use $architecture-eval to compare the current architecture options and recommend a path.

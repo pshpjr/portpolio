@@ -1,0 +1,4 @@
+version: 1
+display_name: Performance Analysis
+short_description: Define bottlenecks, metrics, and measurement plans early.
+default_prompt: Use $performance-analysis to define the performance risks, metrics, and measurement plan for the current design.

@@ -10,6 +10,7 @@ public class client : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Json", "UMG" });
+		PublicDependencyModuleNames.Add("ImGui");
 
 		PublicIncludePaths.Add(Path.GetFullPath(Path.Combine(ModuleDirectory, "../../../shared/generated/unreal")));
 

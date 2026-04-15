@@ -4,6 +4,9 @@
 
 ## 현재 활성 계획
 
+- [20260413-job-system-redesign.md](./20260413-job-system-redesign.md) - Job 시스템(Executor/Strand/Timer) 인터페이스 재설계 및 `JobQueueHelper` 제거
+- [20260413-job-system-interface-spec.md](./20260413-job-system-interface-spec.md) - 위 plan의 인터페이스·데이터·내부 동작 명세 (단일 소스)
+
 ## 운영 규칙
 
 - 작업과 직접 무관한 활성 plan은 읽지 않는다.

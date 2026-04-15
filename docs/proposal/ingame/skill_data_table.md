@@ -6,79 +6,145 @@
 
 ## 핵심 규칙
 
-- 스킬은 무기 타입 단위로 `SkillSetTable`에 묶인다.
-- 각 스킬의 계수와 판정 데이터는 `SkillTable`이 담당한다.
+- 스킬 **정의**(공식·판정)는 `SkillTable`이 담당한다.
+- 무기 타입의 **기본 지급 스킬 세트**는 `WeaponDefaultSkillTable`이 담당한다.
+- 캐릭터가 **해금한 스킬 목록**은 `CharacterSkillUnlockTable`이 담당한다.
+- 캐릭터가 **현재 장착한 슬롯 배정**은 `CharacterSkillPresetTable`이 담당한다.
 - 레벨별 성장 보정은 `SkillLevelTable`이 담당한다.
 - 스킬 변형(트라이포드) 옵션은 `SkillTripoTable`이 담당한다.
 
+## 테이블 관계 다이어그램
+
+```
+WeaponType
+  → WeaponDefaultSkillTable.WeaponType  (무기 타입별 초기 지급 스킬 4종)
+    → SkillTable.SkillId                (각 스킬의 판정·계수 정의)
+
+Character.CharacterId + WeaponType
+  → CharacterSkillUnlockTable           (해금된 스킬 목록)
+    → SkillTable.SkillId
+
+Character.CharacterId + WeaponType + SlotKey
+  → CharacterSkillPresetTable           (슬롯별 장착 스킬)
+    → SkillTable.SkillId
+
+SkillTable.SkillId
+  → SkillLevelTable.SkillId             (레벨별 계수 보정)
+  → SkillTripoTable.SkillId             (트라이포드 변형)
+```
+
 ## 테이블 구조
 
-### `SkillTable` - 스킬 기본 정의
+### `SkillTable` — 스킬 기본 정의
 
-| 컬럼 | 설명 |
+> SkillTable은 스킬 한 종의 판정 형태·계수·쿨다운·자원 소모를 저장하며, 서버가 스킬 발동 시 단일 조회로 전투 계산에 필요한 모든 수치를 가져올 수 있게 한다.
+
+| 컬럼 | 타입 | 역할 | 설명 |
+|---|---|---|---|
+| `SkillId` | INT | PK | |
+| `SkillCode` | VARCHAR | DATA | 내부 코드명 (예: `SWORD_SHIELD_Q`) |
+| `SkillName` | VARCHAR | DATA | 표시 이름 |
+| `WeaponType` | ENUM | DATA | `SWORD_SHIELD`, `GREAT_SWORD`, `STAFF` |
+| `SlotCategory` | ENUM | DATA | `BASIC_ATTACK`, `ACTIVE`, `IDENTITY`, `MOVE` — 어느 슬롯 유형에 배정 가능한지 |
+| `SkillType` | ENUM | DATA | `INSTANT`, `DIRECTIONAL`, `DASH`, `GROUND_TARGET`, `PARRY` |
+| `HitShape` | ENUM | DATA | `CIRCLE`, `SECTOR`, `RECTANGLE`, `LINE` |
+| `HitRange` | FLOAT | DATA | 판정 거리/반경 |
+| `HitAngle` | FLOAT | DATA | 부채꼴 판정 시 각도 (0이면 미사용) |
+| `SkillCoeff` | FLOAT | DATA | 데미지 계수 |
+| `SkillStaggerCoeff` | FLOAT | DATA | 무력화 계수 |
+| `SkillGaugeCoeff` | FLOAT | DATA | 아이덴티티 게이지 계수 |
+| `SkillThreatBase` | FLOAT | DATA | 기본 위협도 추가량 |
+| `BaseCooldown` | FLOAT | DATA | 기본 쿨다운(초) |
+| `BaseResourceCost` | FLOAT | DATA | 기본 자원 소모량 |
+| `IdentityCost` | FLOAT | DATA | 아이덴티티 발동 시 소모량 (IDENTITY 슬롯만 유효, 나머지 0) |
+| `CastTime` | FLOAT | DATA | 시전 시간(초, 즉발 = 0) |
+| `CounterTag` | VARCHAR | DATA | 카운터 가능 패턴 태그 (쉼표 구분, 조회 조건 아님) |
+| `CancelGrade` | ENUM | DATA | `NONE`, `LIGHT`, `HEAVY`, `CRUSH` |
+| `StatusBuildUpPerHit` | FLOAT | DATA | 상태이상 축적량 (확장용, 기본 0) |
+| `AnimKey` | VARCHAR | META | 애니메이션 키 |
+| `BalanceVersion` | INT | META | 밸런스 버전 |
+
+- PK: `SkillId`
+- Unique: `SkillCode + BalanceVersion`
+
+---
+
+### `WeaponDefaultSkillTable` — 무기 타입별 초기 지급 스킬
+
+> WeaponDefaultSkillTable은 무기 타입이 캐릭터 생성·무기 장착 시 자동으로 지급하는 스킬 4종과 이동기/아이덴티티를 정의하며, 초기 해금 목록 생성과 기본 프리셋 생성의 소스가 된다.
+
+**설계 의도:** 이 테이블은 무기 타입의 정적 기본값이다. 플레이어의 현재 장착 상태와 무관하다. 기존 `SkillSetTable`을 대체하며, 슬롯별 단일 FK 구조는 "기본 지급 스킬 1종"을 의미하는 것으로 역할을 명확히 한다.
+
+| 컬럼 | 타입 | 역할 | 설명 |
+|---|---|---|---|
+| `WeaponType` | ENUM | PK | `SWORD_SHIELD`, `GREAT_SWORD`, `STAFF` |
+| `BasicAttackSkillId` | INT | FK | → `SkillTable.SkillId` |
+| `DefaultQSkillId` | INT | FK | 기본 지급 Q 스킬 → `SkillTable.SkillId` |
+| `DefaultESkillId` | INT | FK | 기본 지급 E 스킬 → `SkillTable.SkillId` |
+| `DefaultRSkillId` | INT | FK | 기본 지급 R 스킬 → `SkillTable.SkillId` |
+| `DefaultFSkillId` | INT | FK | 기본 지급 F 스킬 → `SkillTable.SkillId` |
+| `IdentitySkillId` | INT | FK | → `SkillTable.SkillId` |
+| `MoveSkillId` | INT | FK | → `SkillTable.SkillId` |
+| `BalanceVersion` | INT | PK | 밸런스 버전 |
+
+- PK: `WeaponType + BalanceVersion`
+
+---
+
+## 서버 구현으로 넘기는 항목
+
+아래는 런타임 플레이어 상태를 저장하는 DB 테이블이다. 기획 문서 범위 밖이며, 서버 구현 문서에서 정의한다.
+
+| 필요한 테이블 | 이유 |
 |---|---|
-| `SkillId` | PK |
-| `SkillCode` | 스킬 코드명 (예: `SWORD_SHIELD_Q`) |
-| `SkillName` | 표시 이름 |
-| `WeaponType` | 무기 타입 (`SWORD_SHIELD`, `GREAT_SWORD`, `STAFF`) |
-| `SkillSlot` | 슬롯 분류 (`BASIC_ATTACK`, `ACTIVE_Q`, `ACTIVE_E`, `ACTIVE_R`, `ACTIVE_F`, `IDENTITY`, `MOVE`) |
-| `SkillType` | 판정 타입 (`INSTANT`, `DIRECTIONAL`, `DASH`, `GROUND_TARGET`, `PARRY`) |
-| `HitShape` | 판정 형태 (`CIRCLE`, `SECTOR`, `RECTANGLE`, `LINE`) |
-| `HitRange` | 판정 거리/반경 (float) |
-| `HitAngle` | 부채꼴 판정 시 각도 (float) |
-| `SkillCoeff` | 데미지 계수 |
-| `SkillStaggerCoeff` | 무력화 계수 |
-| `SkillGaugeCoeff` | 아이덴티티 게이지 계수 |
-| `SkillThreatBase` | 기본 위협도 추가량 |
-| `BaseCooldown` | 기본 쿨다운(초) |
-| `BaseResourceCost` | 기본 자원 소모량 |
-| `IdentityCost` | 아이덴티티 발동 시 소모량 (아이덴티티 스킬만) |
-| `CastTime` | 시전 시간(초, 즉발 = 0) |
-| `CounterTag` | 카운터 가능 패턴 태그 (쉼표 구분) |
-| `CancelGrade` | 캔슬 등급 (`NONE`, `LIGHT`, `HEAVY`, `CRUSH`) |
-| `StatusBuildUpPerHit` | 상태이상 축적량 (확장용, 기본 0) |
-| `AnimKey` | 애니메이션 키 |
-| `BalanceVersion` | 밸런스 버전 |
+| 캐릭터별 스킬 해금 이력 | 스킬북 드롭·마을 훈련으로 해금한 스킬 목록 — 플레이어 상태 |
+| 캐릭터별 무기×슬롯 배정 | 현재 Q/E/R/F에 어떤 스킬이 있는지 — 플레이어 상태 |
+| 캐릭터별 트라이포드 선택 | 어떤 변형 옵션을 골랐는지 — 플레이어 상태 |
 
-### `SkillSetTable` - 무기 타입별 스킬 세트 묶음
+서버 구현 제약 사항 (기획 의도):
+- 슬롯 배정 가능 스킬은 `SkillTable.WeaponType + SlotCategory`로 필터링 가능해야 한다.
+- 해금되지 않은 스킬은 슬롯에 배정할 수 없다.
+- 던전 입장 시 현재 슬롯 배정과 해금 목록을 잠근다.
 
-| 컬럼 | 설명 |
-|---|---|
-| `SkillSetId` | PK |
-| `WeaponType` | 무기 타입 |
-| `BasicAttackSkillId` | FK → SkillTable |
-| `QSkillId` | FK → SkillTable |
-| `ESkillId` | FK → SkillTable |
-| `RSkillId` | FK → SkillTable |
-| `FSkillId` | FK → SkillTable |
-| `IdentitySkillId` | FK → SkillTable |
-| `MoveSkillId` | FK → SkillTable |
-| `BalanceVersion` | 밸런스 버전 |
+---
 
-### `SkillLevelTable` - 레벨별 스킬 계수 보정
+### `SkillLevelTable` — 레벨별 스킬 계수 보정
 
-| 컬럼 | 설명 |
-|---|---|
-| `SkillLevelId` | PK |
-| `SkillId` | FK → SkillTable |
-| `SkillLevel` | 1~5 |
-| `CoeffMult` | 계수 배율 (예: 레벨 1 = 1.00, 레벨 5 = 1.30) |
-| `StaggerMult` | 무력화 배율 |
-| `CooldownMult` | 쿨다운 배율 (레벨업 시 감소) |
-| `ResourceCostMult` | 자원 소모 배율 |
+> SkillLevelTable은 스킬 포인트 투자로 올라가는 레벨(1~5)에 따른 계수 배율을 저장하며, 서버가 스킬 발동 시 현재 스킬 레벨로 실제 수치를 산출할 수 있게 한다.
 
-### `SkillTripoTable` - 스킬 변형(트라이포드) 옵션
+| 컬럼 | 타입 | 역할 | 설명 |
+|---|---|---|---|
+| `SkillId` | INT | PK | → `SkillTable.SkillId` |
+| `SkillLevel` | INT | PK | 1~5 |
+| `CoeffMult` | FLOAT | DATA | 계수 배율 (레벨 1 = 1.00, 레벨 5 = 1.30) |
+| `StaggerMult` | FLOAT | DATA | 무력화 배율 |
+| `CooldownMult` | FLOAT | DATA | 쿨다운 배율 (레벨업 시 감소) |
+| `ResourceCostMult` | FLOAT | DATA | 자원 소모 배율 |
 
-| 컬럼 | 설명 |
-|---|---|
-| `TripoId` | PK |
-| `SkillId` | FK → SkillTable |
-| `TripoTier` | 변형 단계 (1 = 레벨3 해금, 2 = 레벨5 해금) |
-| `TripoOption` | A/B 중 선택 (`OPTION_A`, `OPTION_B`) |
-| `TripoDesc` | 변형 설명 텍스트 |
-| `CoeffDelta` | 계수 변화량 |
-| `CooldownDelta` | 쿨다운 변화량 |
-| `AddEffect` | 추가 효과 태그 (예: `ADD_KNOCKBACK`, `ADD_SLOW`) |
+- PK: `SkillId + SkillLevel`
+- FK: `SkillId → SkillTable.SkillId`
+- Check: `SkillLevel BETWEEN 1 AND 5`
+
+---
+
+### `SkillTripoTable` — 스킬 변형(트라이포드) 옵션
+
+> SkillTripoTable은 스킬 레벨 3/5 해금 시 A/B 중 선택하는 변형 옵션을 저장하며, 캐릭터의 트라이포드 선택에 따라 스킬 수치와 효과를 다르게 적용할 수 있게 한다.
+
+| 컬럼 | 타입 | 역할 | 설명 |
+|---|---|---|---|
+| `TripoId` | INT | PK | |
+| `SkillId` | INT | FK | → `SkillTable.SkillId` |
+| `TripoTier` | INT | DATA | 변형 단계 (1 = 레벨3 해금, 2 = 레벨5 해금) |
+| `TripoOption` | ENUM | DATA | `OPTION_A`, `OPTION_B` |
+| `TripoDesc` | VARCHAR | DATA | 변형 설명 텍스트 |
+| `CoeffDelta` | FLOAT | DATA | 계수 변화량 |
+| `CooldownDelta` | FLOAT | DATA | 쿨다운 변화량 |
+| `AddEffect` | VARCHAR | DATA | 추가 효과 태그 (쉼표 구분, 예: `ADD_KNOCKBACK,ADD_SLOW`) |
+
+- PK: `TripoId`
+- Unique: `SkillId + TripoTier + TripoOption`
+- FK: `SkillId → SkillTable.SkillId`
 
 ## v1 스킬 목록 초안
 

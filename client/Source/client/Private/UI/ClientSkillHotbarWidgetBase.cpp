@@ -1,6 +1,20 @@
 #include "UI/ClientSkillHotbarWidgetBase.h"
 
+#include "ClientCharacterSubsystem.h"
 #include "Inventory/ClientSkillHotbarComponent.h"
+
+void UClientSkillHotbarWidgetBase::NativeConstruct()
+{
+    Super::NativeConstruct();
+
+    if (UGameInstance* GI = GetGameInstance())
+    {
+        if (UClientCharacterSubsystem* CharSub = GI->GetSubsystem<UClientCharacterSubsystem>())
+        {
+            BindSkillHotbarComponent(CharSub->GetSkillHotbar());
+        }
+    }
+}
 
 void UClientSkillHotbarWidgetBase::BindSkillHotbarComponent(UClientSkillHotbarComponent* InSkillHotbarComponent)
 {

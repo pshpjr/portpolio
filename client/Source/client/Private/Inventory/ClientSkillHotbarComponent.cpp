@@ -2,10 +2,9 @@
 
 UClientSkillHotbarComponent::UClientSkillHotbarComponent()
 {
-    PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UClientSkillHotbarComponent::SetEquippedWeaponType(EClientWeaponType InWeaponType)
+void UClientSkillHotbarComponent::SetEquippedWeaponType(EWeaponType InWeaponType)
 {
     EquippedWeaponType = InWeaponType;
     BroadcastHotbarUpdated();
@@ -28,8 +27,8 @@ bool UClientSkillHotbarComponent::CanRegisterSkillToSlot(const FClientSkillDefin
         return false;
     }
 
-    return SkillDefinition.RequiredWeaponType == EClientWeaponType::None
-        || EquippedWeaponType == EClientWeaponType::None
+    return SkillDefinition.RequiredWeaponType == EWeaponType::None
+        || EquippedWeaponType == EWeaponType::None
         || SkillDefinition.RequiredWeaponType == EquippedWeaponType;
 }
 

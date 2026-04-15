@@ -76,7 +76,6 @@ Types -> Config -> Core -> Service -> Network -> Runtime
 
 ## 관련 참조
 
-- 레이어 요약: [docs/architecture/layers.md](./docs/architecture/layers.md)
 - 구현 상태: [docs/quality/grades.md](./docs/quality/grades.md)
 - 외부 라이브러리: [docs/architecture/dependencies.md](./docs/architecture/dependencies.md)
 - 구조 개요: [docs/reference/project-layout.md](./docs/reference/project-layout.md)

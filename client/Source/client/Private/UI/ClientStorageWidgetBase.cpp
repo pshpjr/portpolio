@@ -1,6 +1,20 @@
 #include "UI/ClientStorageWidgetBase.h"
 
+#include "ClientCharacterSubsystem.h"
 #include "Inventory/ClientStorageComponent.h"
+
+void UClientStorageWidgetBase::NativeConstruct()
+{
+    Super::NativeConstruct();
+
+    if (UGameInstance* GI = GetGameInstance())
+    {
+        if (UClientCharacterSubsystem* CharSub = GI->GetSubsystem<UClientCharacterSubsystem>())
+        {
+            BindStorageComponent(CharSub->GetStorage());
+        }
+    }
+}
 
 void UClientStorageWidgetBase::BindStorageComponent(UClientStorageComponent* InStorageComponent)
 {

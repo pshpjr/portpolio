@@ -1,0 +1,4 @@
+version: 1
+display_name: Codex Delegate
+short_description: Delegate repetitive, deterministic implementation tasks to Codex sub-agents.
+default_prompt: Use $codex-delegate to offload file scaffolding, code generation, or build verification to Codex.

@@ -8,8 +8,8 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 set(PORTPOLIO_SHARED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../shared")
 set(PORTPOLIO_PROTOCOL_DIR "${PORTPOLIO_SHARED_DIR}/protocol")
 set(PORTPOLIO_COMBAT_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../docs/proposal/ingame/data")
-set(PORTPOLIO_GENERATED_SERVER_DIR "${PORTPOLIO_SHARED_DIR}/generated/server")
-set(PORTPOLIO_GENERATED_UNREAL_DIR "${PORTPOLIO_SHARED_DIR}/generated/unreal")
+set(PORTPOLIO_GENERATED_SERVER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/generated")
+set(PORTPOLIO_GENERATED_UNREAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../client/Source/client/Public/Generated")
 set(PORTPOLIO_CODEGEN_STAMP "${CMAKE_CURRENT_BINARY_DIR}/packet_codegen.stamp")
 set(PORTPOLIO_COMBAT_CODEGEN_STAMP "${CMAKE_CURRENT_BINARY_DIR}/combat_data_codegen.stamp")
 
@@ -66,13 +66,16 @@ add_custom_target(generate_combat_data DEPENDS "${PORTPOLIO_COMBAT_CODEGEN_STAMP
 add_dependencies(generate_combat_data generate_packets)
 
 add_subdirectory(
-    "${CMAKE_CURRENT_SOURCE_DIR}/../Lib"
-    "${CMAKE_CURRENT_BINARY_DIR}/Lib"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib"
+    "${CMAKE_CURRENT_BINARY_DIR}/lib"
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+find_package(unofficial-perfetto CONFIG REQUIRED)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -90,19 +93,21 @@ target_include_directories(portpolio_server
         "${PORTPOLIO_GENERATED_SERVER_DIR}"
 )
 
-target_compile_features(portpolio_server PUBLIC cxx_std_20)
+target_compile_features(portpolio_server PUBLIC cxx_std_23)
 
 target_link_libraries(portpolio_server
     PUBLIC
         Boost::system
         psh::lib
+        nlohmann_json::nlohmann_json
+        spdlog::spdlog
+        unofficial::perfetto::perfetto
 )
 
 if(BUILD_TESTING)
     find_package(GTest CONFIG REQUIRED)
 
     add_executable(portpolio_unit_tests
-        tests/unit/scaffold_smoke_test.cpp
     )
 
     target_link_libraries(portpolio_unit_tests

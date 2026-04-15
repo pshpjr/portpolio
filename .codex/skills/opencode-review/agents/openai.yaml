@@ -1,0 +1,4 @@
+version: 1
+display_name: OpenCode Review
+short_description: Delegate review tasks to the project's headless OpenCode agent for a second opinion.
+default_prompt: Use $opencode-review to send the current task to the project's headless OpenCode agent for an independent review.

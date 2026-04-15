@@ -47,7 +47,10 @@ TEXT_FILENAMES = {
 SKIP_DIR_NAMES = {
     ".git",
     ".cache",
+    ".venv",
+    ".idea",
     "build",
+    "node_modules",
     ".vcpkg-downloads",
     ".vcpkg-registries",
     ".vcpkg-bincache",

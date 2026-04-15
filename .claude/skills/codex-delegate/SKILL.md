@@ -1,95 +1,125 @@
 ---
 name: codex-delegate
 description: >
-  반복적·결정적 구현 작업을 Codex 서브에이전트에 위임하여 Claude 메인 컨텍스트를 절약한다.
-  C++ 파일 생성, 코드 생성 스크립트 실행, scaffolding, 빌드 검증처럼 "같은 입력 → 같은 출력"이
-  보장되는 작업을 맡길 때 이 스킬을 사용한다. 설계 결정이나 사용자 조율이 필요한 작업은
-  Claude가 직접 처리하고 위임하지 않는다.
+  Delegate implementation tasks to Codex and OpenCode headless agents to save Claude context and
+  maximize output quality. Claude decides WHAT to implement; Codex (`codex exec`) and OpenCode
+  (`opencode run`) can both work on the task, and Claude chooses the correct path based on whether
+  the write scope is shared or isolated. Use when: C++ scaffolding, batch file generation, running
+  code-gen scripts (e.g. generate_*.py), build execution, or any file creation / modification task.
+  Do NOT use for design decisions or user coordination — Claude handles those directly.
 ---
 
-# Codex 서브에이전트 위임 스킬
+# Parallel Implementation Executor
 
-Claude는 설계·조율·사용자 소통에 집중하고, 반복적·결정적 구현은 Codex에 위임한다.
-컨텍스트 윈도우는 공공재이므로, 위임 가능한 작업을 Claude가 직접 처리하지 않는다.
+Claude's role is to decide **what** to implement and write a clear task prompt. File writing can be
+delegated to Codex and OpenCode headless agents. Use OpenCode proposal mode when you need
+side-by-side comparison, and use direct apply mode only when OpenCode has isolated write ownership.
 
-## 위임 판단 기준
-
-**Codex에 위임하는 작업:**
-
-| 유형 | 예시 |
-|------|------|
-| 파일 생성·scaffolding | 레이어별 C++ 헤더/소스 초안, 디렉터리 구조 생성 |
-| 코드 생성 스크립트 실행 | `tools/` 하위 Python 스크립트, 스탯/프로토콜 생성 |
-| 반복 편집 | 동일한 패턴의 여러 파일 수정, 명칭 일괄 변경 |
-| 빌드·검증 도구 실행 | `check_layers.py`, `doc_check.py`, CMake 빌드 |
-| 독립적 조사 | 특정 파일의 구조 분석, 의존성 추적 |
-
-**Claude가 직접 처리하는 작업:**
-
-| 유형 | 이유 |
-|------|------|
-| 설계 결정 | 트레이드오프 판단, 사용자 의도 해석 필요 |
-| exec-plan 작성·검토 | 전체 맥락과 범위 조율 필요 |
-| 에이전트/스킬 설계 | 하네스 구조 전체를 알아야 함 |
-| 사용자 피드백 반영 | 대화 맥락이 필요 |
-| 레이어 경계 판단 | 아키텍처 이해가 필요한 결정 |
-
-## 위임 프로토콜
-
-### 1. 위임 전 준비
-
-위임 전에 Codex가 독립적으로 실행할 수 있는지 확인한다:
+## Execution Model
 
 ```
-□ 작업 범위가 명확한가? (어느 파일을, 어떤 규칙으로)
-□ 필요한 컨텍스트가 파일로 존재하는가? (AGENTS.md, ARCHITECTURE.md 등)
-□ 출력 형식이 명확한가? (파일 경로, 포맷)
-□ 검증 방법이 있는가? (빌드, 린터, 체크 스크립트)
+Claude (decides scope + writes task prompt)
+    ├── [parallel] codex exec  ──────────────────────────────→ writes files directly → output A
+    └── [parallel] opencode run --agent portpolio-propose ─→ returns proposed code/text → output B
+                                                         ↓
+                                        Claude compares A vs B → select or merge
 ```
 
-### 2. 위임 방식
+## Step 1: Write a Self-Contained Task Prompt
 
-Codex 서브에이전트 호출 시 prompt에 다음을 포함한다:
+Before delegating, write a prompt that either executor can run independently:
 
 ```
-1. 읽어야 할 컨텍스트 파일 목록 (AGENTS.md, exec-plan 등)
-2. 수행할 작업의 명확한 범위
-3. 따라야 할 규칙 (레이어 규칙, 컨벤션 등)
-4. 출력 경로와 형식
-5. 완료 확인 방법
+□ Which files to create or modify (exact paths)
+□ Context files to read (AGENTS.md, exec-plan, ARCHITECTURE.md, etc.)
+□ Rules to follow (layer rules, naming conventions, style guide)
+□ Output format and file paths
+□ How to verify completion (build, lint, check script)
 ```
 
-### 3. 결과 통합
+## Step 2: Run Codex and OpenCode
 
-Codex 작업 완료 후:
-- 생성된 파일이 범위를 벗어나지 않았는지 확인
-- 레이어 규칙 위반 여부 확인 (`check_layers.py`)
-- exec-plan 진행 상황 갱신
-- 이슈가 있으면 Claude가 직접 수정하거나 재위임
+### Codex — Invocation Syntax
 
-## 이 프로젝트의 주요 위임 시나리오
+| Scenario | Command |
+|----------|---------|
+| Read-only investigation | `codex exec --sandbox read-only --ask-for-approval never "[prompt]"` |
+| File creation / editing (default) | `codex exec --sandbox workspace-write --ask-for-approval untrusted "[prompt]"` |
+| Fully unrestricted (use sparingly) | `codex exec --yolo "[prompt]"` |
+| Specify working directory | `codex exec -C D:\path\to\repo "[prompt]"` |
+| Short alias | `codex e "[prompt]"` |
 
-### 시나리오 A: C++ 레이어 파일 scaffolding
-```
-위임 내용: server/src/03_core/ 아래에 새 도메인 헤더/소스 생성
-컨텍스트: server/AGENTS.md, server/ARCHITECTURE.md, server/docs/conventions/cpp-style.md
-검증: check_layers.py
-```
-
-### 시나리오 B: 코드 생성 스크립트 실행
-```
-위임 내용: tools/ 하위 Python 스크립트 실행 및 출력 파일 생성
-컨텍스트: tools/AGENTS.md (있을 경우), exec-plan
-검증: 생성된 파일 존재 확인, 파싱 오류 없음 확인
+Default for most implementation tasks:
+```bash
+codex exec --sandbox workspace-write --ask-for-approval untrusted "[task prompt]"
 ```
 
-### 시나리오 C: 문서 검증
-```
-위임 내용: doc_check.py, check_encoding.py 실행 및 결과 보고
-컨텍스트: docs/AGENTS.md
-검증: 스크립트 종료 코드
+### OpenCode Headless — Proposal Mode
+
+Use the identical task prompt with the project's non-writing OpenCode agent:
+
+```bash
+opencode run --agent portpolio-propose --format json "[task prompt — identical to what was sent to Codex]"
 ```
 
-## 참고
+This is the safe default when Codex is writing to the same files.
 
-위임 프로토콜 상세 예시: `references/delegation-examples.md` (필요 시 생성)
+### OpenCode Headless — Direct Apply Mode
+
+If OpenCode should edit files directly instead of returning a proposal:
+
+```bash
+opencode run --agent portpolio-implement --format json "[task prompt]"
+```
+
+Use the direct-apply path only when OpenCode owns a disjoint write scope or is running in an isolated worktree.
+
+## Step 3: Compare and Select
+
+After both complete, evaluate on these criteria:
+
+| Criterion | What to check |
+|-----------|---------------|
+| **Correctness** | Layer rules, type consistency, no obvious bugs |
+| **Completeness** | All required files and sections present |
+| **Convention** | Matches project style (cpp-style.md, naming rules, etc.) |
+| **Diff scope** | Smaller, targeted changes preferred over unnecessary rewrites |
+
+**Decision rules:**
+
+| Situation | Action |
+|-----------|--------|
+| Both agree | Either is fine — Codex output is already on disk, use it |
+| Only Codex is correct | Codex output already applied, done |
+| Only OpenCode proposal is correct | Apply or merge OpenCode's proposed text |
+| Both partially correct | Merge best parts — Claude applies the merged version |
+| Both wrong | Re-delegate with a refined prompt |
+
+## Step 4: Validate
+
+After applying the selected output:
+- Server work: run `check_deps.py`
+- Documentation work: run `doc_check.py`
+- Update the exec-plan progress
+- Report any remaining issues
+
+## What Claude Delegates vs. Handles Directly
+
+**Always delegate (when the scope fits):**
+- File creation / scaffolding
+- Code-gen script execution
+- Repetitive edits and bulk renames
+- Build execution
+- Independent file-level investigation
+- OpenCode direct-apply runs with isolated write ownership
+
+**Claude handles directly (never delegate):**
+- Design decisions and architectural trade-offs
+- Writing or reviewing exec-plans
+- Agent / skill architecture decisions
+- Incorporating user feedback
+- Layer boundary judgments requiring full context
+
+## References
+
+Delegation protocol examples: `references/delegation-examples.md` (create if needed)

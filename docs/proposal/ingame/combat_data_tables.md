@@ -1,8 +1,25 @@
-# 전투 데이터 테이블 초안
+# 전투 데이터 테이블 구조
 
 ## 목적
 
 전투 스탯 데이터의 책임 범위와 테이블 연결 규칙만 정의한다. 실제 행 데이터는 `data.json`, 필드 계약과 생성 메타는 `schema.json`, 서버/언리얼 코드 생성은 `combat_data_gen.py`가 담당한다.
+
+## 테이블 전체 관계 다이어그램
+
+```
+Player.Level + BalanceVersion
+  → UserLevelStatLinkTable              (레벨 → 스탯 스냅샷 ID)
+    → PlayerStatTable.PlayerStatTableId (유저 기본 스탯)
+
+Weapon.WeaponType + Weapon.EnhanceLevel + BalanceVersion
+  → WeaponLevelStatLinkTable            (무기 타입 + 강화 → 전투 스탯 ID)
+    → WeaponStatTable.WeaponStatTableId (무기 전투 수치)
+
+WeaponTable.WeaponId
+  → WeaponStatTable (BaseWeaponStatTableId)   (기본 전투 수치)
+  → WeaponDefaultSkillTable (WeaponType)      (기본 지급 스킬)
+  ← ItemTemplateTable.ItemId (ItemCategory=WEAPON) (공통 아이템 메타)
+```
 
 ## 핵심 규칙
 
@@ -51,38 +68,55 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId
 
 ### `PlayerStatTable`
 
-유저 레벨 성장에 따라 변하는 공통 스탯 스냅샷이다.
+> PlayerStatTable은 유저 레벨별 공통 스탯 스냅샷을 저장하며, 레벨업 시 단일 ID 조회로 전체 기본 스탯을 반환할 수 있게 한다.
 
 - 담당 값: `MaxHP`, `AttackPower`, `Defense`, `CriticalChance`, `CriticalDamage`, `CooldownReduction`, `DamageReduction`, `MoveSpeedBonus`
 - 제외 값: `WeaponPower`, `AttackSpeed`, `CastSpeed`, `ResourceMax`, `IdentityGaugeMax`
 
 ### `UserLevelStatLinkTable`
 
-유저 레벨을 `PlayerStatTableId`에 연결하는 링크 테이블이다.
+> UserLevelStatLinkTable은 유저 레벨을 PlayerStatTableId에 연결하는 링크 테이블로, 레벨 → 스탯 스냅샷 경로를 단일 키 조회로 처리할 수 있게 한다.
 
 - 역할: `Level -> PlayerStatTableId`
 - 목적: 레벨별 스탯 스냅샷을 안정적으로 참조하기 위함
 
 ### `WeaponStatTable`
 
-무기 타입과 강화 단계가 제공하는 전투 스탯 스냅샷이다.
+> WeaponStatTable은 무기 타입과 강화 단계별 전투 수치 스냅샷을 저장하며, 무기 장착/강화 시 단일 ID 조회로 전투 스탯을 반환할 수 있게 한다.
 
 - 담당 값: `WeaponPower`, `BaseMoveSpeed`, `AttackSpeed`, `CastSpeed`, `IdentityGaugeMax`, `IdentityGaugeGain`, `ResourceType`, `ResourceMax`, `ResourceRegen`, `StaggerPower`, `ThreatGen`, `ParryWindowBonus`
 - 목적: 무기 강화에 따른 전투 성능 변화를 저장하기 위함
 
 ### `WeaponLevelStatLinkTable`
 
-무기 종류와 강화 레벨을 `WeaponStatTableId`에 연결하는 링크 테이블이다.
+> WeaponLevelStatLinkTable은 무기 타입과 강화 단계를 WeaponStatTableId에 연결하는 링크 테이블로, 무기 강화 스탯을 단일 키 조회로 처리할 수 있게 한다.
 
 - 역할: `WeaponType + EnhanceLevel -> WeaponStatTableId`
 - 목적: 무기 강화 스탯을 직접 참조하기 위함
 
 ### `WeaponTable`
 
-무기 템플릿과 메타데이터를 저장하는 테이블이다.
+> WeaponTable은 무기 전투 전용 메타(전투 수치 참조, 애니메이션, 역할 태그)를 저장하며, ItemTemplateTable(공통 아이템 메타)과 FK로 연결해 아이템 시스템과 전투 시스템을 분리할 수 있게 한다.
 
-- 담당 값: `WeaponCode`, `WeaponName`, `WeaponType`, `BaseWeaponStatTableId`, `MaxEnhanceLevel`, `SkillSetId`, `IdentitySkillId`, `SmartDropTag`, `OptionPoolId`, `BaseDurabilityMax`, `RepairCostRate`, `EquipLevelMin`, `TradeLimitCount`, `AnimationSetId`, `IconKey`, `ModelKey`, `DisplayOrder`, `HandType`, `CombatRoleTag`, `RangeProfile`, `BalanceVersion`
+- 담당 값: `WeaponCode`, `WeaponName`, `WeaponType`, `BaseWeaponStatTableId`, `MaxEnhanceLevel`, `SmartDropTag`, `BaseDurabilityMax`, `RepairCostRate`, `EquipLevelMin`, `AnimationSetId`, `ModelKey`, `DisplayOrder`, `HandType`, `CombatRoleTag`, `RangeProfile`, `BalanceVersion`
+- **교차 참조 (pending decision #6 미해결):** `OptionPoolId`, `TradeLimitCount`, `IconKey`는 `item_data_table.md`의 `ItemTemplateTable`과 소유권이 중복된다. pending decision #6(무기 authoring 단일 소스)이 확정되기 전까지는 `ItemTemplateTable`을 정본으로 간주하고, `WeaponTable`에서 이 컬럼들을 참조할 경우 `ItemId FK`를 경유한다.
 - 목적: 전투 수치와 무기 메타를 분리해 참조하기 위함
+- 기본 공격, 기본 지급 액티브, 아이덴티티, 이동기는 `WeaponType + BalanceVersion -> WeaponDefaultSkillTable` 경로로 연결한다.
+
+## v1 장비 데이터 책임
+
+### 방어구/장신구 템플릿
+
+- v1에서는 무기처럼 별도 강화 단계 테이블을 크게 벌리지 않고, `ItemTemplate + FixedStatSet + OptionPool` 조합으로 시작한다.
+- 방어구 템플릿은 `SlotType`, `EquipLevelMin`, `BaseDefense`, `BaseHP`, `OptionPoolId`, `TradeLimitCount`를 중심으로 관리한다.
+- 장신구 템플릿은 `SlotType`, `EquipLevelMin`, `BaseCritChance`, `BaseCritDamage`, `BaseCooldownReduction`, `OptionPoolId`, `TradeLimitCount`를 중심으로 관리한다.
+- 강화 단계가 늘어나거나 등급별 반복 행이 많아지면 후속 단계에서 `EquipStatTable` 계열로 분리할 수 있다.
+
+### 옵션 풀
+
+- `OptionPoolId`는 장비군별로 분리한다.
+- 무기 옵션 풀은 공격/무력화/아이덴티티 계열, 방어구 옵션 풀은 생존 계열, 장신구 옵션 풀은 운용 보조 계열을 우선한다.
+- 재련은 `OptionPoolId` 안에서 단일 옵션 재굴림을 수행하는 구조를 전제로 한다.
 
 ## PK / FK 규칙
 
@@ -103,15 +137,20 @@ WeaponTable.BaseWeaponStatTableId -> WeaponStatTableId
 - `WeaponTable`
   - PK: `WeaponId`
   - FK: `BaseWeaponStatTableId -> WeaponStatTable.WeaponStatTableId`
-  - FK: `SkillSetId -> SkillSetTable.SkillSetId`
-  - FK: `IdentitySkillId -> SkillTable.SkillId`
+  - Logical FK: `WeaponType + BalanceVersion -> WeaponDefaultSkillTable.(WeaponType + BalanceVersion)`
 
 ## 주의할 점
 
 - `PlayerStatTable`는 유저 기본 성장만 담당하고, 무기 성장 값은 넣지 않는다.
 - `WeaponStatTable`는 전투 수치만 담당하고, 템플릿 메타는 `WeaponTable`에 둔다.
+- 방어구/장신구는 v1에서 무기와 같은 복잡한 강화 테이블을 강제하지 않는다.
 - `WeaponStatTableId`는 안정적인 규칙으로 생성하고, 스크립트가 임의 재배치하지 않게 유지한다.
 - 강화 단계가 실제 장비 상태라면 구현 단계에서 별도 소유 테이블이 필요하다.
+
+## 서버 구현으로 넘기는 항목
+
+- **버프/디버프 런타임 계약**: main.md는 전투 스탯 조합에 "임시 버프"를 포함한다. `BuffTable`/`StatusEffectTable` 계열의 런타임 상태 계약(버프 종류, 스택 규칙, 만료 조건)은 서버 구현 문서에서 정의한다. v1 스탯 설명 가능성 요건을 충족하려면 최소한 버프 종류 목록과 스탯 영향 계수를 서버 구현 문서에 명시해야 한다.
+- **캐릭터 강화 상태**: 강화 단계가 실제 플레이어 장비 상태라면 `CharacterEquipTable` 계열의 인스턴스 테이블로 구현 단계에서 분리한다.
 
 ## 관련 문서
 

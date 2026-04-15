@@ -53,6 +53,16 @@
 4. 제약과 예외
 5. 관련 문서
 
+## 데이터 테이블 문서 규칙
+
+`*_data_table*.md` 형식의 테이블 문서는 일반 기획 문서와 다른 추가 규칙을 따른다.
+
+- 작성 기준: [`common/data-table-conventions.md`](./common/data-table-conventions.md)
+- 검증 에이전트: `data-table-reviewer` (기획 의도 반영 여부 + OpenCode 2차 검토)
+- 각 테이블마다 의도 한 문장 (> 인용 블록), 타입/역할/설명 컬럼 표, PK/FK 선언 블록 필수
+- 테이블 전체 관계 다이어그램 필수
+- 수정 완료 후 `data-table-reviewer`로 검증 실행
+
 ---
 
 ## 빠른 라우팅

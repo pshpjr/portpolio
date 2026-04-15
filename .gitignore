@@ -1,3 +1,14 @@
+## Local environment
+.env
+
+## Workspace auto-generated logs
+_workspace/*.jsonl
+
+## Python
+__pycache__/
+*.pyc
+*.pyo
+
 ## Unreal client
 /client/.vs/
 /client/Backup/

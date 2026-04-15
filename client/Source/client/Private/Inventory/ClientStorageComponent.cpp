@@ -4,7 +4,6 @@
 
 UClientStorageComponent::UClientStorageComponent()
 {
-    PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UClientStorageComponent::InitializeStorage(const TArray<FClientStorageTabDescriptor>& TabDescriptors)
@@ -189,7 +188,7 @@ void UClientStorageComponent::AssignItemToSlot(UClientItemInstance* Item, int32 
     NewLocation.StorageKind = EClientItemStorageKind::SharedStorage;
     NewLocation.SlotIndex = SlotIndex;
     NewLocation.SecondaryIndex = TabIndex;
-    NewLocation.EquipSlot = EClientEquipSlot::None;
+    NewLocation.EquipSlot = EEquipSlot::None;
     NewLocation.SkillHotSlot = EClientSkillHotSlot::None;
     Item->SetLocation(NewLocation);
 }
@@ -207,7 +206,7 @@ void UClientStorageComponent::ClearSlot(int32 TabIndex, int32 SlotIndex)
         NewLocation.StorageKind = EClientItemStorageKind::None;
         NewLocation.SlotIndex = INDEX_NONE;
         NewLocation.SecondaryIndex = INDEX_NONE;
-        NewLocation.EquipSlot = EClientEquipSlot::None;
+        NewLocation.EquipSlot = EEquipSlot::None;
         NewLocation.SkillHotSlot = EClientSkillHotSlot::None;
         Item->SetLocation(NewLocation);
     }

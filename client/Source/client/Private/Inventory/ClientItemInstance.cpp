@@ -1,6 +1,6 @@
 #include "Inventory/ClientItemInstance.h"
 
-void UClientItemInstance::InitializeFromData(const FClientItemStaticData& InStaticData, const FClientItemRuntimeData& InRuntimeData)
+void UClientItemInstance::InitializeFromData(const FItemTableRow& InStaticData, const FClientItemRuntimeData& InRuntimeData)
 {
     StaticData = InStaticData;
     RuntimeData = InRuntimeData;
@@ -10,7 +10,7 @@ void UClientItemInstance::InitializeFromData(const FClientItemStaticData& InStat
     SetRemainingTradeCount(RuntimeData.RemainingTradeCount);
 }
 
-const FClientItemStaticData& UClientItemInstance::GetStaticData() const
+const FItemTableRow& UClientItemInstance::GetStaticData() const
 {
     return StaticData;
 }
@@ -37,19 +37,19 @@ bool UClientItemInstance::CanStackWith(const UClientItemInstance* OtherItem) con
         return false;
     }
 
-    const FClientItemStaticData& OtherStaticData = OtherItem->GetStaticData();
+    const FItemTableRow& OtherStaticData = OtherItem->GetStaticData();
     const FClientItemRuntimeData& OtherRuntimeData = OtherItem->GetRuntimeData();
 
-    return StaticData.ItemTid == OtherStaticData.ItemTid
+    return StaticData.ItemId == OtherStaticData.ItemId
         && StaticData.MaxStackCount > 1
         && RuntimeData.Durability == OtherRuntimeData.Durability
         && RuntimeData.bIsAccountBound == OtherRuntimeData.bIsAccountBound
         && RuntimeData.RemainingTradeCount == OtherRuntimeData.RemainingTradeCount;
 }
 
-bool UClientItemInstance::CanEquipInSlot(EClientEquipSlot TargetSlot) const
+bool UClientItemInstance::CanEquipInSlot(EEquipSlot TargetSlot) const
 {
-    return StaticData.EquipSlot != EClientEquipSlot::None && StaticData.EquipSlot == TargetSlot;
+    return StaticData.EquipSlot != EEquipSlot::None && StaticData.EquipSlot == TargetSlot;
 }
 
 bool UClientItemInstance::CanMoveToStorage(EClientItemStorageKind TargetStorageKind) const

@@ -2,9 +2,36 @@
   "permissions": {
     "allow": [
       "Bash(cd:*)",
-      "Bash(cmd.exe /c \"dir \\\\\"C:\\\\\\\\Program Files\\\\\\\\Microsoft Visual Studio\\\\\" /b\")",
+      "Bash(cmd.exe /c \"dir \\\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\\\\" /b\")",
+      "Bash(git mv:*)",
+      "Bash(mv:*)",
+      "Bash(mv *)",
+      "Bash(node:*)",
+      "Bash(opencode run *)",
+      "Bash(python *)",
+      "Bash(python -c *)",
+      "Bash(python3 -c:*)",
+      "Bash(python \"D:\\\\Users\\\\pshpjr\\\\source\\\\repos\\\\portpolio\\\\tools\\\\extract_opencode_text.py\")",
+      "Bash(xargs python:*)",
+      "Edit(//d/Users/pshpjr/source/repos/**)",
       "Find *",
-      "Ls *"
+      "Ls *",
+      "Read(//d/Users/pshpjr/**)",
+      "Read(//d/Users/pshpjr/AppData/Local/claude/**)",
+      "Read(//d/Users/pshpjr/AppData/Roaming/claude/**)",
+      "Bash(mkdir:*)",
+      "Skill(codex:rescue)",
+      "Bash(rm /d/Users/pshpjr/source/repos/portpolio/server/lib/include/job/job_queue_helper.h)",
+      "Bash(ls build*/)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
+  },
+  "sandbox": {
+    "filesystem": {
+      "allowWrite": [
+        "D:/Users/pshpjr/source/repos"
+      ]
+    }
   }
 }
