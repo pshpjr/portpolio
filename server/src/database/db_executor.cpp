@@ -17,10 +17,10 @@ namespace psh::database
 {
 
 DbExecutor::DbExecutor(boost::mysql::pool_params params, std::size_t workerCount)
-    : m_io{},
-      m_workGuard{m_io.get_executor()},
-      m_pool{m_io, std::move(params)},
-      m_workerCount{workerCount == 0 ? std::thread::hardware_concurrency() : workerCount}
+    : io_{},
+      workGuard_{io_.get_executor()},
+      pool_{io_, std::move(params)},
+      workerCount_{workerCount == 0 ? std::thread::hardware_concurrency() : workerCount}
 {
 }
 
@@ -31,35 +31,35 @@ DbExecutor::~DbExecutor()
 
 void DbExecutor::Start()
 {
-    if (std::exchange(m_started, true))
+    if (std::exchange(started_, true))
         return;
 
-    m_pool.async_run(boost::asio::detached);
+    pool_.async_run(boost::asio::detached);
 
-    m_workers.reserve(m_workerCount);
-    for (std::size_t i = 0; i < m_workerCount; ++i)
+    workers_.reserve(workerCount_);
+    for (std::size_t i = 0; i < workerCount_; ++i)
     {
-        m_workers.emplace_back(
+        workers_.emplace_back(
             [this]
             {
-                m_io.run();
+                io_.run();
             });
     }
 }
 
 void DbExecutor::Stop()
 {
-    if (!std::exchange(m_started, false))
+    if (!std::exchange(started_, false))
         return;
 
-    m_pool.cancel();
-    m_io.stop();
-    m_workers.clear(); // jthread dtor joins
+    pool_.cancel();
+    io_.stop();
+    workers_.clear(); // jthread dtor joins
 }
 
 DbStrand DbExecutor::MakeDbStrand()
 {
-    return boost::asio::make_strand(m_io.get_executor());
+    return boost::asio::make_strand(io_.get_executor());
 }
 
 void DbExecutor::Post(const DbStrand& userDbStrand, std::shared_ptr<IQuery> query, DbCallback onComplete)
@@ -69,7 +69,7 @@ void DbExecutor::Post(const DbStrand& userDbStrand, std::shared_ptr<IQuery> quer
         // 성공
         [this, queryP = std::move(query), cb = std::move(onComplete)]() mutable -> boost::asio::awaitable<void>
         {
-            auto [ec, conn] = co_await m_pool.async_get_connection(
+            auto [ec, conn] = co_await pool_.async_get_connection(
                 boost::asio::as_tuple(boost::asio::use_awaitable));
             if (!ec)
             {

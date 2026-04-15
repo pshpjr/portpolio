@@ -23,6 +23,10 @@ using DbStrand = boost::asio::strand<boost::asio::io_context::executor_type>;
 using DbCallback = std::function<void(std::error_code)>;
 using WorkGuard = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
 
+
+//  pool_params builder class
+
+
 // DB IO 전용 io_context + 워커 스레드를 소유한다.
 // Post 는 호출 스레드와 무관하게 항상 deferred 로 실행되며,
 // 코루틴 본체와 onComplete 는 전달된 userDbStrand 위에서 실행된다.
@@ -50,12 +54,12 @@ public:
     void Post(const DbStrand& userDbStrand, std::shared_ptr<IQuery> query, DbCallback onComplete);
 
 private:
-    boost::asio::io_context m_io;
-    WorkGuard m_workGuard;
-    boost::mysql::connection_pool m_pool;
-    std::vector<std::jthread> m_workers;
-    std::size_t m_workerCount;
-    bool m_started{false};
+    boost::asio::io_context io_;
+    WorkGuard workGuard_;
+    boost::mysql::connection_pool pool_;
+    std::vector<std::jthread> workers_;
+    std::size_t workerCount_;
+    bool started_{false};
 };
 
 } // namespace psh::database
