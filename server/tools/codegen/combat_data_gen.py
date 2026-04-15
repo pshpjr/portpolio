@@ -105,7 +105,7 @@ def sanitize_identifier(text: str) -> str:
 
 
 def sanitize_enum_value(text: str) -> str:
-    name = sanitize_identifier(text).upper()
+    name = sanitize_identifier(text)
     if name and name[0].isdigit():
         name = f"_{name}"
     return name
@@ -439,6 +439,8 @@ def render_enum_header(runtime: str, enums: tuple[EnumDefinition, ...]) -> str:
             f"    {value}"
             for value in enum_def.values
         )
+        if runtime == "unreal":
+            lines.append("UENUM()")
         lines.extend(
             [
                 f"enum class {enum_name} : {'uint8' if runtime == 'unreal' else 'std::uint8_t'}",
@@ -846,9 +848,11 @@ def render_table_header(runtime: str, table: TableDefinition) -> str:
             "#include \"Serialization/JsonSerializer.h\"",
             f'#include "{COMMON_NAME}"',
             f'#include "{ENUM_NAME}"',
-            "",
+            "USTRUCT(BlueprintType)",
             f"struct {row_struct}",
             "{",
+            "    GENERATED_BODY()",
+            "public:",
         ]
     )
     for field in table.fields:

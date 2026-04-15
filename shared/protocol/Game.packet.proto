@@ -5,6 +5,31 @@ package C2G;
 // 공통 구조체 import
 import "xxx.Common.proto";
 
+message RqLogin
+{
+	string  nickname = 1;
+}
+
+message RsLogin
+{
+    InstanceKey uid = 1;
+}
+
+message RqUserInfo
+{
+
+}
+
+message RsUserInfo
+{
+
+}
+
+message RqUserOutfit
+{
+
+}
+
 // =======================================================================
 // SECTION X: ITEM MODELS (아이템 패킷)
 // =======================================================================
