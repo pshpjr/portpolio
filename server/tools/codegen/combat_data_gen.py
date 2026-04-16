@@ -726,6 +726,9 @@ def render_table_header(runtime: str, table: TableDefinition) -> str:
     row_struct = table.server_struct if runtime == "server" else table.unreal_struct
     lines: list[str] = ["// Auto-generated. Do not edit.", "#pragma once", ""]
 
+    # Table headers live under OUTPUT_SUBDIR, so parent-relative includes are needed.
+    parent_prefix = "../"
+
     if runtime == "server":
         lines.extend(
             [
@@ -739,8 +742,8 @@ def render_table_header(runtime: str, table: TableDefinition) -> str:
                 "#include <string_view>",
                 "#include <vector>",
                 "",
-                f'#include "{COMMON_NAME}"',
-                f'#include "{ENUM_NAME}"',
+                f'#include "{parent_prefix}{COMMON_NAME}"',
+                f'#include "{parent_prefix}{ENUM_NAME}"',
                 "",
                 "namespace psh::generated::combat {",
                 "",
@@ -847,8 +850,8 @@ def render_table_header(runtime: str, table: TableDefinition) -> str:
             "#include \"Misc/Paths.h\"",
             "#include \"Serialization/JsonReader.h\"",
             "#include \"Serialization/JsonSerializer.h\"",
-            f'#include "{COMMON_NAME}"',
-            f'#include "{ENUM_NAME}"',
+            f'#include "{parent_prefix}{COMMON_NAME}"',
+            f'#include "{parent_prefix}{ENUM_NAME}"',
             f'#include "{generated_h}"',
             "USTRUCT(BlueprintType)",
             f"struct {row_struct}",

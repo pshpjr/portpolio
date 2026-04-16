@@ -7,8 +7,8 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
-#include "combat_data_common.h"
-#include "combat_data_enums.h"
+#include "../combat_data_common.h"
+#include "../combat_data_enums.h"
 #include "weapon_level_stat_link_table.generated.h"
 USTRUCT(BlueprintType)
 struct FWeaponLevelStatLinkTableRow

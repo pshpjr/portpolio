@@ -11,8 +11,8 @@
 #include <string_view>
 #include <vector>
 
-#include "combat_data_common.h"
-#include "combat_data_enums.h"
+#include "../combat_data_common.h"
+#include "../combat_data_enums.h"
 
 namespace psh::generated::combat {
 

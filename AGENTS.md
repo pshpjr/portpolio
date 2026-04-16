@@ -8,7 +8,7 @@
 
 - `server/` — 게임 서버 프로젝트
 - `Lib/` — 서버와 언리얼 클라이언트가 함께 쓰는 공용 라이브러리
-- `client/` — 예정
+- `client/` — UE5 게임 클라이언트 프로젝트
 - `dummyserver/` — 예정
 
 ## 상위 문서 구성
@@ -30,6 +30,7 @@
 ## 현재 기준
 
 - 서버 작업: [server/AGENTS.md](./server/AGENTS.md)
+- 클라이언트 작업: [client/AGENTS.md](./client/AGENTS.md)
 - 공용 라이브러리 작업: [server/lib/AGENTS.md](./server/lib/AGENTS.md)
 - 상위 문서 작업: [docs/AGENTS.md](./docs/AGENTS.md)
 - 서버 아키텍처/설계/컨벤션 문서는 `server/` 하위에 있음

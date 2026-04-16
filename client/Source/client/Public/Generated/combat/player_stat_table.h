@@ -7,8 +7,8 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
-#include "combat_data_common.h"
-#include "combat_data_enums.h"
+#include "../combat_data_common.h"
+#include "../combat_data_enums.h"
 #include "player_stat_table.generated.h"
 USTRUCT(BlueprintType)
 struct FPlayerStatTableRow
