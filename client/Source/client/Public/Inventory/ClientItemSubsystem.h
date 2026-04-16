@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "Generated/ItemTableRow.h"
 #include "Inventory/ClientInventoryTypes.h"
 #include "ClientItemSubsystem.generated.h"
 
@@ -22,7 +21,7 @@ class UClientItemInstance;
  *   지정하며, 상대 경로는 프로젝트 디렉터리 기준으로 해석된다.
  *   설정이 없거나 로드 실패 시 Content/Data 로 폴백한다.
  *   다른 경로를 사용하려면 LoadFromFile()을 직접 호출한다.
- */
+ */ㅗ,
 UCLASS(Config=Game)
 class CLIENT_API UClientItemSubsystem : public UGameInstanceSubsystem
 {

@@ -123,15 +123,10 @@ bool UClientInventoryComponent::TryStackIntoExisting(UClientItemInstance* Item)
 void UClientInventoryComponent::SortItems()
 {
     // 정렬 기준: 카테고리(오름차순) → 등급(내림차순) → 표시 이름(가나다순)
-    Items.Sort([](const TObjectPtr<UClientItemInstance>& A, const TObjectPtr<UClientItemInstance>& B)
+    Items.Sort([](const UClientItemInstance& A, const UClientItemInstance& B)
     {
-        if (A == nullptr || B == nullptr)
-        {
-            return A != nullptr;
-        }
-
-        const FItemTableRow& SA = A->GetStaticData();
-        const FItemTableRow& SB = B->GetStaticData();
+        const FItemTableRow& SA = A.GetStaticData();
+        const FItemTableRow& SB = B.GetStaticData();
 
         if (SA.ItemCategory != SB.ItemCategory)
         {
