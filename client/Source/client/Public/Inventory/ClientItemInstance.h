@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "Generated/ItemTableRow.h"
+#include "Generated/combat_data_tables.h"
 #include "Inventory/ClientInventoryTypes.h"
 #include "ClientItemInstance.generated.h"
 

@@ -838,6 +838,7 @@ def render_table_header(runtime: str, table: TableDefinition) -> str:
         )
         return "\n".join(lines)
 
+    generated_h = f"{table.source_stem}.generated.h"
     lines.extend(
         [
             "#include \"CoreMinimal.h\"",
@@ -848,6 +849,7 @@ def render_table_header(runtime: str, table: TableDefinition) -> str:
             "#include \"Serialization/JsonSerializer.h\"",
             f'#include "{COMMON_NAME}"',
             f'#include "{ENUM_NAME}"',
+            f'#include "{generated_h}"',
             "USTRUCT(BlueprintType)",
             f"struct {row_struct}",
             "{",

@@ -71,7 +71,12 @@ bool UClientItemSubsystem::LoadFromFile(const FString& FilePath)
     }
 
     Rows = MoveTemp(LoadedRows);
-    Index = BuildItemTableIndexByItemId(Rows);
+    Index.Empty();
+    Index.Reserve(Rows.Num());
+    for (const FItemTableRow& Row : Rows)
+    {
+        Index.Add(Row.ItemId, Row);
+    }
 
     UE_LOG(LogTemp, Log, TEXT("UClientItemSubsystem: 아이템 %d개 로드 완료 (%s)"), Rows.Num(), *FilePath);
     return true;
