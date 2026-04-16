@@ -3,7 +3,8 @@
     "allow": [
       "Bash(\"/c/Program Files/GitButler/but.exe\" status)",
       "Read(//c/Users/admin/Desktop/portpolio/shared/protocol/**)",
-      "Read(//c/Users/admin/Desktop/portpolio/shared/**)"
+      "Read(//c/Users/admin/Desktop/portpolio/shared/**)",
+      "Bash(\"C:/Program Files/Epic Games/UE_5.7/Engine/Build/BatchFiles/Build.bat\" clientEditor Win64 Development -Project=\"C:/Users/admin/Desktop/portpolio/client/client.uproject\" -WaitMutex -FromMsBuild)"
     ]
   }
 }
