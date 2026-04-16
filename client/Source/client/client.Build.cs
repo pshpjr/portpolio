@@ -12,9 +12,18 @@ public class client : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "Json", "UMG" });
 		PublicDependencyModuleNames.Add("ImGui");
 
-		PublicIncludePaths.Add(Path.GetFullPath(Path.Combine(ModuleDirectory, "../../../shared/generated/unreal")));
-
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+
+		string ThirdPartyDir = Path.GetFullPath(Path.Combine(ModuleDirectory, "../ThirdParty"));
+		PublicIncludePaths.Add(ThirdPartyDir);
+		PublicAdditionalLibraries.Add(Path.Combine(ThirdPartyDir, "libprotobuf.lib"));
+
+		bUseRTTI = true;
+		bEnableExceptions = true;
+		bEnableUndefinedIdentifierWarnings = false;
+		ShadowVariableWarningLevel = WarningLevel.Off;
+		PublicDefinitions.Add("GOOGLE_PROTOBUF_NO_RTTI=0");
+		PublicDefinitions.Add("GOOGLE_PROTOBUF_INTERNAL_DONATE_STEAL_INLINE=0");
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

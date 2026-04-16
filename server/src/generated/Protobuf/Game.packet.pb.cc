@@ -16,68 +16,74 @@
 #include <google/protobuf/port_def.inc>
 
 PROTOBUF_PRAGMA_INIT_SEG
+
+namespace _pb = ::PROTOBUF_NAMESPACE_ID;
+namespace _pbi = _pb::internal;
+
 namespace C2G {
-constexpr RqLogin::RqLogin(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : nickname_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+PROTOBUF_CONSTEXPR RqLogin::RqLogin(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.nickname_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct RqLoginDefaultTypeInternal {
-  constexpr RqLoginDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RqLoginDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~RqLoginDefaultTypeInternal() {}
   union {
     RqLogin _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT RqLoginDefaultTypeInternal _RqLogin_default_instance_;
-constexpr RsLogin::RsLogin(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : uid_(nullptr){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RqLoginDefaultTypeInternal _RqLogin_default_instance_;
+PROTOBUF_CONSTEXPR RsLogin::RsLogin(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.uid_)*/nullptr
+  , /*decltype(_impl_._cached_size_)*/{}} {}
 struct RsLoginDefaultTypeInternal {
-  constexpr RsLoginDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RsLoginDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~RsLoginDefaultTypeInternal() {}
   union {
     RsLogin _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT RsLoginDefaultTypeInternal _RsLogin_default_instance_;
-constexpr RqUserInfo::RqUserInfo(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RsLoginDefaultTypeInternal _RsLogin_default_instance_;
+PROTOBUF_CONSTEXPR RqUserInfo::RqUserInfo(
+    ::_pbi::ConstantInitialized) {}
 struct RqUserInfoDefaultTypeInternal {
-  constexpr RqUserInfoDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RqUserInfoDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~RqUserInfoDefaultTypeInternal() {}
   union {
     RqUserInfo _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT RqUserInfoDefaultTypeInternal _RqUserInfo_default_instance_;
-constexpr RsUserInfo::RsUserInfo(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RqUserInfoDefaultTypeInternal _RqUserInfo_default_instance_;
+PROTOBUF_CONSTEXPR RsUserInfo::RsUserInfo(
+    ::_pbi::ConstantInitialized) {}
 struct RsUserInfoDefaultTypeInternal {
-  constexpr RsUserInfoDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RsUserInfoDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~RsUserInfoDefaultTypeInternal() {}
   union {
     RsUserInfo _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT RsUserInfoDefaultTypeInternal _RsUserInfo_default_instance_;
-constexpr RqUserOutfit::RqUserOutfit(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RsUserInfoDefaultTypeInternal _RsUserInfo_default_instance_;
+PROTOBUF_CONSTEXPR RqUserOutfit::RqUserOutfit(
+    ::_pbi::ConstantInitialized) {}
 struct RqUserOutfitDefaultTypeInternal {
-  constexpr RqUserOutfitDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR RqUserOutfitDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
   ~RqUserOutfitDefaultTypeInternal() {}
   union {
     RqUserOutfit _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT RqUserOutfitDefaultTypeInternal _RqUserOutfit_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RqUserOutfitDefaultTypeInternal _RqUserOutfit_default_instance_;
 }  // namespace C2G
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_Game_2epacket_2eproto[5];
-static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_Game_2epacket_2eproto = nullptr;
-static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_Game_2epacket_2eproto = nullptr;
+static ::_pb::Metadata file_level_metadata_Game_2epacket_2eproto[5];
+static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_Game_2epacket_2eproto = nullptr;
+static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_Game_2epacket_2eproto = nullptr;
 
 const uint32_t TableStruct_Game_2epacket_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
@@ -86,14 +92,14 @@ const uint32_t TableStruct_Game_2epacket_2eproto::offsets[] PROTOBUF_SECTION_VAR
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::C2G::RqLogin, nickname_),
+  PROTOBUF_FIELD_OFFSET(::C2G::RqLogin, _impl_.nickname_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::C2G::RsLogin, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::C2G::RsLogin, uid_),
+  PROTOBUF_FIELD_OFFSET(::C2G::RsLogin, _impl_.uid_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::C2G::RqUserInfo, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -113,7 +119,7 @@ const uint32_t TableStruct_Game_2epacket_2eproto::offsets[] PROTOBUF_SECTION_VAR
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
 };
-static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::C2G::RqLogin)},
   { 7, -1, -1, sizeof(::C2G::RsLogin)},
   { 14, -1, -1, sizeof(::C2G::RqUserInfo)},
@@ -121,12 +127,12 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 26, -1, -1, sizeof(::C2G::RqUserOutfit)},
 };
 
-static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::C2G::_RqLogin_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::C2G::_RsLogin_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::C2G::_RqUserInfo_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::C2G::_RsUserInfo_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::C2G::_RqUserOutfit_default_instance_),
+static const ::_pb::Message* const file_default_instances[] = {
+  &::C2G::_RqLogin_default_instance_._instance,
+  &::C2G::_RsLogin_default_instance_._instance,
+  &::C2G::_RqUserInfo_default_instance_._instance,
+  &::C2G::_RsUserInfo_default_instance_._instance,
+  &::C2G::_RqUserOutfit_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_Game_2epacket_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -136,22 +142,24 @@ const char descriptor_table_protodef_Game_2epacket_2eproto[] PROTOBUF_SECTION_VA
   "nfo\"\014\n\nRsUserInfo\"\016\n\014RqUserOutfitb\006proto"
   "3"
   ;
-static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_Game_2epacket_2eproto_deps[1] = {
+static const ::_pbi::DescriptorTable* const descriptor_table_Game_2epacket_2eproto_deps[1] = {
   &::descriptor_table_xxx_2eCommon_2eproto,
 };
-static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_Game_2epacket_2eproto_once;
-const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_Game_2epacket_2eproto = {
-  false, false, 161, descriptor_table_protodef_Game_2epacket_2eproto, "Game.packet.proto", 
-  &descriptor_table_Game_2epacket_2eproto_once, descriptor_table_Game_2epacket_2eproto_deps, 1, 5,
-  schemas, file_default_instances, TableStruct_Game_2epacket_2eproto::offsets,
-  file_level_metadata_Game_2epacket_2eproto, file_level_enum_descriptors_Game_2epacket_2eproto, file_level_service_descriptors_Game_2epacket_2eproto,
+static ::_pbi::once_flag descriptor_table_Game_2epacket_2eproto_once;
+const ::_pbi::DescriptorTable descriptor_table_Game_2epacket_2eproto = {
+    false, false, 161, descriptor_table_protodef_Game_2epacket_2eproto,
+    "Game.packet.proto",
+    &descriptor_table_Game_2epacket_2eproto_once, descriptor_table_Game_2epacket_2eproto_deps, 1, 5,
+    schemas, file_default_instances, TableStruct_Game_2epacket_2eproto::offsets,
+    file_level_metadata_Game_2epacket_2eproto, file_level_enum_descriptors_Game_2epacket_2eproto,
+    file_level_service_descriptors_Game_2epacket_2eproto,
 };
-PROTOBUF_ATTRIBUTE_WEAK const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable* descriptor_table_Game_2epacket_2eproto_getter() {
+PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_Game_2epacket_2eproto_getter() {
   return &descriptor_table_Game_2epacket_2eproto;
 }
 
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_Game_2epacket_2eproto(&descriptor_table_Game_2epacket_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_Game_2epacket_2eproto(&descriptor_table_Game_2epacket_2eproto);
 namespace C2G {
 
 // ===================================================================
@@ -163,53 +171,58 @@ class RqLogin::_Internal {
 RqLogin::RqLogin(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:C2G.RqLogin)
 }
 RqLogin::RqLogin(const RqLogin& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  RqLogin* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.nickname_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  nickname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  _impl_.nickname_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    nickname_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
+    _impl_.nickname_.Set("", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_nickname().empty()) {
-    nickname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_nickname(), 
-      GetArenaForAllocation());
+    _this->_impl_.nickname_.Set(from._internal_nickname(), 
+      _this->GetArenaForAllocation());
   }
   // @@protoc_insertion_point(copy_constructor:C2G.RqLogin)
 }
 
-inline void RqLogin::SharedCtor() {
-nickname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  nickname_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void RqLogin::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.nickname_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.nickname_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.nickname_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 RqLogin::~RqLogin() {
   // @@protoc_insertion_point(destructor:C2G.RqLogin)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void RqLogin::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  nickname_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  _impl_.nickname_.Destroy();
 }
 
-void RqLogin::ArenaDtor(void* object) {
-  RqLogin* _this = reinterpret_cast< RqLogin* >(object);
-  (void)_this;
-}
-void RqLogin::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void RqLogin::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void RqLogin::Clear() {
@@ -218,23 +231,23 @@ void RqLogin::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  nickname_.ClearToEmpty();
+  _impl_.nickname_.ClearToEmpty();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* RqLogin::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* RqLogin::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // string nickname = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           auto str = _internal_mutable_nickname();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "C2G.RqLogin.nickname"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "C2G.RqLogin.nickname"));
         } else
           goto handle_unusual;
         continue;
@@ -278,7 +291,7 @@ uint8_t* RqLogin::_InternalSerialize(
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:C2G.RqLogin)
@@ -300,32 +313,28 @@ size_t RqLogin::ByteSizeLong() const {
         this->_internal_nickname());
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RqLogin::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     RqLogin::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RqLogin::GetClassData() const { return &_class_data_; }
 
-void RqLogin::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<RqLogin *>(to)->MergeFrom(
-      static_cast<const RqLogin &>(from));
-}
 
-
-void RqLogin::MergeFrom(const RqLogin& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:C2G.RqLogin)
-  GOOGLE_DCHECK_NE(&from, this);
+void RqLogin::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<RqLogin*>(&to_msg);
+  auto& from = static_cast<const RqLogin&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:C2G.RqLogin)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_nickname().empty()) {
-    _internal_set_nickname(from._internal_nickname());
+    _this->_internal_set_nickname(from._internal_nickname());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void RqLogin::CopyFrom(const RqLogin& from) {
@@ -345,14 +354,13 @@ void RqLogin::InternalSwap(RqLogin* other) {
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      &nickname_, lhs_arena,
-      &other->nickname_, rhs_arena
+      &_impl_.nickname_, lhs_arena,
+      &other->_impl_.nickname_, rhs_arena
   );
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RqLogin::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_Game_2epacket_2eproto_getter, &descriptor_table_Game_2epacket_2eproto_once,
       file_level_metadata_Game_2epacket_2eproto[0]);
 }
@@ -366,58 +374,60 @@ class RsLogin::_Internal {
 
 const ::InstanceKey&
 RsLogin::_Internal::uid(const RsLogin* msg) {
-  return *msg->uid_;
+  return *msg->_impl_.uid_;
 }
 void RsLogin::clear_uid() {
-  if (GetArenaForAllocation() == nullptr && uid_ != nullptr) {
-    delete uid_;
+  if (GetArenaForAllocation() == nullptr && _impl_.uid_ != nullptr) {
+    delete _impl_.uid_;
   }
-  uid_ = nullptr;
+  _impl_.uid_ = nullptr;
 }
 RsLogin::RsLogin(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor();
-  if (!is_message_owned) {
-    RegisterArenaDtor(arena);
-  }
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:C2G.RsLogin)
 }
 RsLogin::RsLogin(const RsLogin& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  RsLogin* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.uid_){nullptr}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   if (from._internal_has_uid()) {
-    uid_ = new ::InstanceKey(*from.uid_);
-  } else {
-    uid_ = nullptr;
+    _this->_impl_.uid_ = new ::InstanceKey(*from._impl_.uid_);
   }
   // @@protoc_insertion_point(copy_constructor:C2G.RsLogin)
 }
 
-inline void RsLogin::SharedCtor() {
-uid_ = nullptr;
+inline void RsLogin::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.uid_){nullptr}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 RsLogin::~RsLogin() {
   // @@protoc_insertion_point(destructor:C2G.RsLogin)
-  if (GetArenaForAllocation() != nullptr) return;
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
 inline void RsLogin::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  if (this != internal_default_instance()) delete uid_;
+  if (this != internal_default_instance()) delete _impl_.uid_;
 }
 
-void RsLogin::ArenaDtor(void* object) {
-  RsLogin* _this = reinterpret_cast< RsLogin* >(object);
-  (void)_this;
-}
-void RsLogin::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void RsLogin::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
 
 void RsLogin::Clear() {
@@ -426,18 +436,18 @@ void RsLogin::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  if (GetArenaForAllocation() == nullptr && uid_ != nullptr) {
-    delete uid_;
+  if (GetArenaForAllocation() == nullptr && _impl_.uid_ != nullptr) {
+    delete _impl_.uid_;
   }
-  uid_ = nullptr;
+  _impl_.uid_ = nullptr;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* RsLogin::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* RsLogin::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     uint32_t tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .InstanceKey uid = 1;
       case 1:
@@ -478,14 +488,13 @@ uint8_t* RsLogin::_InternalSerialize(
 
   // .InstanceKey uid = 1;
   if (this->_internal_has_uid()) {
-    target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        1, _Internal::uid(this), target, stream);
+      InternalWriteMessage(1, _Internal::uid(this),
+        _Internal::uid(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:C2G.RsLogin)
@@ -504,35 +513,32 @@ size_t RsLogin::ByteSizeLong() const {
   if (this->_internal_has_uid()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *uid_);
+        *_impl_.uid_);
   }
 
-  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RsLogin::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
     RsLogin::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RsLogin::GetClassData() const { return &_class_data_; }
 
-void RsLogin::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
-                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-  static_cast<RsLogin *>(to)->MergeFrom(
-      static_cast<const RsLogin &>(from));
-}
 
-
-void RsLogin::MergeFrom(const RsLogin& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:C2G.RsLogin)
-  GOOGLE_DCHECK_NE(&from, this);
+void RsLogin::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<RsLogin*>(&to_msg);
+  auto& from = static_cast<const RsLogin&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:C2G.RsLogin)
+  GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (from._internal_has_uid()) {
-    _internal_mutable_uid()->::InstanceKey::MergeFrom(from._internal_uid());
+    _this->_internal_mutable_uid()->::InstanceKey::MergeFrom(
+        from._internal_uid());
   }
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void RsLogin::CopyFrom(const RsLogin& from) {
@@ -549,11 +555,11 @@ bool RsLogin::IsInitialized() const {
 void RsLogin::InternalSwap(RsLogin* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(uid_, other->uid_);
+  swap(_impl_.uid_, other->_impl_.uid_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RsLogin::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_Game_2epacket_2eproto_getter, &descriptor_table_Game_2epacket_2eproto_once,
       file_level_metadata_Game_2epacket_2eproto[1]);
 }
@@ -571,6 +577,7 @@ RqUserInfo::RqUserInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
 }
 RqUserInfo::RqUserInfo(const RqUserInfo& from)
   : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  RqUserInfo* const _this = this; (void)_this;
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:C2G.RqUserInfo)
 }
@@ -592,7 +599,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RqUserInfo::GetClassData() con
 
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RqUserInfo::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_Game_2epacket_2eproto_getter, &descriptor_table_Game_2epacket_2eproto_once,
       file_level_metadata_Game_2epacket_2eproto[2]);
 }
@@ -610,6 +617,7 @@ RsUserInfo::RsUserInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
 }
 RsUserInfo::RsUserInfo(const RsUserInfo& from)
   : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  RsUserInfo* const _this = this; (void)_this;
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:C2G.RsUserInfo)
 }
@@ -631,7 +639,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RsUserInfo::GetClassData() con
 
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RsUserInfo::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_Game_2epacket_2eproto_getter, &descriptor_table_Game_2epacket_2eproto_once,
       file_level_metadata_Game_2epacket_2eproto[3]);
 }
@@ -649,6 +657,7 @@ RqUserOutfit::RqUserOutfit(::PROTOBUF_NAMESPACE_ID::Arena* arena,
 }
 RqUserOutfit::RqUserOutfit(const RqUserOutfit& from)
   : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  RqUserOutfit* const _this = this; (void)_this;
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:C2G.RqUserOutfit)
 }
@@ -670,7 +679,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RqUserOutfit::GetClassData() c
 
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RqUserOutfit::GetMetadata() const {
-  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+  return ::_pbi::AssignDescriptors(
       &descriptor_table_Game_2epacket_2eproto_getter, &descriptor_table_Game_2epacket_2eproto_once,
       file_level_metadata_Game_2epacket_2eproto[4]);
 }
@@ -678,19 +687,24 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RqUserOutfit::GetClassData() c
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace C2G
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::C2G::RqLogin* Arena::CreateMaybeMessage< ::C2G::RqLogin >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::C2G::RqLogin*
+Arena::CreateMaybeMessage< ::C2G::RqLogin >(Arena* arena) {
   return Arena::CreateMessageInternal< ::C2G::RqLogin >(arena);
 }
-template<> PROTOBUF_NOINLINE ::C2G::RsLogin* Arena::CreateMaybeMessage< ::C2G::RsLogin >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::C2G::RsLogin*
+Arena::CreateMaybeMessage< ::C2G::RsLogin >(Arena* arena) {
   return Arena::CreateMessageInternal< ::C2G::RsLogin >(arena);
 }
-template<> PROTOBUF_NOINLINE ::C2G::RqUserInfo* Arena::CreateMaybeMessage< ::C2G::RqUserInfo >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::C2G::RqUserInfo*
+Arena::CreateMaybeMessage< ::C2G::RqUserInfo >(Arena* arena) {
   return Arena::CreateMessageInternal< ::C2G::RqUserInfo >(arena);
 }
-template<> PROTOBUF_NOINLINE ::C2G::RsUserInfo* Arena::CreateMaybeMessage< ::C2G::RsUserInfo >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::C2G::RsUserInfo*
+Arena::CreateMaybeMessage< ::C2G::RsUserInfo >(Arena* arena) {
   return Arena::CreateMessageInternal< ::C2G::RsUserInfo >(arena);
 }
-template<> PROTOBUF_NOINLINE ::C2G::RqUserOutfit* Arena::CreateMaybeMessage< ::C2G::RqUserOutfit >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::C2G::RqUserOutfit*
+Arena::CreateMaybeMessage< ::C2G::RqUserOutfit >(Arena* arena) {
   return Arena::CreateMessageInternal< ::C2G::RqUserOutfit >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
