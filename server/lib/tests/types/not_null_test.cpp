@@ -7,29 +7,43 @@
 
 #include <gtest/gtest.h>
 
-namespace psh::lib::types {
-namespace {
+namespace psh::lib::types
+{
+namespace
+{
 
-struct TestValue {
+struct TestValue
+{
     explicit TestValue(int initialValue, std::string initialName = {})
-        : value(initialValue), name(std::move(initialName)) {}
+        : value(initialValue),
+          name(std::move(initialName))
+    {
+    }
 
-    void increment() { ++value; }
+    void increment()
+    {
+        ++value;
+    }
 
-    [[nodiscard]] int doubled() const { return value * 2; }
+    [[nodiscard]] int doubled() const
+    {
+        return value * 2;
+    }
 
     int value;
     std::string name;
 };
 
-TEST(NotNullTest, MakeCreatesNonNullSharedObject) {
+TEST(NotNullTest, MakeCreatesNonNullSharedObject)
+{
     auto value = NotNull<TestValue>::Make(7, "alpha");
 
     EXPECT_EQ(value->value, 7);
     EXPECT_EQ(value->name, "alpha");
 }
 
-TEST(NotNullTest, FromRejectsNullSharedPtr) {
+TEST(NotNullTest, FromRejectsNullSharedPtr)
+{
     std::shared_ptr<TestValue> ptr;
 
     auto value = NotNull<TestValue>::From(std::move(ptr));
@@ -37,7 +51,8 @@ TEST(NotNullTest, FromRejectsNullSharedPtr) {
     EXPECT_FALSE(value.has_value());
 }
 
-TEST(NotNullTest, FromConsumesSharedPtrAndPreservesOwnership) {
+TEST(NotNullTest, FromConsumesSharedPtrAndPreservesOwnership)
+{
     auto ptr = std::make_shared<TestValue>(11);
     auto raw = ptr.get();
 
@@ -48,7 +63,8 @@ TEST(NotNullTest, FromConsumesSharedPtrAndPreservesOwnership) {
     EXPECT_EQ(value->operator->(), raw);
 }
 
-TEST(NotNullTest, CopyAndMoveOperationsKeepInvariant) {
+TEST(NotNullTest, CopyAndMoveOperationsKeepInvariant)
+{
     auto original = NotNull<TestValue>::Make(3);
     auto copy = original;
     auto moved = std::move(original);
@@ -58,7 +74,8 @@ TEST(NotNullTest, CopyAndMoveOperationsKeepInvariant) {
     EXPECT_EQ(moved->value, 4);
 }
 
-TEST(NotNullTest, DereferenceOperatorsExposeUnderlyingObject) {
+TEST(NotNullTest, DereferenceOperatorsExposeUnderlyingObject)
+{
     auto value = NotNull<TestValue>::Make(5);
 
     (*value).increment();
@@ -67,7 +84,8 @@ TEST(NotNullTest, DereferenceOperatorsExposeUnderlyingObject) {
     EXPECT_EQ((*value).doubled(), 12);
 }
 
-TEST(NotNullTest, ImplicitSharedPtrConversionReturnsSharedOwnership) {
+TEST(NotNullTest, ImplicitSharedPtrConversionReturnsSharedOwnership)
+{
     auto value = NotNull<TestValue>::Make(9);
 
     std::shared_ptr<TestValue> shared = value;
@@ -77,7 +95,8 @@ TEST(NotNullTest, ImplicitSharedPtrConversionReturnsSharedOwnership) {
     EXPECT_EQ(shared.use_count(), 2);
 }
 
-TEST(NotNullTest, ToWeakReturnsLockableWeakPtr) {
+TEST(NotNullTest, ToWeakReturnsLockableWeakPtr)
+{
     auto value = NotNull<TestValue>::Make(13);
 
     auto weak = value.to_weak();
@@ -91,5 +110,5 @@ static_assert(!std::is_default_constructible_v<NotNull<TestValue>>);
 static_assert(std::is_copy_constructible_v<NotNull<TestValue>>);
 static_assert(std::is_move_constructible_v<NotNull<TestValue>>);
 
-}  // namespace
-}  // namespace psh::lib::types
+} // namespace
+} // namespace psh::lib::types

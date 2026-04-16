@@ -3,12 +3,13 @@
 
 #include <cassert>
 
-namespace psh::core {
+namespace psh::core
+{
 
 bool Inventory::Insert(EntityId entityId, const NotNull<Item>& item)
 {
-    const auto  contentId = item->GetContentId();
-    auto        datum = std::make_unique<Datum>(item, contentId, repo2_[contentId].size());
+    const auto contentId = item->GetContentId();
+    auto datum = std::make_unique<Datum>(item, contentId, repo2_[contentId].size());
 
     auto [it, inserted] = repo1_.emplace(entityId, std::move(datum));
     if (!inserted)
@@ -94,4 +95,4 @@ void Inventory::DeleteFromRepo2(Datum& datum)
         repo2_.erase(bucketIt);
 }
 
-}  // namespace psh::core
+} // namespace psh::core

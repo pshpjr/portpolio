@@ -4,13 +4,17 @@
 
 #include <gtest/gtest.h>
 
-namespace psh::lib::utils {
-namespace {
+namespace psh::lib::utils
+{
+namespace
+{
 
-TEST(RandomUtilsTest, RandomEngineUsesInclusiveIntAndHalfOpenFloatRanges) {
+TEST(RandomUtilsTest, RandomEngineUsesInclusiveIntAndHalfOpenFloatRanges)
+{
     RandomEngine engine(1234);
 
-    for (int i = 0; i < 32; ++i) {
+    for (int i = 0; i < 32; ++i)
+    {
         const int intValue = engine.rand_int(3, 5);
         const double floatValue = engine.rand_float(1.5, 2.5);
 
@@ -21,7 +25,8 @@ TEST(RandomUtilsTest, RandomEngineUsesInclusiveIntAndHalfOpenFloatRanges) {
     }
 }
 
-TEST(RandomUtilsTest, RandomEngineSupportsRangeObjectsAndProbabilityEdges) {
+TEST(RandomUtilsTest, RandomEngineSupportsRangeObjectsAndProbabilityEdges)
+{
     RandomEngine engine(77);
 
     EXPECT_EQ(engine.rand_int(IntRange{4, 4}), 4);
@@ -30,7 +35,8 @@ TEST(RandomUtilsTest, RandomEngineSupportsRangeObjectsAndProbabilityEdges) {
     EXPECT_TRUE(engine.rand_bool(1.0));
 }
 
-TEST(RandomUtilsTest, RandPickAndShuffleUseEngineState) {
+TEST(RandomUtilsTest, RandPickAndShuffleUseEngineState)
+{
     RandomEngine first(42);
     RandomEngine second(42);
     std::vector<int> firstValues{1, 2, 3, 4, 5};
@@ -44,8 +50,10 @@ TEST(RandomUtilsTest, RandPickAndShuffleUseEngineState) {
     EXPECT_EQ(firstValues, secondValues);
 }
 
-TEST(RandomUtilsTest, GlobalRandHelpersRespectProvidedBounds) {
-    for (int i = 0; i < 32; ++i) {
+TEST(RandomUtilsTest, GlobalRandHelpersRespectProvidedBounds)
+{
+    for (int i = 0; i < 32; ++i)
+    {
         const int value = Rand(IntRange{10, 12});
         const double real = Rand(FloatRange{0.0, 1.0});
 
@@ -56,5 +64,5 @@ TEST(RandomUtilsTest, GlobalRandHelpersRespectProvidedBounds) {
     }
 }
 
-}  // namespace
-}  // namespace psh::lib::utils
+} // namespace
+} // namespace psh::lib::utils

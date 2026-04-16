@@ -14,4 +14,4 @@ public:
     virtual uint64_t GetIdleTime() const = 0;
 };
 
-}  // namespace psh::lib
+} // namespace psh::lib

@@ -5,19 +5,22 @@
 #include <gtest/gtest.h>
 #include <thread>
 
-namespace psh::lib {
+namespace psh::lib
+{
 using namespace std::chrono_literals;
 
 // --- ManualClock ---
 
-TEST(ManualClock, InitialValuesAreZero) {
+TEST(ManualClock, InitialValuesAreZero)
+{
     ManualClock clock;
     EXPECT_DOUBLE_EQ(clock.GetCurrentTime(), 0.0);
     EXPECT_DOUBLE_EQ(clock.GetDeltaTime(), 0.0);
     EXPECT_DOUBLE_EQ(clock.GetIdleTime(), 0.0);
 }
 
-TEST(ManualClock, Advance) {
+TEST(ManualClock, Advance)
+{
     ManualClock clock;
     clock.Advance(1.5);
 
@@ -29,7 +32,8 @@ TEST(ManualClock, Advance) {
     EXPECT_DOUBLE_EQ(clock.GetDeltaTime(), 0.5);
 }
 
-TEST(ManualClock, SetCurrentTime) {
+TEST(ManualClock, SetCurrentTime)
+{
     ManualClock clock;
     clock.SetCurrentTime(10.0);
 
@@ -41,7 +45,8 @@ TEST(ManualClock, SetCurrentTime) {
     EXPECT_DOUBLE_EQ(clock.GetDeltaTime(), 2.0);
 }
 
-TEST(ManualClock, SetIdleTime) {
+TEST(ManualClock, SetIdleTime)
+{
     ManualClock clock;
     clock.SetIdleTime(0.3);
     EXPECT_DOUBLE_EQ(clock.GetIdleTime(), 0.3);
@@ -49,14 +54,16 @@ TEST(ManualClock, SetIdleTime) {
 
 // --- SteadyTickClock ---
 
-TEST(SteadyTickClock, InitialValuesAreZero) {
+TEST(SteadyTickClock, InitialValuesAreZero)
+{
     SteadyTickClock clock;
     EXPECT_DOUBLE_EQ(clock.GetCurrentTime(), 0.0);
     EXPECT_DOUBLE_EQ(clock.GetDeltaTime(), 0.0);
     EXPECT_DOUBLE_EQ(clock.GetIdleTime(), 0.0);
 }
 
-TEST(SteadyTickClock, TickAdvancesTime) {
+TEST(SteadyTickClock, TickAdvancesTime)
+{
     SteadyTickClock clock;
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     clock.Tick();
@@ -66,7 +73,8 @@ TEST(SteadyTickClock, TickAdvancesTime) {
     EXPECT_DOUBLE_EQ(clock.GetIdleTime(), 0.0);
 }
 
-TEST(SteadyTickClock, DeltaReflectsTickInterval) {
+TEST(SteadyTickClock, DeltaReflectsTickInterval)
+{
     SteadyTickClock clock;
     clock.Tick();
 
@@ -78,7 +86,8 @@ TEST(SteadyTickClock, DeltaReflectsTickInterval) {
 
 // --- SteadyClock ---
 
-TEST(SteadyClock, StartsAndStops) {
+TEST(SteadyClock, StartsAndStops)
+{
     SteadyClock clock(1ms);
     clock.Start();
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -88,25 +97,28 @@ TEST(SteadyClock, StartsAndStops) {
     EXPECT_GT(clock.GetDeltaTime(), 0.0);
 }
 
-TEST(SteadyClock, DoubleStartIsNoop) {
+TEST(SteadyClock, DoubleStartIsNoop)
+{
     SteadyClock clock(1ms);
     clock.Start();
-    clock.Start();  // 두 번째 호출은 무시
+    clock.Start(); // 두 번째 호출은 무시
     clock.Stop();
 }
 
-TEST(SteadyClock, PolymorphicAccess) {
+TEST(SteadyClock, PolymorphicAccess)
+{
     ManualClock manual;
     SteadyTickClock tick;
     SteadyClock steady(1ms);
 
     IClock* clocks[] = {&manual, &tick, &steady};
 
-    for (auto* c : clocks) {
+    for (auto* c : clocks)
+    {
         EXPECT_GE(c->GetCurrentTime(), 0.0);
         EXPECT_GE(c->GetDeltaTime(), 0.0);
         EXPECT_GE(c->GetIdleTime(), 0.0);
     }
 }
 
-}  // namespace psh::lib
+} // namespace psh::lib

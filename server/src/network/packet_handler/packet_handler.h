@@ -9,21 +9,16 @@
 namespace psh::network
 {
 //
-using HandlerFunction = void(*)(short, char*);
+using HandlerFunction = void (*)(short, char*);
 using HandlerMap = HashMap<short, HandlerFunction>;
-
-
 
 inline void OnRecvTest(short uid, char* data)
 {
     return;
 }
 
-static HandlerMap gConnectionHandlerMap =
-{
-    {1,OnRecvTest}
-};
+static HandlerMap gConnectionHandlerMap = {{1, OnRecvTest}};
 
-}
+} // namespace psh::network
 
-#endif //PORTPOLIO_PACKET_HANDLER_H
+#endif // PORTPOLIO_PACKET_HANDLER_H

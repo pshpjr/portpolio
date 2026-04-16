@@ -27,9 +27,9 @@ using HashSet = std::unordered_set<T>;
 template <typename Key, typename Val>
 using HashMap = std::unordered_map<Key, Val>;
 
-using UserID    = psh::lib::types::StrongId<UInt64>;
+using UserID = psh::lib::types::StrongId<UInt64>;
 using AccountID = psh::lib::types::StrongId<UInt64>;
-using ItemID    = psh::lib::types::StrongId<UInt64>;
-using SkillID   = psh::lib::types::StrongId<UInt64>;
+using ItemID = psh::lib::types::StrongId<UInt64>;
+using SkillID = psh::lib::types::StrongId<UInt64>;
 
-#endif //PORTPOLIO_TYPE_DEF_H
+#endif // PORTPOLIO_TYPE_DEF_H

@@ -13,14 +13,17 @@ namespace psh::core
 class Item : public ContentId, public EntityId
 {
 public:
-    auto GetCurCount() const -> std::size_t {return 0;}
+    auto GetCurCount() const -> std::size_t
+    {
+        return 0;
+    }
     auto AddCount(size_t count) -> void;
+
 private:
     size_t curCount_{};
     size_t maxCount_{};
     size_t oldCount_{};
 };
-}
+} // namespace psh::core
 
-
-#endif //PORTPOLIO_ITEM_H
+#endif // PORTPOLIO_ITEM_H
