@@ -1,0 +1,26 @@
+// Auto-generated. Do not edit.
+#pragma once
+
+#include "CoreMinimal.h"
+{% for enum in enums %}
+
+UENUM()
+enum class {{ enum.name }} : uint8
+{
+{% for value in enum.values %}
+    {{ value }}{{ "," if not loop.last }}
+{% endfor %}
+};
+
+inline bool TryParse{{ enum.name }}(const FString& text, {{ enum.name }}& out_value)
+{
+{% for value in enum.values %}
+    {{ "if" if loop.first else "else if" }} (text.Equals(TEXT("{{ value }}")))
+    {
+        out_value = {{ enum.name }}::{{ value }};
+        return true;
+    }
+{% endfor %}
+    return false;
+}
+{% endfor %}
