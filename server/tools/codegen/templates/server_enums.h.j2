@@ -1,0 +1,17 @@
+// Auto-generated. Do not edit.
+#pragma once
+
+#include <cstdint>
+
+namespace psh::generated {
+{% for enum in enums %}
+
+enum class {{ enum.name }} : std::uint8_t
+{
+{% for value in enum.values %}
+    {{ value }}{{ "," if not loop.last }}
+{% endfor %}
+};
+{% endfor %}
+
+} // namespace psh::generated

@@ -1,0 +1,39 @@
+// Auto-generated. Do not edit.
+#pragma once
+
+#include <array>
+#include <filesystem>
+#include <string_view>
+#include <vector>
+
+#include "table_common.h"
+#include "enums.h"
+{% for table in tables %}
+#include "{{ table.source_stem }}.h"
+{% endfor %}
+
+namespace psh::generated {
+
+inline constexpr std::array<TableDescriptor, {{ tables | length }}> kGameDataTables = {
+{% for table in tables %}
+    TableDescriptor{"{{ table.table_name }}", "{{ table.schema_file }}", "{{ table.data_file }}", {{ table.row_count }}, {{ table.field_count }}},
+{% endfor %}
+};
+
+struct GameDataBundle
+{
+{% for table in tables %}
+    std::vector<{{ table.row_struct }}> {{ table.table_name }}Rows;
+{% endfor %}
+};
+
+inline GameDataBundle LoadGameDataBundleFromDirectory(const std::filesystem::path& directory)
+{
+    GameDataBundle bundle{};
+{% for table in tables %}
+    bundle.{{ table.table_name }}Rows = Load{{ table.table_name }}FromFile(directory / "{{ table.data_file }}");
+{% endfor %}
+    return bundle;
+}
+
+} // namespace psh::generated

@@ -1,0 +1,149 @@
+// Auto-generated. Do not edit.
+#pragma once
+
+#include <array>
+#include <cstdint>
+#include <filesystem>
+#include <fstream>
+#include <magic_enum/magic_enum.hpp>
+#include <nlohmann/json.hpp>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include "table_common.h"
+#include "enums.h"
+
+namespace psh::generated {
+
+struct {{ row_struct }}
+{
+{% for field in fields %}
+    {{ field.cpp_type }} {{ field.name }}{};
+{% endfor %}
+};
+
+struct {{ table_name }}Schema
+{
+    static constexpr std::string_view TableName = "{{ table_name }}";
+    static constexpr std::string_view SchemaFile = "{{ schema_file }}";
+    static constexpr std::string_view DataFile = "{{ data_file }}";
+    static constexpr std::size_t RowCount = {{ row_count }};
+    static constexpr std::size_t FieldCount = {{ fields | length }};
+    static constexpr std::array<TableFieldMetadata, FieldCount> Fields = {
+{% for field in fields %}
+        TableFieldMetadata{"{{ field.json_name }}", "{{ field.kind }}", {{ field.required | string | lower }}, {{ field.key | string | lower }}},
+{% endfor %}
+    };
+};
+
+inline {{ row_struct }} Load{{ table_name }}Row(const nlohmann::json& object)
+{
+    if (!object.is_object())
+    {
+        throw std::runtime_error("table row must be a JSON object");
+    }
+
+    {{ row_struct }} row{};
+{% for field in fields %}
+{% if field.kind == 'enum' %}
+    if (const auto it = object.find("{{ field.json_name }}"); it != object.end() && it->is_string())
+    {
+        if (auto parsed = magic_enum::enum_cast<{{ field.enum_name }}>(it->get<std::string_view>()))
+        {
+            row.{{ field.name }} = *parsed;
+        }
+        else
+        {
+            throw std::runtime_error("failed to parse enum: {{ table_name }}.{{ field.name }}");
+        }
+    }
+    else
+    {
+        throw std::runtime_error("missing or invalid field: {{ table_name }}.{{ field.name }}");
+    }
+{% elif field.kind in ['int32', 'int64'] %}
+    if (const auto it = object.find("{{ field.json_name }}"); it != object.end() && (it->is_number_integer() || it->is_number_unsigned()))
+    {
+        row.{{ field.name }} = static_cast<{{ field.cpp_type }}>(it->get<long long>());
+    }
+    else
+    {
+        throw std::runtime_error("missing or invalid field: {{ table_name }}.{{ field.name }}");
+    }
+{% elif field.kind in ['float', 'double'] %}
+    if (const auto it = object.find("{{ field.json_name }}"); it != object.end() && it->is_number())
+    {
+        row.{{ field.name }} = static_cast<{{ field.cpp_type }}>(it->get<double>());
+    }
+    else
+    {
+        throw std::runtime_error("missing or invalid field: {{ table_name }}.{{ field.name }}");
+    }
+{% elif field.kind == 'bool' %}
+    if (const auto it = object.find("{{ field.json_name }}"); it != object.end() && it->is_boolean())
+    {
+        row.{{ field.name }} = it->get<bool>();
+    }
+    else
+    {
+        throw std::runtime_error("missing or invalid field: {{ table_name }}.{{ field.name }}");
+    }
+{% elif field.kind in ['string', 'name', 'text'] %}
+    if (const auto it = object.find("{{ field.json_name }}"); it != object.end() && it->is_string())
+    {
+        row.{{ field.name }} = it->get<std::string>();
+    }
+    else
+    {
+        throw std::runtime_error("missing or invalid field: {{ table_name }}.{{ field.name }}");
+    }
+{% endif %}
+{% endfor %}
+    return row;
+}
+
+inline std::vector<{{ row_struct }}> Load{{ table_name }}(const nlohmann::json& root)
+{
+    const nlohmann::json* rows = &root;
+    if (root.is_object())
+    {
+        if (auto it = root.find("rows"); it != root.end())
+        {
+            rows = &*it;
+        }
+        else if (auto it = root.find("data"); it != root.end())
+        {
+            rows = &*it;
+        }
+    }
+
+    if (!rows->is_array())
+    {
+        throw std::runtime_error("table root must be an array or an object with rows/data");
+    }
+
+    std::vector<{{ row_struct }}> result;
+    result.reserve(rows->size());
+    for (const auto& entry : *rows)
+    {
+        result.push_back(Load{{ table_name }}Row(entry));
+    }
+    return result;
+}
+
+inline std::vector<{{ row_struct }}> Load{{ table_name }}FromFile(const std::filesystem::path& path)
+{
+    std::ifstream input(path);
+    if (!input.is_open())
+    {
+        throw std::runtime_error("failed to open data file: " + path.string());
+    }
+
+    nlohmann::json root;
+    input >> root;
+    return Load{{ table_name }}(root);
+}
+
+} // namespace psh::generated

@@ -1,6 +1,7 @@
 // Auto-generated. Do not edit.
 #pragma once
 
+#include <cstdint>
 #include <type_traits>
 #include <concepts>
 
@@ -9,7 +10,7 @@
 {% endfor %}
 
 namespace {{ model.prefix }} {
-enum class PACKET_TYPE
+enum class PACKET_TYPE : std::uint16_t
 {
     NONE,
 {% for msg_name in model.msg_names -%}

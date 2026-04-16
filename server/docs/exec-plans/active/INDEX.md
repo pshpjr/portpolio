@@ -5,6 +5,7 @@
 ## 현재 활성 계획
 
 - [20260414-login-move-sync-protocol.md](./20260414-login-move-sync-protocol.md) — 로그인/이동/유저 정보 동기화 프로토콜(.proto) 정의. (검토 대기)
+- [20260416-boost-asio-network-library.md](./20260416-boost-asio-network-library.md) — Boost.Asio TCP 네트워크 라이브러리 구현. (완료)
 
 ## 운영 규칙
 
