@@ -53,16 +53,38 @@
 
 ## Open Tasks
 
-## 2026-04-14 - document-gitbutler-cli-workflow-as-skill
+## 2026-04-16 - migrate-server-includes-combat-to-game-data
 - status: open
-- suggested-agent: harness-improver
-- area: skill
-- recommended-artifact: skill
-- context-savings: medium
+- suggested-agent: worker
+- area: build
+- recommended-artifact: other
+- context-savings: low
 - token-meter: pending
-- task: GitButler CLI(`but`) 사용 흐름을 별도 문서 + skill로 정리한다. 스테이징/커밋/푸시, hunk lock 동작, 잠금된 hunk가 다른 브랜치로 자동 분리될 때의 처리 절차를 포함.
-- message: clang-format 일괄 적용 작업에서 `but stage` → `but commit <branch> --only -m` → `but push <branch>` 루틴을 사용했는데, 파일 hunk가 기존 브랜치의 커밋(🔒)에 잠겨 다른 브랜치로 자동 스테이지되는 동작 때문에 동일한 포매팅 작업이 두 개 브랜치에 나뉘어 커밋되는 일이 반복됐다. 매 세션마다 CLI 헬프를 탐색하지 않도록 기본 절차, 잠금 처리 선택지(해당 브랜치에 같이 커밋 / unapply 후 재시도), 바이너리 경로(`/c/Program Files/GitButler/but.exe`), 단일 소스 위치(`.claude/skills/` 원본, `.codex/skills/` 래퍼) 규칙을 명시해야 한다.
-- source: server/ clang-format sweep 세션 (chore/clang-format-sweep, boost-mysql-user-db-executor 분리 커밋 경험)
+- task: 서버 소스에서 `combat_data_tables.h`, `combat_data_enums.h`, `combat_data_common.h`, `combat/*.h` 인클루드를 `game_data/game_data_tables.h`, `game_data/enums.h`, `game_data/table_common.h`, `game_data/*.h`로 교체하고 `psh::generated::combat` 네임스페이스 참조를 `psh::generated`로 변경한다.
+- message: `game_data_gen.py` Jinja2 리팩터링으로 서버 생성 경로가 `generated/game_data/`로 이동, 네임스페이스가 `psh::generated`로 변경됨. 기존 `generated/combat_data_*.h`와 `generated/combat/` 파일은 새 생성 결과로 대체되었으나, 비생성 서버 소스의 인클루드가 아직 구 경로를 가리킴. `CombatDataBundle` → `GameDataBundle` 타입명도 변경 필요.
+- source: server/tools/codegen/game_data_gen.py 리팩터링
+
+## 2026-04-16 - migrate-unreal-includes-combat-to-game-data
+- status: open
+- suggested-agent: worker
+- area: build
+- recommended-artifact: other
+- context-savings: low
+- token-meter: pending
+- task: 언리얼 클라이언트 소스에서 `Generated/combat_data_tables.h`, `Generated/combat_data_enums.h`, `Generated/combat/*.h` 인클루드를 `Generated/game_data/game_data_tables.h`, `Generated/game_data/enums.h`, `Generated/game_data/*.h`로 교체한다. `FCombatDataBundle` → `FGameDataBundle`, `kCombatDataTables` → `kGameDataTables` 타입/변수명도 변경.
+- message: 언리얼도 동일하게 `game_data/` 하위 플랫 구조로 생성 경로 변경됨. 기존 `combat/` 서브디렉터리와 `combat_data_*` 접두사 파일은 더 이상 생성되지 않음.
+- source: server/tools/codegen/game_data_gen.py 리팩터링
+
+## 2026-04-16 - cleanup-old-combat-generated-files
+- status: open
+- suggested-agent: worker
+- area: build
+- recommended-artifact: other
+- context-savings: low
+- token-meter: pending
+- task: 인클루드 마이그레이션 완료 후 `server/src/generated/combat_data_*.h`, `server/src/generated/combat/`, `client/.../Generated/combat_data_*.h`, `client/.../Generated/combat/` 구 파일 삭제. `combat_data_gen.py`도 삭제 또는 deprecated 마킹.
+- message: 새 `game_data_gen.py`가 대체하므로 구 파일은 빌드 혼란 방지를 위해 제거해야 함. 인클루드 마이그레이션이 먼저 완료되어야 안전하게 삭제 가능.
+- source: server/src/generated/, client/Source/client/Public/Generated/
 
 ## 2026-04-08 - review-delegate-opencode-text-extraction-robustness
 - status: open

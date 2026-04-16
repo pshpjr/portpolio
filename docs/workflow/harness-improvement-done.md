@@ -112,6 +112,20 @@
 
 ---
 
+## 2026-04-14 - document-gitbutler-cli-workflow-as-skill
+- status: done
+- suggested-agent: harness-improver
+- area: skill
+- recommended-artifact: skill
+- context-savings: medium
+- token-meter: pending
+- task: GitButler CLI(`but`) 사용 흐름을 별도 문서 + skill로 정리한다.
+- message: clang-format 일괄 적용 작업에서 `but stage` → `but commit` → `but push` 루틴 사용 시 hunk lock으로 인한 브랜치 분리 문제가 반복됨. 기본 절차, 잠금 처리 선택지, 바이너리 경로를 스킬로 문서화 필요.
+- source: server/ clang-format sweep 세션
+- resolution: `.claude/skills/gitbutler/SKILL.md` 추가 (commit 7d3356f). 2026-04-16 처리 완료.
+
+---
+
 ## 2026-04-08 - command-script-usage-purpose-log
 - status: done
 - suggested-agent: harness-improver
