@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.23)
 
 project(portpolio VERSION 0.1.0 LANGUAGES CXX)
 
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 include(CTest)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
@@ -94,6 +98,14 @@ target_include_directories(portpolio_server
 )
 
 target_compile_features(portpolio_server PUBLIC cxx_std_23)
+
+if(WIN32)
+    target_compile_definitions(portpolio_server PUBLIC
+        _WIN32_WINNT=0x0A00
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+    )
+endif()
 
 target_link_libraries(portpolio_server
     PUBLIC
