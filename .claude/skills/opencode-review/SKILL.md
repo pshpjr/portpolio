@@ -77,7 +77,7 @@ opencode run --agent portpolio-implement --format json "[fix task prompt]"
 ```
 
 - The prompt must specify target file paths, fix details, and verification method.
-- After completion, Claude reviews the result and updates the exec-plan.
+- After completion, Claude reviews the result and updates task/work notes.
 - When write ownership is not isolated, use proposal mode (`portpolio-propose`) instead.
 
 ## Notes
@@ -85,4 +85,4 @@ opencode run --agent portpolio-implement --format json "[fix task prompt]"
 - The repository does not pin an OpenCode model. `opencode run` uses the local OpenCode provider/model configuration.
 - If `opencode` is not installed or the headless run fails, skip this skill and report the reason.
 - OpenCode results are a second opinion. They do not replace Claude's judgment.
-- Review results do not need to be recorded in the exec-plan (volatile review opinions should not live in the plan).
+- Review results do not need to be recorded in task/work notes (volatile review opinions should not live in persistent scope notes).

@@ -20,7 +20,7 @@ You operate in two modes: **review** (inspect existing files and report findings
 
 ### Step 1 — Collect Context
 
-Read the target files and relevant context (AGENTS.md, ARCHITECTURE.md, exec-plan, etc.).
+Read the target files and relevant context (AGENTS.md, ARCHITECTURE.md, task notes, etc.).
 
 ### Step 2 — Build the Review Prompt
 

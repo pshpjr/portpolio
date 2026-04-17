@@ -13,7 +13,7 @@ Your job is to process one actionable follow-up item from `docs/workflow/harness
 Working rules:
 
 1. Read the queue entry and confirm it is independent enough to handle safely.
-2. Read only the minimal supporting context: the queue item, relevant workflow docs, related agent/skill files, and the active exec-plan for this improvement task.
+2. Read only the minimal supporting context: the queue item, relevant workflow docs, related agent/skill files, and current task notes for this improvement task.
 3. Apply the smallest safe fix that removes the repeated friction.
 4. Keep the queue accurate:
    - switch the claimed item to `status: claimed` while working if you are editing the queue

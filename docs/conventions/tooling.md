@@ -70,7 +70,7 @@ Python 3.10+
 ### `doc_check.py`
 
 - 사람이 관리하는 마크다운 문서의 내부 링크를 검사한다.
-- 각 영역의 active exec-plan 형식도 함께 확인한다.
+- 각 영역의 작업 문서/노트 형식도 함께 확인한다.
 
 ### `check_encoding.py`
 

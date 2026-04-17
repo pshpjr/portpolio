@@ -67,4 +67,4 @@ Report issues as a numbered list with file:line references.
 - `--sandbox read-only` ensures Codex makes no file writes during the review.
 - If `codex` is not installed or the run fails, skip this skill and report the reason.
 - Codex results are a second opinion. They do not replace Claude's judgment.
-- Review results do not need to be recorded in the exec-plan (volatile review opinions should not live in the plan).
+- Review results do not need to be recorded in task/work notes (volatile review opinions should not live in persistent scope notes).

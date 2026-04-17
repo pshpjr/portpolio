@@ -13,7 +13,7 @@ Use this skill when the team needs a deliberate structural choice.
 
 ## Workflow
 
-1. Read the relevant proposal docs, design notes, and active plan.
+1. Read the relevant proposal docs, design notes, and current task notes.
 2. Extract or propose at least two architecture options.
 3. Compare them across:
    - responsibility boundaries

@@ -31,7 +31,7 @@ Before delegating, write a prompt that either executor can run independently:
 
 ```
 □ Which files to create or modify (exact paths)
-□ Context files to read (AGENTS.md, exec-plan, ARCHITECTURE.md, etc.)
+□ Context files to read (AGENTS.md, task note, ARCHITECTURE.md, etc.)
 □ Rules to follow (layer rules, naming conventions, style guide)
 □ Output format and file paths
 □ How to verify completion (build, lint, check script)
@@ -100,7 +100,7 @@ After both complete, evaluate on these criteria:
 After applying the selected output:
 - Server work: run `check_deps.py`
 - Documentation work: run `doc_check.py`
-- Update the exec-plan progress
+- Update task/work notes progress
 - Report any remaining issues
 
 ## What Claude Delegates vs. Handles Directly
@@ -115,7 +115,7 @@ After applying the selected output:
 
 **Claude handles directly (never delegate):**
 - Design decisions and architectural trade-offs
-- Writing or reviewing exec-plans
+- Writing or reviewing task/work notes
 - Agent / skill architecture decisions
 - Incorporating user feedback
 - Layer boundary judgments requiring full context

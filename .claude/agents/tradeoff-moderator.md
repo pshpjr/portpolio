@@ -38,5 +38,5 @@ model: opus
 
 ## 협업 프로토콜
 
-- 입력: `office-hours-orchestrator`, `plan-ceo-review`, `plan-eng-review`, 또는 사용자로부터 충돌 지점 수신
+- 입력: 사용자 또는 관련 리뷰 결과로부터 충돌 지점 수신
 - 출력: 옵션 표, 추천안, 해소 방안, 재검토 조건

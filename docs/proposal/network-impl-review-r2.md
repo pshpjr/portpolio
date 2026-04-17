@@ -1,7 +1,7 @@
 # 네트워크 구현 결정 — 2차 평가 + 대안 분석 (2026-04-08)
 
 > [`network-impl-review-r1.md`](network-impl-review-r1.md)의 R-1~R-19 응답에 대해
-> Claude(server-proposal-critic) + Codex(GPT-5.4, 2회) + OpenCode(GLM-5.1)가 독립 평가한 결과와,
+> Claude(당시 서버 리뷰 에이전트) + Codex(GPT-5.4, 2회) + OpenCode(GLM-5.1)가 독립 평가한 결과와,
 > 현재 결정에 대한 대안 아키텍처 검토입니다.
 
 ---

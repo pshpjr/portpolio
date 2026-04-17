@@ -5,8 +5,7 @@
   },
   "project": {
     "name": "portpolio",
-    "entrypoint": "AGENTS.md",
-    "planIndex": "docs/exec-plans/active/INDEX.md"
+    "entrypoint": "AGENTS.md"
   },
   "harness": {
     "enabled": true,

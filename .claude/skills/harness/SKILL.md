@@ -12,7 +12,7 @@ A meta-skill for configuring a harness suited to a domain or project, defining e
 2. **All file creation and modification is delegated** via `codex-delegate`: Codex and OpenCode headless agents handle execution, and Claude compares or selects the right path based on write ownership.
 3. Generate agent definitions (`.claude/agents/`) and skills (`.claude/skills/`) through the delegation model above.
 4. **Use an agent team as the default execution mode** for multi-agent collaboration.
-5. Harness work is repository work, so `exec-plan-gate` runs first. This is intentional.
+5. Harness work은 저장소 운영 문서와 충돌하지 않도록 현재 프로젝트 워크플로우 규칙을 먼저 확인한다.
 
 ## Workflow
 
