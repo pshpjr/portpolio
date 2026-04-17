@@ -1,0 +1,170 @@
+// Auto-generated. Do not edit.
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Dom/JsonObject.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
+#include "table_common.h"
+#include "enums.h"
+#include "{{ source_stem }}.generated.h"
+
+USTRUCT(BlueprintType)
+struct {{ row_struct }}
+{
+    GENERATED_BODY()
+public:
+{% for field in fields %}
+    {{ field.cpp_type }} {{ field.name }}{};
+{% if not loop.last %}
+
+{% endif %}
+{% endfor %}
+};
+
+struct {{ table_name }}Schema
+{
+    static constexpr const TCHAR* TableName = TEXT("{{ table_name }}");
+    static constexpr const TCHAR* SchemaFile = TEXT("{{ schema_file }}");
+    static constexpr const TCHAR* DataFile = TEXT("{{ data_file }}");
+    static constexpr int32 RowCount = {{ row_count }};
+    static constexpr int32 FieldCount = {{ fields | length }};
+    static constexpr FTableFieldMetadata Fields[FieldCount] = {
+{% for field in fields %}
+        FTableFieldMetadata{TEXT("{{ field.json_name }}"), TEXT("{{ field.kind }}"), {{ field.required | string | lower }}, {{ field.key | string | lower }}},
+{% endfor %}
+    };
+};
+
+inline bool Load{{ table_name }}Row(const TSharedPtr<FJsonObject>& object, {{ row_struct }}& out_row, FString& out_error)
+{
+    if (!object.IsValid())
+    {
+        out_error = TEXT("table row must be a JSON object");
+        return false;
+    }
+
+{% for field in fields %}
+{% if field.kind == 'enum' %}
+    {
+        FString value;
+        if (!object->TryGetStringField(TEXT("{{ field.json_name }}"), value))
+        {
+            out_error = FString::Printf(TEXT("missing required enum field: {{ table_name }}.{{ field.name }}"));
+            return false;
+        }
+        {{ field.enum_name }} parsed_value{};
+        if (!TryParse{{ field.enum_name }}(value, parsed_value))
+        {
+            out_error = FString::Printf(TEXT("failed to parse enum field: {{ table_name }}.{{ field.name }}"));
+            return false;
+        }
+        out_row.{{ field.name }} = parsed_value;
+    }
+{% elif field.kind in ['int32', 'int64', 'float', 'double'] %}
+    {
+        double value = 0.0;
+        if (!object->TryGetNumberField(TEXT("{{ field.json_name }}"), value))
+        {
+            out_error = FString::Printf(TEXT("missing required numeric field: {{ table_name }}.{{ field.name }}"));
+            return false;
+        }
+        out_row.{{ field.name }} = static_cast<{{ field.cpp_type }}>(value);
+    }
+{% elif field.kind == 'bool' %}
+    {
+        bool value = false;
+        if (!object->TryGetBoolField(TEXT("{{ field.json_name }}"), value))
+        {
+            out_error = FString::Printf(TEXT("missing required bool field: {{ table_name }}.{{ field.name }}"));
+            return false;
+        }
+        out_row.{{ field.name }} = value;
+    }
+{% elif field.kind == 'string' %}
+    {
+        FString value;
+        if (!object->TryGetStringField(TEXT("{{ field.json_name }}"), value))
+        {
+            out_error = FString::Printf(TEXT("missing required string field: {{ table_name }}.{{ field.name }}"));
+            return false;
+        }
+        out_row.{{ field.name }} = MoveTemp(value);
+    }
+{% elif field.kind == 'name' %}
+    {
+        FString value;
+        if (!object->TryGetStringField(TEXT("{{ field.json_name }}"), value))
+        {
+            out_error = FString::Printf(TEXT("missing required name field: {{ table_name }}.{{ field.name }}"));
+            return false;
+        }
+        out_row.{{ field.name }} = FName(*value);
+    }
+{% elif field.kind == 'text' %}
+    {
+        FString value;
+        if (!object->TryGetStringField(TEXT("{{ field.json_name }}"), value))
+        {
+            out_error = FString::Printf(TEXT("missing required text field: {{ table_name }}.{{ field.name }}"));
+            return false;
+        }
+        out_row.{{ field.name }} = FText::FromString(MoveTemp(value));
+    }
+{% endif %}
+{% endfor %}
+    return true;
+}
+
+inline bool Load{{ table_name }}(const FString& json_text, TArray<{{ row_struct }}>& out_rows, FString& out_error)
+{
+    TSharedPtr<FJsonObject> root_object;
+    TSharedRef<TJsonReader<>> reader = TJsonReaderFactory<>::Create(json_text);
+    if (!FJsonSerializer::Deserialize(reader, root_object) || !root_object.IsValid())
+    {
+        out_error = TEXT("failed to parse table JSON");
+        return false;
+    }
+
+    const TArray<TSharedPtr<FJsonValue>>* rows = nullptr;
+    if (!root_object->TryGetArrayField(TEXT("rows"), rows))
+    {
+        if (!root_object->TryGetArrayField(TEXT("data"), rows))
+        {
+            out_error = TEXT("table root must expose a \"rows\" or \"data\" array");
+            return false;
+        }
+    }
+
+    out_rows.Reset(rows->Num());
+    for (const TSharedPtr<FJsonValue>& entry : *rows)
+    {
+        const TSharedPtr<FJsonObject>* entry_object = nullptr;
+        if (!entry.IsValid() || entry->Type != EJson::Object || !entry->TryGetObject(entry_object) || !entry_object || !entry_object->IsValid())
+        {
+            out_error = TEXT("table row must be a JSON object");
+            return false;
+        }
+
+        {{ row_struct }} row{};
+        if (!Load{{ table_name }}Row(*entry_object, row, out_error))
+        {
+            return false;
+        }
+        out_rows.Add(MoveTemp(row));
+    }
+    return true;
+}
+
+inline bool Load{{ table_name }}FromFile(const FString& file_path, TArray<{{ row_struct }}>& out_rows, FString& out_error)
+{
+    FString json_text;
+    if (!FFileHelper::LoadFileToString(json_text, *file_path))
+    {
+        out_error = FString::Printf(TEXT("failed to read data file: %s"), *file_path);
+        return false;
+    }
+    return Load{{ table_name }}(json_text, out_rows, out_error);
+}

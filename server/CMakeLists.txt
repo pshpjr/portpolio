@@ -15,7 +15,7 @@ set(PORTPOLIO_COMBAT_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../docs/proposal/inga
 set(PORTPOLIO_GENERATED_SERVER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/generated")
 set(PORTPOLIO_GENERATED_UNREAL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../client/Source/client/Public/Generated")
 set(PORTPOLIO_CODEGEN_STAMP "${CMAKE_CURRENT_BINARY_DIR}/packet_codegen.stamp")
-set(PORTPOLIO_COMBAT_CODEGEN_STAMP "${CMAKE_CURRENT_BINARY_DIR}/combat_data_codegen.stamp")
+set(PORTPOLIO_GAME_DATA_CODEGEN_STAMP "${CMAKE_CURRENT_BINARY_DIR}/game_data_codegen.stamp")
 
 file(GLOB PORTPOLIO_PROTOCOL_INPUTS CONFIGURE_DEPENDS
     "${PORTPOLIO_PROTOCOL_DIR}/*.proto"
@@ -49,25 +49,25 @@ file(GLOB PORTPOLIO_COMBAT_DATA_INPUTS CONFIGURE_DEPENDS
 )
 
 add_custom_command(
-    OUTPUT "${PORTPOLIO_COMBAT_CODEGEN_STAMP}"
+    OUTPUT "${PORTPOLIO_GAME_DATA_CODEGEN_STAMP}"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${PORTPOLIO_GENERATED_SERVER_DIR}"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${PORTPOLIO_GENERATED_UNREAL_DIR}"
     COMMAND ${Python3_EXECUTABLE}
-        "${CMAKE_CURRENT_SOURCE_DIR}/tools/codegen/combat_data_gen.py"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tools/codegen/game_data_gen.py"
         --schema-dir "${PORTPOLIO_COMBAT_DATA_DIR}"
         --server-out "${PORTPOLIO_GENERATED_SERVER_DIR}"
         --unreal-out "${PORTPOLIO_GENERATED_UNREAL_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E touch "${PORTPOLIO_COMBAT_CODEGEN_STAMP}"
+    COMMAND ${CMAKE_COMMAND} -E touch "${PORTPOLIO_GAME_DATA_CODEGEN_STAMP}"
     DEPENDS
-        "${CMAKE_CURRENT_SOURCE_DIR}/tools/codegen/combat_data_gen.py"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tools/codegen/game_data_gen.py"
         ${PORTPOLIO_COMBAT_DATA_INPUTS}
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMENT "Generating combat data code"
+    COMMENT "Generating game data code"
     VERBATIM
 )
 
-add_custom_target(generate_combat_data DEPENDS "${PORTPOLIO_COMBAT_CODEGEN_STAMP}")
-add_dependencies(generate_combat_data generate_packets)
+add_custom_target(generate_game_data DEPENDS "${PORTPOLIO_GAME_DATA_CODEGEN_STAMP}")
+add_dependencies(generate_game_data generate_packets)
 
 add_subdirectory(
     "${CMAKE_CURRENT_SOURCE_DIR}/lib"
@@ -75,6 +75,7 @@ add_subdirectory(
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
+find_package(magic_enum CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(unofficial-perfetto CONFIG REQUIRED)
@@ -89,7 +90,7 @@ file(GLOB_RECURSE PORTPOLIO_SOURCES CONFIGURE_DEPENDS
 
 add_library(portpolio_server STATIC ${PORTPOLIO_SOURCES})
 add_library(psh::server ALIAS portpolio_server)
-add_dependencies(portpolio_server generate_packets generate_combat_data)
+add_dependencies(portpolio_server generate_packets generate_game_data)
 
 target_include_directories(portpolio_server
     PUBLIC
@@ -110,6 +111,7 @@ endif()
 target_link_libraries(portpolio_server
     PUBLIC
         Boost::system
+        magic_enum::magic_enum
         psh::lib
         nlohmann_json::nlohmann_json
         spdlog::spdlog

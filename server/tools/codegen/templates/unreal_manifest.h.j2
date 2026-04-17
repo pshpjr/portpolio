@@ -1,0 +1,35 @@
+// Auto-generated. Do not edit.
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Misc/Paths.h"
+
+#include "table_common.h"
+#include "enums.h"
+{% for table in tables %}
+#include "{{ table.source_stem }}.h"
+{% endfor %}
+
+inline constexpr std::array<FTableDescriptor, {{ tables | length }}> kGameDataTables = {
+{% for table in tables %}
+    FTableDescriptor{TEXT("{{ table.table_name }}"), TEXT("{{ table.schema_file }}"), TEXT("{{ table.data_file }}"), {{ table.row_count }}, {{ table.field_count }}},
+{% endfor %}
+};
+
+struct FGameDataBundle
+{
+{% for table in tables %}
+    TArray<{{ table.row_struct }}> {{ table.table_name }}Rows;
+{% endfor %}
+};
+
+inline bool LoadGameDataBundleFromDirectory(const FString& directory, FGameDataBundle& out_bundle, FString& out_error)
+{
+{% for table in tables %}
+    if (!Load{{ table.table_name }}FromFile(FPaths::Combine(directory, TEXT("{{ table.data_file }}")), out_bundle.{{ table.table_name }}Rows, out_error))
+    {
+        return false;
+    }
+{% endfor %}
+    return true;
+}
