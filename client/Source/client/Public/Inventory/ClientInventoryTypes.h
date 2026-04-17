@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Generated/combat_data_tables.h"
+#include "Generated/game_data/game_data_tables.h"
 #include "ClientInventoryTypes.generated.h"
 
 class UClientItemInstance;

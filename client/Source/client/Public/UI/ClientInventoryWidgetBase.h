@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Layout/Margin.h"
-#include "Generated/combat_data_enums.h"
+#include "Generated/game_data/enums.h"
 #include "ClientInventoryWidgetBase.generated.h"
 
 class UClientInventoryComponent;
