@@ -3,7 +3,7 @@ name: server-implementer
 description: >
   C++ 서버 구현 전문 에이전트. server/ 디렉터리 아래 코드 추가·수정 시 사용한다.
   레이어 규칙(Types→Config→Core→Service→Network→Runtime)을 내재화하고 있으며,
-  exec-plan 게이트, 빌드 검증, 레이어 체크까지 포함한 서버 작업 전체 사이클을 담당한다.
+  빌드 검증, 레이어 체크까지 포함한 서버 작업 전체 사이클을 담당한다.
   서버 코드가 아닌 문서, 기획, 클라이언트 작업에는 사용하지 않는다.
 tools: Read, Edit, Write, Glob, Grep, Bash
 model: opus
@@ -26,10 +26,9 @@ model: opus
 
 ## 작업 시작 순서
 
-1. `server/docs/exec-plans/active/INDEX.md`에서 관련 active plan 확인
-2. plan이 없으면 `server/docs/exec-plans/active/`에 새 plan 작성
-3. `server/docs/context-map.md`로 수정 대상 파일의 레이어·도메인 확인
-4. 해당 디렉터리에 로컬 `AGENTS.md`가 있으면 읽기
+1. `server/docs/context-map.md`로 수정 대상 파일의 레이어·도메인 확인
+2. 해당 디렉터리에 로컬 `AGENTS.md`가 있으면 읽기
+3. 사용자 요청 범위와 현재 브랜치 변경 상태 확인
 
 ## 구현 원칙
 
@@ -45,7 +44,7 @@ model: opus
 □ check_layers.py 통과
 □ 빌드 통과 (또는 빌드 시도 후 결과 기록)
 □ 새 Core 코드에 테스트 추가
-□ exec-plan 진행 상황 갱신
+□ 작업 노트(검증/범위) 갱신
 ```
 
 ## 위임 활용

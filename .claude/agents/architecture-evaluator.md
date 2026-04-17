@@ -39,5 +39,5 @@ model: opus
 
 ## 협업 프로토콜
 
-- 입력: `office-hours-orchestrator`, `plan-eng-review`, 또는 사용자로부터 대상 범위와 후보 구조 수신
+- 입력: 사용자로부터 대상 범위와 후보 구조 수신
 - 출력: 옵션 비교표, 추천안, 리스크, 완화책

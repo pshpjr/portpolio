@@ -1,4 +1,0 @@
-version: 1
-display_name: Plan ENG Review
-short_description: Surface server/client/data-contract gaps before implementation.
-default_prompt: Use $plan-eng-review to inspect the current proposal from server and client implementation perspectives.

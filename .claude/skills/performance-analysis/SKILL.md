@@ -13,7 +13,7 @@ Use this skill to turn vague performance concern into an explicit measurement pl
 
 ## Workflow
 
-1. Read the relevant proposal docs, design notes, and active plan.
+1. Read the relevant proposal docs, design notes, and current task notes.
 2. Identify the highest-risk performance paths.
 3. For each path, define:
    - bottleneck hypothesis

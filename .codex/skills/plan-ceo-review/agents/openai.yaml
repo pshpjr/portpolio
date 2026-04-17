@@ -1,4 +1,0 @@
-version: 1
-display_name: Plan CEO Review
-short_description: Review proposal scope, value, and what to cut or defer.
-default_prompt: Use $plan-ceo-review to pressure-test the current proposal for scope, product value, and showcase clarity.

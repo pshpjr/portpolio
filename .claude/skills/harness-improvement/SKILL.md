@@ -43,7 +43,7 @@ When the task is substantial or when optimization is being considered, measure t
 python tools/context_meter.py --git-base HEAD --files <context-file-1> <context-file-2> ...
 ```
 
-Record the result in the active exec-plan or the queued item so future agents can compare work size against estimated token load.
+Record the result in the queued item or related workflow note so future agents can compare work size against estimated token load.
 
 ## Response Artifacts
 
@@ -58,7 +58,7 @@ If the response reveals an independent follow-up item, include `--task` and `--m
 
 ## Workflow
 
-1. Run `exec-plan-gate` first if the improvement itself becomes repository work.
+1. Confirm the current workflow policy and scope before changing repository files.
 2. Read the feedback log, improvement queue, and relevant workflow docs.
 3. Decide whether you are:
    - registering a new follow-up item, or

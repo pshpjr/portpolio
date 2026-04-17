@@ -10,17 +10,15 @@
 - `design/` — 저장소 공용 설계 철학
 - `conventions/` — 저장소 공용 코딩/도구 규칙
 - `workflow/` — 루트 공용 작업 절차
-- `exec-plans/` — 루트 레벨 실행 계획
 
 ---
 
 ## 작업 시작 순서
 
 1. 이 파일을 읽는다.
-2. 작업 대상이 기획서인지, 공용 워크플로인지, 루트 exec-plan인지 결정한다.
-3. [exec-plans/active/INDEX.md](./exec-plans/active/INDEX.md)에서 관련 active plan을 확인하고, 없으면 새 plan을 먼저 만든다.
-4. 필요한 하위 문서만 선택해서 읽는다.
-5. 앱 구현 세부사항이 필요해질 때만 해당 앱의 `AGENTS.md`로 내려간다.
+2. 작업 대상이 기획서인지, 공용 워크플로인지 결정한다.
+3. 필요한 하위 문서만 선택해서 읽는다.
+4. 앱 구현 세부사항이 필요해질 때만 해당 앱의 `AGENTS.md`로 내려간다.
 
 ---
 
@@ -40,7 +38,8 @@
 - 공용 C++ 규칙: [../server/docs/conventions/cpp-style.md](../server/docs/conventions/cpp-style.md)
 - 공용 Python 도구 규칙: [conventions/tooling.md](./conventions/tooling.md)
 - 공용 작업 절차: [workflow/agent-workflow.md](./workflow/agent-workflow.md)
-- 루트 활성 exec-plan: [exec-plans/active/INDEX.md](./exec-plans/active/INDEX.md)
+- Game Studio 정리 후보: [workflow/game-studio-prune-candidates.md](./workflow/game-studio-prune-candidates.md)
+- Non-Studio 잔여 인벤토리: [workflow/non-studio-agent-skill-inventory.md](./workflow/non-studio-agent-skill-inventory.md)
 - 서버 구현 문서로 이동: [../server/AGENTS.md](../server/AGENTS.md)
 - 공용 라이브러리 문서로 이동: [../server/lib/AGENTS.md](../server/lib/AGENTS.md)
 
@@ -51,6 +50,7 @@
 - Codex에서 에이전트를 사용할 때는 `.claude/agents/<name>.md`를 읽어 prompt로 전달한다.
 - Codex UI 전용 메타데이터는 `.codex/skills/<skill>/agents/openai.yaml`에만 둔다.
 - 앱 디렉터리(`server/` 등) 아래에는 skill 또는 agent 저장소를 만들지 않는다.
+- `Claude-Code-Game-Studios-main/.claude/`에서 가져온 데이터도 루트 `.claude/agents/`, `.claude/skills/`에 병합해 운용한다.
 
 ---
 

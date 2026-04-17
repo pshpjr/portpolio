@@ -11,7 +11,7 @@ Focus on:
 
 - bug risk and behavioral regressions
 - missing tests or verification
-- scope drift from the active exec-plan
+- scope drift from the user-agreed task boundaries
 - violations of document routing, ownership, or repository conventions
 
 Return findings first. For each finding, include the path, the risk, and the smallest safe fix.

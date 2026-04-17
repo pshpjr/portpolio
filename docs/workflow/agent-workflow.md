@@ -6,19 +6,9 @@
 
 ```
 □ AGENTS.md 읽기
-□ docs/exec-plans/active/INDEX.md 확인
-  → 진행 중인 플랜이 있으면: 해당 파일을 읽고 컨텍스트 복원
-  → 없으면: 새 플랜 파일 작성 후 시작
 □ 관련 도메인 문서 읽기
 □ 문서 작업이면 문서 검증 스크립트 존재 여부 확인
 ```
-
-## exec-plan 위치 규칙
-
-- 위치: 해당 앱/영역의 `docs/exec-plans/active/`
-- 파일명: `YYYYMMDD-작업명.md`
-- 완료 시: `docs/exec-plans/completed/`로 이동
-- 작성 기준: [exec-plan-template.md](./exec-plan-template.md)
 
 ## 브랜치 운영 (기본 순서)
 
@@ -52,17 +42,9 @@ python tools/check_all.py
 - 레이어 의존성 위반 코드 커밋
 - 테스트 없는 Core 레이어 신규 코드
 - `check_layers.py` 통과 전 PR 생성
-- exec-plan 없이 대형 작업 시작 (300줄 이상 변경 예상 시)
 - 문서를 코드보다 나중에 작성
 - 문서 변경 후 검증 스크립트 미확인
 - `.codex/agents/`에 내용이 있는 에이전트 파일 생성
-
-## 반복 작업 자동화 도구
-
-새 exec-plan 생성 (보일러플레이트 제거):
-```bash
-python tools/new_exec_plan.py --name <slug> --area docs|proposal|server|lib --goal "<한 줄 목표>"
-```
 
 ## Codex / OpenCode 위임 기준
 
@@ -77,11 +59,23 @@ python tools/new_exec_plan.py --name <slug> --area docs|proposal|server|lib --go
 - 300줄 이상 순수 코드 생성 (문서/주석 제외)
 - Claude가 컨텍스트를 많이 소비해야 하는 리뷰 작업
 
+## Game Studio 자산 병합 규칙 (신규)
+
+`Claude-Code-Game-Studios-main/.claude/`의 agent/skill 데이터를 가져올 때는 아래 기준을 따른다.
+
+1. 반영 위치는 항상 canonical 경로를 사용한다.
+   - agent 정의: `.claude/agents/`
+   - skill 정의: `.claude/skills/`
+   - Codex UI 메타데이터: `.codex/skills/*/agents/openai.yaml`
+2. 같은 이름의 agent/skill은 단일 파일만 유지한다. (겹치는 항목은 병합/교체 후 중복 제거)
+3. 임시 매핑 문서보다 실제 agent/skill 파일 정리를 우선한다.
+5. 병합 후 정리 대상은 [game-studio-prune-candidates.md](./game-studio-prune-candidates.md)에서 우선순위를 확인한다.
+
 ## 피드백 / 개선 큐 / LLM 아티팩트
 
 - 독립 후속 작업 → [harness-improvement-queue.md](./harness-improvement-queue.md)
 - 외부 LLM 응답 요약 → `_workspace/agent-notes/*.md` (`record_agent_artifact.py` 사용)
-- substantial task → `python tools/context_meter.py --git-base HEAD --files <파일>` 로 계측 후 exec-plan에 기록
+- substantial task → `python tools/context_meter.py --git-base HEAD --files <파일>` 로 계측 후 작업 노트에 기록
 
 ## harness-improvement 사용 트리거
 
